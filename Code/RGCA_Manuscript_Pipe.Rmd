@@ -1,0 +1,169 @@
+---
+title: "RGCA_Manuscript_Pipe"
+author: "Daniel Zilber"
+date: "2023-07-07"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#, echo=FALSE
+```
+
+## The Mixture Prediction Pipeline
+
+This script predicts a response to a mixture of chemicals given an input data of individual dose responses and the concentrations of the components of the mixture.  The procedure followed in this pipeline is as follows:
+
+1. Load all inputs
+2. Fit individual dose response curves
+3. Cluster the individual dose response slope parameters
+4. Create a collection of predictors ("calculators") by sampling the slope cluster and parameters
+5. Given a mixture, predict a response with each calculator.  The plots show the 5, 50, and 95 percentile.  
+
+### Loading data
+To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
+
+```{r Input}
+library(ggplot2)
+library(cowplot)
+library(reshape2)
+library(scoringRules)
+
+source("Code/helper_plots.R")
+source("Code/helper_calculators.R")
+source("Code/RE_dose_response_MCMC.R")
+source("Code/dirichlet_MCMC.R")
+# read in data
+source("Code/tox21_prep_data.R")
+
+```
+
+
+The last line prepared a series of objects representing the data, including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates.  Null values are present in the data to indicate an anomalous response, such as cell death.  Some chemicals have 3 replicates and some have 6.  
+
+```{r prepped input}
+message("Observed response")
+head(y_i)
+message("Concentration")
+head(Cx)
+message("Replicates by index")
+head(replicate_sets)
+```
+
+
+### Fitting Dose Responses
+A random effect model is fit to each chemical indexed by $i$,
+$$  R_i(c) =f_i(c|a_i,\theta_i,\beta_i, u_{ij}, v_{ij}) = \frac{a_i+u_{ij}}{1+\left(\frac{\theta_i}{c}\right)^{\beta_i}} + v_{ij} + \epsilon_{ijc} $$
+The MCMC script uses standard methods and an alternative script is available for Nimble.  
+
+```{r RE-MCMC}
+re_iter = 2.5e4 #25,000 iterations
+set.seed(102)
+# fit random effects model
+re_chains = RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
+
+```
+
+The beginning 5000 iterations of the chains are removed and the remaining iterations thinned.
+```{r}
+re_par_list = pull_parameters(re_chains)
+```
+The slope parameters are of particular interest, since they are used next for clustering.  It is hypothesized that the slope parameter is related to the mode of action for a chemical, and that chemicals with a similar mode of action follow concentration addition.  A Dirichlet Process model is used for clustering.
+
+
+```{r}
+clust_iter =3.5e4  #3.5e4
+set.seed(131)
+cluster_chain = DP_MCMC_fit((re_par_list$slope_params[1:18]), n_iter = clust_iter)
+beepr::beep()
+```
+
+The MCMC procedure produces a chain of possible clusterings, with more likely clusterings occuring more often.  We extract the top 20 most frequent (likely) clusters.
+
+```{r}
+# check what top assignments are
+n_top = 20
+clust_centers_w_prob = cluster_centers(cluster_chain, n_top = n_top)
+```
+A helper function plots what the top clusters look like.
+
+```{r}
+# visualize clusters
+visualize_clusters_blocks(re_par_list$slope_params, clust_centers_w_prob)
+```
+
+Next we create the lists that contain all the necessary parameters for our model with Reflected GCA and Dirichlet Process clusters (RGD).  Note that one of the parameters is the probability of each cluster, which is computed from the counts shown in the visualization on the right (using $p_i = c_i / \sum_{j=1}^{20} c_j$)
+
+```{r}
+cluster_prob = clust_centers_w_prob$probs
+centers = clust_centers_w_prob$centers
+cent_sd = clust_centers_w_prob$center_sd
+cluster_assign = clust_centers_w_prob$assign
+DP_par_list = list("centers" = centers, 
+                   "cluster_assign" = cluster_assign,
+                   "cent_sd" = cent_sd, 
+                   "cluster_prob" = cluster_prob)
+tot_par_list = c(re_par_list, DP_par_list)
+```
+
+
+We make the parameter lists for the simpler Independent Action (IA) and regular GCA models.
+
+```{r}
+# fixed assignments for GCA and IA
+GCA_assign = 1
+names(GCA_assign) = do.call(paste, as.list(rep(1, n_chems)))
+DP_2par_list = list("centers" = matrix(rep(1, n_chems),nrow=1),
+                    "cluster_assign" = GCA_assign,
+                    "cent_sd" = matrix(rep(0, n_chems), nrow=1), 
+                    "cluster_prob" = 1)
+GCA_par_list = c(re_2par_list, DP_2par_list)
+
+# for IA, allow different slopes
+IA_assign =1 
+names(IA_assign) = do.call(paste, as.list( 1:n_chems))
+DP_2parIA_list = list("centers" = matrix(re_par_summary$slope_params, nrow = 1),#matrix(rep(1, n_chems),nrow=1),
+                      "cluster_assign" = IA_assign,
+                      "cent_sd" = matrix(rep(0, n_chems), nrow=1), 
+                      "cluster_prob" = 1)
+IA_par_list = c(re_par_list, DP_2parIA_list)
+beepr::beep(2)
+```
+
+One of the special cases we test is to use the Reflected GCA but without the clustering.  Hence we create one large cluster (GCA) and keep the fitted slopes.  Regular GCA must set the slope values to 1.  
+```{r}
+# For RGCA no DP, allow different slopes
+GCA_assign = 1
+names(GCA_assign) = do.call(paste, as.list(rep(1, n_chems)))
+RDP_2par_list = list("centers" = matrix(re_par_summary$slope_params, nrow = 1),
+                     "cluster_assign" = GCA_assign,
+                     "cent_sd" = matrix(rep(0, n_chems), nrow=1), 
+                     "cluster_prob" = 1)
+RGCA_par_list = c(re_2par_list, RDP_2par_list)
+```
+
+Given the parameter lists, we can instantiate the calculators that compute the mixture response given the individual concentrations.  For the methods that use clustering, we sample with replacement from the set of possible clusters with weighted probability.  The chemical parameters are sampled as well, conditional on the clustering (mainly the slope parameters depend on the clustering)
+
+```{r}
+set.seed(1026)
+n_bootstraps = 100
+samp_idx = sample(1:n_top, size = n_bootstraps, prob =cluster_prob, replace = T)
+sampled_mix_funs = sapply(samp_idx, FUN = function(x) create_mix_calc(x, tot_par_list, add_RE = T))
+sampled_mix_funs_GCA = sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, GCA_par_list, add_RE = F))
+sampled_mix_funs_IA = sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, IA_par_list, add_RE = F))
+# additional comparisons:  
+# use unit slopes, so no RGCA
+sampled_mix_funs_GCA_noR = sapply(samp_idx, FUN = function(x) create_mix_calc(x, tot_par_list, add_RE = F, unit_slopes=T))
+# only use the top clustering, no DP
+sampled_mix_funs_noDP = sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_par_list, add_RE = F))
+
+bootstrap_calc_list = list("RGD" = sampled_mix_funs, 
+                           "G" = sampled_mix_funs_GCA,
+                           "I" = sampled_mix_funs_IA, 
+                           "DG" = sampled_mix_funs_GCA_noR,
+                           "RG" = sampled_mix_funs_noDP)
+```
+
+
+
+
