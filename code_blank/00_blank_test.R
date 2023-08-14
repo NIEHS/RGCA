@@ -1,1 +1,0 @@
-# Test Script for RGCA_DP Repo for SET group
