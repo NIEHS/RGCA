@@ -48,7 +48,7 @@ by $i$, $$  R_i(c) =f_i(c|a_i,\theta_i,\beta_i, u_{ij}, v_{ij}) =
 \epsilon_{ijc} $$ The MCMC script uses standard methods and an alternative
 script is available for Nimble.
 ```{r RE-MCMC}
-re_iter = 2.5e4 #25,000 iterations
+re_iter = 10000 #25,000 iterations
 set.seed(102)
 # fit random effects model
 re_chains = RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
@@ -68,7 +68,7 @@ clustering.
 clust_iter =3.5e4  #3.5e4
 set.seed(131)
 cluster_chain = DP_MCMC_fit((re_par_list$slope_params[1:18]), n_iter = clust_iter)
-beepr::beep()
+beepr::beep(2)
 ```
 The MCMC procedure produces a chain of possible clusterings, with more likely
 clusterings occuring more often.  We extract the top 20 most frequent (likely)
