@@ -1,5 +1,5 @@
-# RGCA-DP
-Reflected Generalized Concentration Addition with Dirichlet Process
+# RGCA
+Reflected Generalized Concentration Addition
 
 ---
 ## Summary:  
