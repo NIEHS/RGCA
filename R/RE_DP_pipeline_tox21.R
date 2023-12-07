@@ -7,10 +7,12 @@
 
 #  Functions: ####
 library(ggplot2)
-library(cowplot)
 library(reshape2)
 library(scoringRules)
-library(tables) # for converting data frames to latex tabulars
+
+library(drc)
+
+
 
 sessionInfo()
 # checkpoint::checkpoint()

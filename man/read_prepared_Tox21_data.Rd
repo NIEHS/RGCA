@@ -2,18 +2,14 @@
 % Please edit documentation in R/tox21_prep_data.R
 \name{read_prepared_Tox21_data}
 \alias{read_prepared_Tox21_data}
-\title{notes about input data
-AR-luc is best in terms of not having synergy/antagonism and no dose issues
-AR-bla seems to have a lot of antagonism
-ER-luc has a dose issue with zearalenone, throwing off a lot of estimates
-ER-bla (same issue as ER-luc?)}
+\title{Read preprocessed Tox21 Input data}
 \usage{
 read_prepared_Tox21_data(input_file = "AR-luc.txt")
 }
+\arguments{
+\item{input_file}{processed data sets from Tox21 with mixtures, included
+with package}
+}
 \description{
-notes about input data
-AR-luc is best in terms of not having synergy/antagonism and no dose issues
-AR-bla seems to have a lot of antagonism
-ER-luc has a dose issue with zearalenone, throwing off a lot of estimates
-ER-bla (same issue as ER-luc?)
+Read preprocessed Tox21 Input data
 }

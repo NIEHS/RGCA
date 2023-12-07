@@ -1,3 +1,10 @@
+library(truncnorm)
+library(CVXR)
+library(coda)
+library(ggplot2)
+library(scoringRules)
+library(tables) # for converting data frames to latex tabulars
+
 #' Hill function
 #'
 #' A simple function to compute the Hill function response given parameters and
@@ -58,7 +65,6 @@ get_mle_curve_fits <- function(y_i, Cx, replicate_sets) {
 
 
 get_MCMC_diagnostics <- function(re_chains, re_chains2, re_chains3) {
-  require(coda)
   get_GR_Diagnostic <- function(data_id, input_cols) {
     mcmc1 <- coda::as.mcmc(re_chains[[data_id]][, input_cols])
     mcmc2 <- coda::as.mcmc(re_chains2[[data_id]][, input_cols])
@@ -624,7 +630,6 @@ predict_mix_response_many <- function(n_dose, chem_conc_matr, bootstrap_calc_lis
 #' @export
 #'
 compute_mixpred_scores <- function(mix_df, mix_idx, unplotted_repl, curve_data_list) {
-  require(scoringRules)
   n_x_values <- ncol(Cx)
   score_matrix <- c()
   # for each set of curve data
@@ -1037,7 +1042,7 @@ if (F) {
 #'
 #' @examples
 adjust_concentrations <- function(conc, R, A_full) {
-  require(CVXR)
+  
   # AR_scores = read.csv("Desktop/tox_mixtures/pythonenv/Ligand_Scores_Weights.csv", row.names = 1)
   # AR_scores = AR_scores[complete.cases(AR_scores),]
   # pubchem_AR_scores
@@ -1113,203 +1118,3 @@ adjust_concentrations <- function(conc, R, A_full) {
 # c = matrix(chem_conc_matr[30, 1:n_chem], nrow=n_chem, ncol=1)
 # adjust_concentrations(c, mol_weight, A)
 
-
-#--------- Additional plotting stuff -------------- ###########
-
-# Hill inverse testing ####
-if (F) {
-  require(scales)
-  a <- -.9
-  b <- .5
-  slope_c <- 1.5
-  max_R <- 2
-  d <- 0
-  # max_R allows for variable definition of partial agonist
-  # rather than assuming partial means < 1 response
-  # a: sill parameter
-  # b:  EC50 or Disassociation constant
-  # c: slope
-  # d: minimum effect
-  hilly_inverse_test_old <- function(y, c) {
-    sign_flip <- 1
-    if (a < 0) sign_flip <- -1
-    
-    # negative a case?
-    if (F && a < 0) {
-      # y= sign(a)*a*((sign(a)*b/(x_test) -1)^(-1/slope_c))
-      return(sign(a) * b / (1 + (-a / y)^c))
-    }
-    # GCA case:
-    if (c == 1 && y != d + a) {
-      return(b / (a / (y - d) - 1))
-    }
-    # general edge or undefined case:
-    # regular inverse case: valid for d<y<a
-    if (y < a && y > d || y < d && c == 1) {
-      return(b / ((a / (y - d) - 1)^(1 / c)))
-    }
-    # edge case:  y =a is asymptote
-    if (y == a) {
-      return(1e10)
-    }
-    # undefined case:  y> all responses
-    if ((y >= max_R && c != 1)) {
-      return(0)
-    }
-    
-    if (y <= 0) {
-      return(-b / (1 + (-a / y)^c))
-    }
-    
-    
-    # partial agonist case, y in [a, max_R]
-    return(-2 * b - b / ((max_R - a) / (max_R - y) - 1)^(1 / c))
-    # partial to match slope = 1 case: no max_R scaling
-    # return(-2*b-b/(a/(2*a-y)-1)^(1/c))
-  }
-  
-  hilly_inverse_test <- function(y, c) {
-    # simplifying isnt easy:  y=-.1, a = -1 not equivalent to y=.1, a=1:
-    #  sign(a) * y flips around 0, but we flip around a
-    # ie y>a if a<0, y<a for a>0 != sign(a) * y <a
-    if (y == 0) {
-      return(0)
-    }
-    sa <- sign(a)
-    if (a > 0) {
-      # a>0, y <0
-      if (y < 0) {
-        return(-b / (1 + (-a / y)^c))
-      } # y = (a / (b/x - 1)^(1/c))
-      # a>0, y in 0 to a
-      if (y < a) {
-        return(b / (a / y - 1)^(1 / c))
-      }
-      # a> 0, y in a to 2a
-      if (y < 2 * a) {
-        return(-2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
-      }
-      # a>0, y >2a
-      return(-2 * b + b / (1 + (a / (-2 * a + y))^c))
-    }
-    
-    if (a < 0) {
-      # y >0
-      if (y > 0) {
-        return(-b / (1 + (-a / y)^c))
-      } # y = (a / (b/x - 1)^(1/c))
-      # y in a to 0
-      if (y > a) {
-        return(b / (a / y - 1)^(1 / c))
-      }
-      #  y<0  in 2a to a
-      if (y > 2 * a) {
-        return(-2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
-      }
-      # y <2a
-      return(-2 * b + b / (1 + (a / (-2 * a + y))^c))
-    }
-    
-    # 1
-    return(1)
-  }
-  
-  # y_test_old = seq(abs(a)+.02, max_R-.01, by=.001)
-  y_test <- seq(a + .01, 2 * a - .01, by = sign(a) * .001)
-  y_test_bey <- seq(2 * a - .01, 4 * a - .01, by = sign(a) * .001)
-  y_test_neg <- seq(0, -2 * a, by = -sign(a) * .001)
-  x_test <- 1 * 10^(seq(-8, 8, by = .1))
-  
-  # pdf("RGCA_symmetry_detail.pdf", width = 8 ,height = 5)
-  # png("RGCA_symmetry_full_neg.png",width = 8 ,height = 5, units = "in",res = 200)
-  x_test <- seq(-5, 5, by = .01)
-  plot(x_test, a / (1 + (b / x_test)^(1)),
-       type = "l", ylim = c(-3, 1), # c(-3, 2), #
-       lty = 2, col = alpha("black", .95),
-       main = "Hill Function Symmetry, Negative Sill", # "GCA Partial Agonist, with Extension",
-       xlab = "Concentration", ylab = "Response"
-  )
-  
-  points(sapply(y_test, function(x) hilly_inverse_test(x, slope_c)),
-         y_test,
-         col = 5, lwd = 3, type = "l"
-  )
-  points(sapply(y_test_neg, function(x) hilly_inverse_test(x, slope_c)),
-         y_test_neg,
-         col = 2, lwd = 3, type = "l"
-  )
-  points(sapply(y_test_bey, function(x) hilly_inverse_test(x, slope_c)),
-         y_test_bey,
-         col = 6, lwd = 3, type = "l"
-  )
-  lines(x_test, a / (1 + (b / x_test)^(1)), type = "l", lty = 2)
-  lines(x_test, a / (1 + (b / x_test)^slope_c), col = 3, lwd = 3)
-  # lines(x_test, -a/(1+(-b/x_test)^slope_c),  col =4,  lwd = 3)
-  # lines(x_test, -sign(a)*b*((-sign(a)*a/(x_test) -1)^(-1/slope_c)),  col =4,  lwd = 3)
-  # lines(x_test, sign(a)*a*((sign(a)*b/(x_test) -1)^(-1/slope_c)),  col =5,  lwd = 3)
-  abline(v = -b, col = "blue", lty = 3, lwd = 2)
-  abline(h = a, col = "blue", lty = 3, lwd = 2)
-  text(4, a + sign(a) * .2, paste("Sill: a = ", a))
-  text(-b + sign(a) * -.2, -2, paste("-EC50 = ", -b), srt = 90)
-  points(0, 0, pch = 19)
-  
-  # full symmetry plot
-  # text(-b-.2, -.1, paste("-EC50 = ",-b), srt = 90)
-  points(-1, 1.8, pch = 8)
-  points(0, 0, pch = 19)
-  legend("topleft",
-         legend = c(
-           "GCA, b=1",
-           paste("RGCA, b=", slope_c),
-           "RGCA, Local Extension",
-           "RGCA, Reflection",
-           "RGCA, Ext Reflection"
-         ),
-         col = c(1, 3, 2, 5, 6), lty = c(2, 1, 1, 1, 1), lwd = c(1, 3, 3, 3, 3)
-  )
-  
-  
-  # zoomed symmetry plot, with squares
-  rect(0, 0, 100, .9, col = alpha("yellow", .5))
-  rect(-.5, -100, 0, 0, col = alpha("orange", .5))
-  abline(h = 0)
-  abline(v = 0)
-  legend("bottomright",
-         legend = c(
-           "GCA, b=1",
-           paste("RGCA, b=", slope_c),
-           "RGCA, Local Extension"
-         ),
-         col = c(1, 3, 2, 5, 6), lty = c(2, 1, 1, 1, 1), lwd = c(1, 3, 3, 3, 3)
-  )
-  
-  
-  #
-  x_test <- seq(-20, 10, by = .1)
-  y_1 <- seq(0.01, a - .01, by = -.1)
-  y_2 <- seq(a + .1, 2 * a - .01, by = -.1)
-  y_3 <- seq(2 * a + .01, 10 * a, by = -.1)
-  y_4 <- seq(-10 * a, -.01, by = -.1)
-  plot(x_test, a / (1 + (b / x_test)^(1)),
-       type = "l", ylim = c(-2, 6),
-       lty = 2, col = alpha("black", .95), xlim = c(-4, 10),
-       main = "GCA Partial Agonist, with Extension",
-       xlab = "Concentration", ylab = "Response"
-  )
-  lines(sapply(y_1, function(x) hilly_inverse_test(x, slope_c)),
-        y_1,
-        col = 2, lwd = 3
-  )
-  lines(sapply(y_2, function(x) hilly_inverse_test(x, slope_c)),
-        y_2,
-        col = 3, lwd = 3
-  )
-  lines(sapply(y_3, function(x) hilly_inverse_test(x, slope_c)),
-        y_3,
-        col = 4, lwd = 3
-  )
-  lines(sapply(y_4, function(x) hilly_inverse_test(x, slope_c)),
-        y_4,
-        col = 5, lwd = 3
-  )
-}

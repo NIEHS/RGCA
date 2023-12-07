@@ -3,7 +3,7 @@
 library(ggplot2)
 library(cowplot)
 library(reshape2)
-library(scoringRules)
+
 
 #' Plot individual dose response curves
 #'
@@ -673,8 +673,6 @@ plot_individual_response <- function(replicate_sets, re_par_summary, curve_fits,
 
 # creates the Hill function example with reflected segments used in the manuscript
 plot_reflection_illustration <- function(slope_in = .5) {
-  require(scales)
-  require(ggplot2)
   a <- .9
   b <- .5
   slope_c <- slope_in
@@ -785,8 +783,6 @@ plot_reflection_illustration <- function(slope_in = .5) {
   n_layers = length(gplot$layers)
   gplot$layers = gplot$layers[c(1, 7:n_layers, 2:6)]
   gplot
-  # pdf("RGCA_symmetry_detail.pdf", width = 8 ,height = 5)
-  # png("RGCA_symmetry_full_neg.png",width = 8 ,height = 5, units = "in",res = 200)
 }
 # pdf("RGCA_symmetry_full.pdf", width =7,height = 4)
 # plot_reflection_illustration()
@@ -794,8 +790,6 @@ plot_reflection_illustration <- function(slope_in = .5) {
 
 # not used, but plots the inverse of the Hill function
 plot_inverse_illustration <- function(plot_reciprocal = F) {
-  require(scales)
-  require(ggplot2)
   a <- -.9
   b <- .5
   slope_c <- 1.5
