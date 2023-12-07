@@ -1,3 +1,6 @@
+[![R-CMD-check](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml)
+[![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml)
+
 # RGCA
 Reflected Generalized Concentration Addition
 
