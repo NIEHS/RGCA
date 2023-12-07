@@ -68,11 +68,11 @@ if (run_pipe) {
   # MCMC for RE model
   re_iter <- 2.5e4 # 2.5e4
   clust_iter <- 3.5e4 # 3.5e4
-  if(small_run){
+  if (small_run) {
     re_iter <- 2.5e3 # 2.5e4
     clust_iter <- 3.5e3 # 3.5e4
   }
-  
+
   set.seed(102)
   # fit random effects model
   re_chains <- RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
@@ -86,12 +86,12 @@ if (run_pipe) {
     "ec50" = re_par_summary$ec50_params,
     "slope" = re_par_summary$slope_params
   ))
-  
+
   # compare RE to MLE
   cbind(RE_curve_fits, curve_fits)
   # plot_individual_response(replicate_sets, re_par_summary,curve_fits, RE_curve_fits, Cx, y_i)
-  
-  
+
+
   # diagnostic for MCMC ###
   run_diagnostic <- F
   if (run_diagnostic) {
@@ -102,25 +102,25 @@ if (run_pipe) {
     all_dats <- get_MCMC_diagnostics(re_chains, re_chains2, re_chains3)
     # latex.tabular(as.tabular(all_dats))
   }
-  
-  
+
+
   # MCMC - GCA ####
   # fit curves with slope parameter fixed to 1
   set.seed(1025)
   re_chains_2param <- RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter, n_hill_par = 2)
   re_2par_list <- pull_parameters(re_chains_2param)
   re_2par_summary <- pull_summary_parameters(re_chains_2param)
-  
-  
+
+
   # re_chains_small = re_chains
-  
+
   # fit DP clustering model
   set.seed(131)
   cluster_chain <- DP_MCMC_fit((re_par_list$sill_params[1:18]), n_iter = clust_iter)
   beepr::beep()
-  
+
   plot(cluster_chain$alpha_vals[seq(1000, clust_iter, by = 20)])
-  
+
   # check what top assignments are
   n_top <- 20
   clust_centers_w_prob <- cluster_centers(cluster_chain, n_top = n_top)
@@ -128,10 +128,10 @@ if (run_pipe) {
   # pdf("Output/cluster_vis.pdf", width = 8, height = 5)
   visualize_clusters_blocks(re_par_list$sill_params, clust_centers_w_prob, ul = 400, ll = -50)
   # dev.off()
-  
+
   # alternatives:  random clustering, kmeans,
-  
-  
+
+
   # RGCA + DP slope, not used... ####
   # sample clusterings and pass into the mixture estimation function
   cluster_prob <- clust_centers_w_prob$probs
@@ -150,8 +150,8 @@ if (run_pipe) {
     re_par_list,
     list("cluster_assign" = cluster_assign)
   )
-  
-  
+
+
   # RGCA + random sampling
   # create 20 random clusters: 1 GCA, 1 IA, and then 4x2,5x3,5x4,4x5
   set.seed(1331)
@@ -168,8 +168,8 @@ if (run_pipe) {
   randclust_par_list <- list("cluster_assign" = rand_clust_assign)
   RGCA_randclust_par_list <- c(re_par_list, randclust_par_list)
   # RGCA_randclust_par_list_nimble <- c(re_par_list_nimble, randclust_par_list)
-  
-  
+
+
   # RGCA + Kmeans
   kmeans_clust_mat <- matrix(0, nrow = 6, ncol = n_chems)
   for (i in 1:6) {
@@ -180,9 +180,9 @@ if (run_pipe) {
   names(kmeans_clust_assign) <- apply(kmeans_clust_mat, MARGIN = 1, FUN = function(rx) do.call(paste, as.list(rx)))
   kmeans_clust_list <- list("cluster_assign" = kmeans_clust_assign)
   RGCA_kmeansclust_par_list <- c(re_par_list, kmeans_clust_list)
-  
-  
-  
+
+
+
   # RGCA alone ####
   one_clust_assign <- 1
   names(one_clust_assign) <- do.call(paste, as.list(rep(1, n_chems)))
@@ -193,10 +193,10 @@ if (run_pipe) {
   )
   RGCA_par_list <- c(re_par_list, RGCA_clust_par_list)
   # RGCA_par_list_nimble <- c(re_par_list_nimble, RGCA_clust_par_list)
-  
-  
-  
-  
+
+
+
+
   # RGCA + cluster by agonist ####
   one_clust_assign <- 1
   clust_by_agonist <- rep(1, n_chems)
@@ -209,8 +209,8 @@ if (run_pipe) {
   )
   RGCA_ARER_par_list <- c(re_par_list, RGCA_ARER_clust_par_list)
   # RGCA_ARER_par_list_nimble <- c(re_par_list_nimble, RGCA_ARER_clust_par_list)
-  
-  
+
+
   # Bayesian GCA and CA ####
   GCA_assign <- 1
   names(GCA_assign) <- do.call(paste, as.list(rep(1, n_chems)))
@@ -220,8 +220,8 @@ if (run_pipe) {
     "cent_sd" = matrix(rep(0, n_chems), nrow = 1)
   )
   GCA_par_list <- c(re_2par_list, GCA_clust_list)
-  
-  
+
+
   #  Bayesian IA ####
   # allow different slopes
   IA_assign <- 1
@@ -233,11 +233,11 @@ if (run_pipe) {
   )
   IA_par_list <- c(re_par_list, DP_2parIA_list)
   beepr::beep(2)
-  
+
   # Just Curves! ####
   # instead of a list of curves, there should just be 1
   # get parameter means or medians of MAPs
-  
+
   #  IA single ####
   IA_assign <- 1
   names(IA_assign) <- do.call(paste, as.list(1:n_chems))
@@ -250,8 +250,8 @@ if (run_pipe) {
     "d" = 0
   ))
   IA_calculator <- mix_function_generator(param_matrix_IA, IA_assign_vec)
-  
-  
+
+
   # GCA single ####
   GCA_assign <- 1
   names(GCA_assign) <- do.call(paste, as.list(rep(1, n_chems)))
@@ -268,7 +268,7 @@ if (run_pipe) {
   param_matrix_large_slope <- param_matrix_IA
   param_matrix_large_slope[, 3] <- param_matrix_large_slope[, 3] + .7
   RGCA_big_slope_calculator <- mix_function_generator(param_matrix_large_slope, GCA_assign_vec)
-  
+
   # CA single ####
   param_matrix_CA <- as.matrix(cbind(
     "a" = re_par_summary$sill_params,
@@ -279,14 +279,14 @@ if (run_pipe) {
   ))
   # simple CA calculator:  force all sill params to be equal
   CA_calculator <- mix_function_generator(param_matrix_CA, GCA_assign_vec, scale_CA = T)
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
   # bootstraps ####
   # sample from posterior parameter estimates and clustering assigments
   set.seed(1026)
@@ -299,14 +299,14 @@ if (run_pipe) {
   sampled_kmeans_clustered_RGCA <- sapply(kmeans_samp_idx, FUN = function(x) create_mix_calc(x, RGCA_kmeansclust_par_list, add_RE = T))
   samp_idx <- sample(1:n_top, size = n_bootstraps, prob = cluster_prob_sills, replace = T)
   sampled_sill_DPclustered_RGCA <- sapply(samp_idx, FUN = function(x) create_mix_calc(x, RGCA_DP_sill_par_list, add_RE = T))
-  
-  
+
+
   # single cluster assignment versions
   sampled_mix_funs_RGCA <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_par_list, add_RE = T))
   # sampled_mix_funs_RGCA_nimble <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_par_list_nimble, add_RE = T))
   sampled_mix_funs_RGCA_ARER <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_ARER_par_list, add_RE = T))
   # sampled_mix_funs_RGCA_ARER_nimble <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_ARER_par_list_nimble, add_RE = T))
-  
+
   sampled_mix_funs_GCA <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, GCA_par_list, add_RE = F))
   sampled_mix_funs_IA <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, IA_par_list, add_RE = F))
   # additional comparisons:
@@ -314,7 +314,7 @@ if (run_pipe) {
   # sampled_mix_funs_GCA_noR <- sapply(samp_idx, FUN = function(x) create_mix_calc(x, tot_par_list, add_RE = F, unit_slopes = T))
   # only use the top clustering, no DP
   # sampled_mix_funs_noDP <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_par_list, add_RE = F))
-  
+
   bootstrap_calc_list <- list(
     "RGCA" = sampled_mix_funs_RGCA,
     # "RGCA_MOA" = sampled_mix_funs_RGCA_ARER,
@@ -330,23 +330,23 @@ if (run_pipe) {
     "IA" = list(IA_calculator),
     "CA" = list(CA_calculator)
   )
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   # verify 1-comp mix ####
   plot_dummy_mixture(Cx, y_i, re_par_summary, replicate_sets,
-                     bootstrap_calc_list,
-                     test_idx = 6
+    bootstrap_calc_list,
+    test_idx = 6
   )
-  
-  
-  
+
+
+
   # Compare mix vs mix constituents
   plot_mix_vs_individuals(mix_idx = 34, ymax = 120)
-  
+
   # if using QSAR or docking scores, compute
   QSAR <- F
   if (QSAR) {
@@ -358,20 +358,20 @@ if (run_pipe) {
     AR_scores$Ligand_id <- sapply(AR_scores$Ligand_id, get_CAS)
     dock_scores <- AR_scores$Dock_Score
     mol_weight_unordered <- AR_scores$Molecular_wt
-    
+
     score_ordering <- sapply(pure_unique_CAS, FUN = function(x) {
       which(x == AR_scores$Ligand_id)
     })
     mol_weight <- mol_weight_unordered[score_ordering]
     cbind(tot_par_list$slope_params, dock_scores[score_ordering], mol_weight)
   }
-  
-  
+
+
   # ER/AR mix ####
   # compare to tox21 mixtures 34 109 159
   # good RE?  12, 14, 20  (18:  good for both!)
   # good GCA: 19
-  
+
   # check 4 ad 12. # 1, 12, 20, 29, 43, 52, 55, 57
   set_1 <- c(1, 5, 10, 12, 20, 25, 29, 30, 31, 32, 43, 45, 50, 52, 55, 57, 62)
   set_4x <- c(1, 12, 20, 29, 43, 52, 55, 57)
@@ -382,7 +382,7 @@ if (run_pipe) {
   mix_idx <- 62 # 16, 8, 27!
   binary_mixes <- c(8, 18, 34, 37, 44, 49, 61)
   small_mixes <- c(6, 26, 36, 47, 59, 66, 67, 68)
-  
+
   # ER subsets
   no_zear_ER <- c(3, 4, 5, 6, 8, 10, 12, 19, 22, 23, 24, 28, 31, 34, 36, 39, 40, 41, 43, 44, 45, 46, 47, 48, 53, 55, 56, 61, 63, 65, 67, 69)
   graded_no_zear_ER <- c(3, 6, 8, 22, 44, 47, 53, 63)
@@ -397,9 +397,9 @@ if (run_pipe) {
   )
   # dev.off()
   beepr::beep(2)
-  
-  
-  
+
+
+
   # Score results ####
   score_df <- data.frame(score_matrix)
   # save(score_df, file = "AR_xx.RData")
@@ -410,7 +410,7 @@ if (run_pipe) {
     paste(names(bootstrap_calc_list), c("MSE")),
     paste(names(bootstrap_calc_list), c("CRPS"))
   )
-  
+
   ## Violin Plot for Scores ####
   bcl <- list(
     "RGCA" = 1,
@@ -435,8 +435,8 @@ if (run_pipe) {
   # pdf(file = "Output/boxplot_slope_invert_set1.pdf", onefile= T, width=8, height = 4)
   plot_scores(score_df[setdiff(1:69, set_1), ], bootstrap_calc_list, method_levels = method_levels)
   # dev.off()
-  
-  
+
+
   mix_descriptions <- sapply(score_df$`Mix id`, FUN = function(x) {
     mix_guide$Description[which(mix_guide$CAS == mix_df$CAS[x])]
   })
@@ -447,9 +447,9 @@ if (run_pipe) {
   # matplot(x =Cx_axis_values, t(curve_data), type = "l", log = "x", add=F)
   # points(Cx_axis_values, resp_y_values, lwd=3 )
   # plot(Cx_axis_values, resp_y_values, lwd=3 ,log="x")
-  
-  
-  
+
+
+
   ### check which. mixtures have 0 agonists
   no_effect_mix <- c()
   for (mix_idx in 1:nrow(mix_df)) {
@@ -457,27 +457,27 @@ if (run_pipe) {
     chem_conc_matr <- get_conc_matrix(mix_idx)
     if (all(chem_conc_matr[, AR_agonist_rows] == 0)) no_effect_mix <- c(no_effect_mix, mix_idx)
   }
-  
+
   score_df_filt <- (score_df[-no_effect_mix, ])
-  
+
   # among the cases w/o synergy or antagnoism, best?
   best_crps_by_mix <- apply(score_df[set_4x, 9:15], MARGIN = 1, FUN = function(rx) which(rx == min(rx)))
   table(best_crps_by_mix)
   for (rgc_bet in as.numeric(names(which(best_crps_by_mix == 1)))) {
     print(paste(rgc_bet, mix_guide$Description[which(mix_guide$CAS == mix_df$CAS[rgc_bet])]))
   }
-  
-  
-  
-  
+
+
+
+
   valid_cols <- apply(score_df[set_1, 16:22], MARGIN = 1, FUN = function(rx) all(is.finite(rx)))
   apply(score_df[set_1, 16:22], MARGIN = 2, FUN = function(rx) sum(is.finite(rx)))
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   # Compare mixtures with and without no-effect chemicals
   # pdf(file = "Output/No_effect_EC_EP.pdf", onefile= T, width=10, height = 5)
   compare_exclude_include()

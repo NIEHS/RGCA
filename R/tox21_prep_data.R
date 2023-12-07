@@ -159,7 +159,7 @@ read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
 }
 
 
-#' Generate a string based on the vector of mixture indices that 
+#' Generate a string based on the vector of mixture indices that
 #' satisfy the boolean input conditions
 #'
 #' @param drop_no_effect fix agonists for other assays to 0

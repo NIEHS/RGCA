@@ -25,7 +25,7 @@ plot_sample_indv <- function(df) {
   # extract x-y values and a map of replicate to idx
   x_vals <- c()
   y_vals <- c()
-  
+
   for (chem_nm in chems_to_plot) {
     cm_idx <- which(df$Sample.Name == chem_nm)
     # add CAS to chem label for clarity
@@ -78,8 +78,8 @@ plot_sample_indv <- function(df) {
 #'
 make_ggplot <- function(Cx_axis_values, resp_y_values, curve_data, curve_data_GCA = NULL, curve_data_IA = NULL) {
   curve_data_quantiles <- t(apply(curve_data,
-                                  MARGIN = 2,
-                                  FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
+    MARGIN = 2,
+    FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
   ))
   gg_df <- data.frame(Cx_axis_values, resp_y_values, curve_data_quantiles)
   names(gg_df) <- c("Cx", "resp_y", "low", "med", "up")
@@ -88,13 +88,13 @@ make_ggplot <- function(Cx_axis_values, resp_y_values, curve_data, curve_data_GC
     scale_x_continuous(trans = "log10") +
     geom_line(aes(Cx, med, colour = "RE+DP")) +
     geom_ribbon(aes(ymin = low, ymax = up, fill = "RE+DP"),
-                alpha = 0.1, # fill = "green",
-                color = "black", linetype = "dotted"
+      alpha = 0.1, # fill = "green",
+      color = "black", linetype = "dotted"
     )
   if (!is.null(curve_data_GCA)) {
     curve_GCA_data_quantiles <- t(apply(curve_data_GCA,
-                                        MARGIN = 2,
-                                        FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
+      MARGIN = 2,
+      FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
     ))
     GCA_df <- data.frame(Cx_axis_values, resp_y_values, curve_GCA_data_quantiles)
     names(GCA_df) <- c("Cx", "resp_y", "GCA_low", "GCA_med", "GCA_up")
@@ -110,8 +110,8 @@ make_ggplot <- function(Cx_axis_values, resp_y_values, curve_data, curve_data_GC
   }
   if (!is.null(curve_data_IA)) {
     curve_IA_data_quantiles <- t(apply(curve_data_IA,
-                                       MARGIN = 2,
-                                       FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
+      MARGIN = 2,
+      FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
     ))
     IA_df <- data.frame(Cx_axis_values, resp_y_values, curve_IA_data_quantiles)
     names(IA_df) <- c("Cx", "resp_y", "IA_low", "IA_med", "IA_up")
@@ -145,7 +145,7 @@ make_ggplot <- function(Cx_axis_values, resp_y_values, curve_data, curve_data_GC
 #'
 #' @return a ggplot
 #' @export
-#'      
+#'
 make_ggplot_many <- function(Cx_axis_values, resp_y_values, curve_data_list) {
   # plt_id specified from the name of the curve calculator
   plt_id <- names(curve_data_list)
@@ -154,12 +154,12 @@ make_ggplot_many <- function(Cx_axis_values, resp_y_values, curve_data_list) {
     return(NA)
   }
   if (length(plt_id) != num_curves) print("curves not named")
-  
+
   quantile_df_colnames <- c("Cx", "resp_y", "low", "med", "up", "ID")
-  
+
   curve_data_quantiles <- t(apply(curve_data_list[[1]],
-                                  MARGIN = 2,
-                                  FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
+    MARGIN = 2,
+    FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
   ))
   gg_df <- data.frame(Cx_axis_values, resp_y_values, curve_data_quantiles, plt_id[1])
   names(gg_df) <- quantile_df_colnames
@@ -169,14 +169,14 @@ make_ggplot_many <- function(Cx_axis_values, resp_y_values, curve_data_list) {
     scale_x_continuous(trans = "log10") +
     geom_line(aes(Cx, med, colour = ID)) +
     geom_ribbon(aes(ymin = low, ymax = up, fill = plt_id[1]),
-                alpha = 0.1, # fill = "green",
-                color = "black", linetype = "dotted"
+      alpha = 0.1, # fill = "green",
+      color = "black", linetype = "dotted"
     )
-  
+
   for (curve_idx in 2:num_curves) {
     curve_data_quantiles <- t(apply(curve_data_list[[curve_idx]],
-                                    MARGIN = 2,
-                                    FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
+      MARGIN = 2,
+      FUN = function(x) quantile(x, probs = c(0.05, .5, .95), na.rm = T)
     ))
     gg_df <- data.frame(Cx_axis_values, resp_y_values, curve_data_quantiles, plt_id[curve_idx])
     names(gg_df) <- quantile_df_colnames
@@ -191,9 +191,9 @@ make_ggplot_many <- function(Cx_axis_values, resp_y_values, curve_data_list) {
   # coloring:  assume first plot is our method, use black line with green curve
   line_colors <- c("black", "red", "blue", "orange", "magenta", "yellow")
   fill_colors <- c("green", "red", "blue", "orange", "magenta", "yellow")
-  
-  
-  
+
+
+
   legend_color_values <- 1:num_curves
   fill_vals <- 1:num_curves
   fill_vals[1] <- 3
@@ -208,14 +208,14 @@ make_ggplot_many <- function(Cx_axis_values, resp_y_values, curve_data_list) {
     legend_color_values <- line_colors[1:num_curves]
     fill_vals <- fill_colors[1:num_curves]
   }
-  
-  
+
+
   names(legend_color_values) <- plt_id
   names(fill_vals) <- plt_id
   hill_pred_plot <- hill_pred_plot +
     scale_colour_manual(name = "Legend", values = legend_color_values) +
     scale_fill_manual(name = "Legend", values = fill_vals)
-  
+
   return(hill_pred_plot)
 }
 
@@ -308,7 +308,7 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
     #                                        sampled_mix_funs_IA, n_dose,
     #                                        chem_conc_matr_reordered)
     curve_data_list <- predict_mix_response_many(
-      n_dose, 
+      n_dose,
       chem_conc_matr_reordered,
       bootstrap_calc_list
     )
@@ -323,26 +323,28 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
       y_response_ext,
       curve_data_list
     )
-    
+
     # add replicates to single plot
     other_repl_idx <- which(mix_df$CAS == mix_df$CAS[mix_idx])
-    unplotted_repl <- other_repl_idx#setdiff(other_repl_idx, mix_idx)
+    unplotted_repl <- other_repl_idx # setdiff(other_repl_idx, mix_idx)
     y_unplt_repl <- rbind(t(mix_df[unplotted_repl, resp_idx]), matrix(NA, ncol = 3, nrow = n_dose - length(resp_y_values)))
     unplt_repl_df <- data.frame(Cx_axis_values, y_unplt_repl, row.names = NULL)
     names(unplt_repl_df) <- c("Cx_axis_values", 1:length(unplotted_repl))
     unplt_mdf <- reshape2::melt(unplt_repl_df, id.vars = "Cx_axis_values", variable.name = "Replicate")
-    myplot <- myplot + 
-      geom_point( data = unplt_mdf, size = 2,
-                  aes(x = Cx_axis_values, y = value, shape = Replicate))+
-      scale_shape(solid = TRUE)+scale_shape_manual(values = c(16,17,18))
-    #guides(shape = guide_legend(override.aes = list(shape = c(21, 17, 18), size = c(3,2,2), stroke = c(2, 1, 1))))
+    myplot <- myplot +
+      geom_point(
+        data = unplt_mdf, size = 2,
+        aes(x = Cx_axis_values, y = value, shape = Replicate)
+      ) +
+      scale_shape(solid = TRUE) + scale_shape_manual(values = c(16, 17, 18))
+    # guides(shape = guide_legend(override.aes = list(shape = c(21, 17, 18), size = c(3,2,2), stroke = c(2, 1, 1))))
     #
-    
-    
-    
+
+
+
     # add plot showing chemicals included
-    
-    
+
+
     # get Scores
     score_matrix <- compute_mixpred_scores(mix_df, mix_idx, unplotted_repl, curve_data_list)
     score_record[iter_idx, ] <- c(mix_idx, array(t(score_matrix)))
@@ -355,12 +357,12 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
     summry3 <- paste(c("CRPS:", crps_vals))
     # annotation offset: 10% of max(curve_data_IA)
     # offset_y = max(unlist(curve_data_list))*.05
-    
+
     # add chemical presence key
     active_chem <- (chem_conc_matr_reordered[1, ] > 0) + 1
     chem_cols <- c("white", "black")[active_chem]
     names(chem_cols) <- names(pure_ordering)
-    
+
     # provide subtitle to plot with mixture description
     CAS_desc <- mix_guide$Description[which(mix_guide$CAS == mix_df$CAS[mix_idx])]
     if (any(grep("Graded", CAS_desc, ignore.case = TRUE))) {
@@ -380,7 +382,7 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
     # annotate("text", x=x_loc_ann, y=75, label= summry2)+
     # annotate("text", x=x_loc_ann, y=75-offset_y, label= "(RE, GCA, IA)")+
     # #print(annotated_plot+scale_color_manual(name='Active Chemicals',values=chem_cols))
-    
+
     # make some arbitrary plot and get the legend in
     # scm_plot
     fake_dats <- mtcars[1:18, 1:2]
@@ -389,12 +391,12 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
       geom_point(shape = 15) +
       scale_color_manual(name = "Active CAS", values = chem_cols)
     guide_color <- get_legend(fake_plot)
-    
+
     # combine the response plot with the legend from the arbitrary plot using
     # plot_grid
     print(plot_grid(annotated_plot + theme(legend.position = "right"),
-                    guide_color,
-                    rel_widths = c(.6, .2)
+      guide_color,
+      rel_widths = c(.6, .2)
     ))
   }
   return(score_record)
@@ -439,9 +441,9 @@ plot_mix_vs_individuals <- function(mix_idx = 34, ymax = 120) {
     chem_conc <- chem_conc_matr_reordered[1:15, i]
     resp_y_values <- array(unlist(mix_df[mix_idx, resp_idx]))
     plot(chem_conc, resp_y_values,
-         log = "x", type = "l", lwd = 3, col = 3,
-         xlim = c(1e-12, 1e-4), ylim = c(0, ymax),
-         main = paste(chem_cas, "vs Mix", sep = " ")
+      log = "x", type = "l", lwd = 3, col = 3,
+      xlim = c(1e-12, 1e-4), ylim = c(0, ymax),
+      main = paste(chem_cas, "vs Mix", sep = " ")
     )
     matching_pure <- which(y_i_T21$CAS == chem_cas)
     y_i_unscaled <- y_i_T21[matching_pure, 3:ncol(y_i_T21)]
@@ -450,7 +452,7 @@ plot_mix_vs_individuals <- function(mix_idx = 34, ymax = 120) {
       type = "l", add = T, col = 1, log = "x"
     )
     n_repl_cas <- ncol(t(y_i_unscaled))
-    
+
     df_part <- data.frame(chem_cas, chem_conc, resp_y_values, Cx[matching_pure[1], ], t(y_i_unscaled))
     names(df_part) <- c(
       "CAS", "Mix Conc", "Mix Resp",
@@ -509,12 +511,12 @@ visualize_clusters <- function(slopes, clust_centers_w_prob) {
 #'   process clustering
 #' @param ul Upper limit for plotting the cluster values
 #' @param ll lower limit for plotting the cluster values
-#' 
+#'
 #' @return no return object specified other than original plot settings [par()]
 #' @export
 #'
 #' @examples
-visualize_clusters_blocks <- function(slopes, clust_centers_w_prob, ul = 2, ll=0) {
+visualize_clusters_blocks <- function(slopes, clust_centers_w_prob, ul = 2, ll = 0) {
   string2num <- function(xstr) as.numeric(unlist(strsplit(xstr, " ")))
   clust_names <- names(clust_centers_w_prob$assign)
   n_clust <- length(clust_names)
@@ -527,8 +529,8 @@ visualize_clusters_blocks <- function(slopes, clust_centers_w_prob, ul = 2, ll=0
   )
   axis(2, at = 0:n_clust, label = n_clust:0, las = 1, lwd = 0, lwd.ticks = 1)
   axis(4,
-       at = 0:n_clust - 1, label = paste("(", clust_centers_w_prob$assign[n_clust:0 + 1], ")", sep = ""),
-       las = 1, lwd = 0, line = -1
+    at = 0:n_clust - 1, label = paste("(", clust_centers_w_prob$assign[n_clust:0 + 1], ")", sep = ""),
+    las = 1, lwd = 0, line = -1
   )
   for (clust_id in 1:length(clust_names)) {
     clust_assign <- string2num(clust_names[clust_id])
@@ -556,7 +558,7 @@ plot_scores <- function(score_df, bootstrap_calc_list, method_levels = NA) {
   plot_df <- score_df
   names(plot_df) <- c("Mix Desc", rep(names(bootstrap_calc_list), 3))
   n_calcs <- length(bootstrap_calc_list)
-  
+
   subdf <- plot_df # [subindx,]
   mdf <- rbind(
     cbind(reshape2::melt(subdf[, grep("CRPS", names(score_df))]), "Score" = "CRPS"),
@@ -564,16 +566,16 @@ plot_scores <- function(score_df, bootstrap_calc_list, method_levels = NA) {
     cbind(reshape2::melt(subdf[, grep("LLH", names(score_df))]), "Score" = "LLH")
   )
   names(mdf) <- c("Method", "Value", "Score")
-  
-  if(length(method_levels)>1){
-    mdf$Method<- factor(mdf$Method, ordered = T, levels = method_levels)
+
+  if (length(method_levels) > 1) {
+    mdf$Method <- factor(mdf$Method, ordered = T, levels = method_levels)
   }
-  
+
   ggplot2::ggplot(mdf, aes(x = Method, y = Value)) +
     geom_boxplot(draw_quantiles = c(.25, .5, .75)) +
     facet_wrap(vars(Score), scales = "free_y") +
     scale_y_log10() +
-    theme(axis.text.x = element_text(angle = -45, vjust = 0.5, hjust=0))+
+    theme(axis.text.x = element_text(angle = -45, vjust = 0.5, hjust = 0)) +
     labs(title = "Score Summary")
 }
 
@@ -612,7 +614,7 @@ if (F) {
   #   geom_contour(bins = 25) +
   #   facet_grid( rows = vars(slope),cols = vars(a))
   # dev.off()
-  
+
   # 3d plot with 2d contour plot on floor
   # mix_df$effect[mix_df$effect< -1000]=NA
   plot_ly(x = (c_val), y = (c_val), z = matrix(mix_df$effect, nrow = n_pix)) %>%
@@ -628,7 +630,7 @@ if (F) {
   # %>% add_surface(z = matrix(pred_regular, nrow = n_pix), opacity = .4)
   # %>% add_surface(z = matrix(pred_agonist, nrow = n_pix), opacity = .4)
   # beepr::beep()
-  
+
   # plot_ly(z=matrix(mix_df$effect, nrow = n_pix), type = "contour")
 }
 
@@ -643,11 +645,11 @@ plot_individual_response <- function(replicate_sets, re_par_summary, curve_fits,
   for (ri in 1:length(replicate_sets)) {
     u_RE_vals <- re_par_summary$u_RE_params[which(replicate_counts == ri)]
     v_RE_vals <- re_par_summary$v_RE_params[which(replicate_counts == ri)]
-    
+
     rep_idx <- replicate_sets[[ri]]
     plot(Cx[rep_idx, ], y_i[rep_idx, ],
-         log = "x", pch = 1:length(rep_idx),
-         xlab = "Concentration", ylab = "Response", main = chem_map[ri]
+      log = "x", pch = 1:length(rep_idx),
+      xlab = "Concentration", ylab = "Response", main = chem_map[ri]
     )
     lines(Cx[rep_idx[1], ], hill_function(curve_fits[ri, 1], curve_fits[ri, 2], curve_fits[ri, 3], Cx[rep_idx[1], ]), col = 2)
     DRM_SSE <- DRM_SSE + sum((y_i[rep_idx, ] - hill_function(curve_fits[ri, 1], curve_fits[ri, 2], curve_fits[ri, 3], Cx[rep_idx[1], ]))^2, na.rm = T)
@@ -689,10 +691,10 @@ plot_reflection_illustration <- function(slope_in = .5) {
   y_test_bey <- seq(2 * a - .01, 6 * a - .01, by = sign(a) * .01)
   y_test_neg <- seq(0, -4 * a - .01, by = -sign(a) * .01)
   x_test <- seq(0, 5, by = .01) # 1*10^(seq(-8, .5, by=.1))
-  
-  
+
+
   lgnd_brks <- c(" GCA", "RGCA", "Extension", "Intermediate", "Reflection", "Ext+Reflect", "alt")
-  
+
   pt1 <- cbind(x_test, a / (1 + (b / x_test)^(slope_c)), 1, 1, lgnd_brks[2])
   pt1_ghost <- cbind(-x_test - 2 * b, a / (1 + (b / x_test)^(slope_c)), 5, 1, lgnd_brks[4])
   pt2 <- cbind(
@@ -710,12 +712,12 @@ plot_reflection_illustration <- function(slope_in = .5) {
   x_test <- seq(-5, 5, by = .1)
   pt_gca <- cbind(x_test, a / (1 + (b / x_test)^(1)), 0, 2, lgnd_brks[1])
   pt_gca[which(pt_gca[, 2] == "Inf"), 2] <- NA
-  
+
   hill_df <- data.frame(rbind(pt_gca, pt1, pt2, pt3, pt4, pt1_ghost))
   names(hill_df) <- c("x", "y", "subcurve", "line", "Segment")
   hill_df$x <- as.numeric(hill_df$x)
   hill_df$y <- as.numeric(hill_df$y)
-  
+
   rect_region <- data.frame(
     xmin = c(0, -b),
     xmax = c(5, 0),
@@ -723,7 +725,7 @@ plot_reflection_illustration <- function(slope_in = .5) {
     ymax = c(a, 0),
     z = c(1, 2)
   )
-  
+
   okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   basic_col <- c("black", "green", "red", "gray", "cyan", "purple", "gray")
   gplot <- ggplot2::ggplot(data = hill_df, aes(x = x, y = y, color = Segment)) +
@@ -749,10 +751,10 @@ plot_reflection_illustration <- function(slope_in = .5) {
     guides(colour = guide_legend(nrow = 1, override.aes = list(linetype = c(3, 1, 1, 1, 1, 1)))) +
     ylab("Response") +
     labs(title = "Extending GCA with Reflection") # , subtitle = "")
-  
-  
+
+
   x_test <- seq(0.01, 5, by = .01) # 1*10^(seq(-8, .5, by=.1))
-  for(slope_c in c(seq(.1, .8, by=.05),seq(1, 4, by=.2))){
+  for (slope_c in c(seq(.1, .8, by = .05), seq(1, 4, by = .2))) {
     pt1 <- cbind(x_test, a / (1 + (b / x_test)^(slope_c)), 1, 1, "Alt")
     pt2 <- cbind(
       sapply(y_test, function(x) hilly_inverse_test(x, slope_c)),
@@ -766,22 +768,24 @@ plot_reflection_illustration <- function(slope_in = .5) {
       sapply(y_test_bey, function(x) hilly_inverse_test(x, slope_c)),
       y_test_bey, 4, 1, "Alt"
     )
-    
+
     hill_df <- data.frame(rbind(pt_gca, pt1, pt2, pt3, pt4, pt1_ghost))
     names(hill_df) <- c("x", "y", "subcurve", "line", "Segment")
     hill_df$x <- as.numeric(hill_df$x)
     hill_df$y <- as.numeric(hill_df$y)
     # set last point of extension to NA to avoid complete line
-    hill_df[which(hill_df$subcurve=="4")[1]-1,]$y = NA
-    gplot <- gplot+
-      geom_line(data = hill_df, 
-                aes(x = x, y = y, color = Segment),
-                linewidth = .25, 
-                linetype =1)
+    hill_df[which(hill_df$subcurve == "4")[1] - 1, ]$y <- NA
+    gplot <- gplot +
+      geom_line(
+        data = hill_df,
+        aes(x = x, y = y, color = Segment),
+        linewidth = .25,
+        linetype = 1
+      )
   }
-  #reorder layers
-  n_layers = length(gplot$layers)
-  gplot$layers = gplot$layers[c(1, 7:n_layers, 2:6)]
+  # reorder layers
+  n_layers <- length(gplot$layers)
+  gplot$layers <- gplot$layers[c(1, 7:n_layers, 2:6)]
   gplot
 }
 # pdf("RGCA_symmetry_full.pdf", width =7,height = 4)
@@ -806,10 +810,9 @@ plot_inverse_illustration <- function(plot_reciprocal = F) {
   y_test_bey <- seq(2 * a - .01, 6 * a - .01, by = sign(a) * .01) # [2a, Inf (~6a)]
   y_test_neg <- seq(0, -4 * a - .01, by = -sign(a) * .01) # [0, -4a]
   x_test <- seq(0, 5, by = .01) # 1*10^(seq(-8, .5, by=.1))
-  
-  
+
   lgnd_brks <- c(" GCA", "RGCA", "Extension", "Intermediate", "Reflection", "Ext+Reflect")
-  
+
   pt1 <- cbind(a / (1 + (b / (x_test))^(slope_c)), x_test, 1, 1, lgnd_brks[2])
   # pt1_ghost = cbind(-x_test - 2*b, a/(1+(b/x_test)^(slope_c)), 5, 1, lgnd_brks[4])
   pt2 <- cbind(
@@ -826,26 +829,20 @@ plot_inverse_illustration <- function(plot_reciprocal = F) {
     y_test_bey, sapply(y_test_bey, function(x) hilly_inverse_test(x, slope_c)),
     4, 1, lgnd_brks[6]
   )
-  
   x_test <- seq(-5, 5, by = .01)
   # pt_gca = cbind(x_test, a/(1+(b/x_test)^(1)), 0, 2, lgnd_brks[1])
   pt_gca <- cbind(a / (1 + (b / x_test)^(1)), x_test, 0, 2, lgnd_brks[1])
   # pt_gca[which(pt_gca[,1]=="Inf"),2] = NA
-  
-  
   hill_df <- data.frame(rbind(pt_gca, pt1, pt2, pt3, pt4)) # ,pt1_ghost))
   names(hill_df) <- c("x", "y", "subcurve", "line", "Segment")
   hill_df$x <- as.numeric(hill_df$x)
   hill_df$y <- as.numeric(hill_df$y)
-  
+
   if (plot_reciprocal) {
     hill_df$y <- 1 / as.numeric(hill_df$y)
   }
   hill_df$y[which(hill_df$y == "Inf")] <- NA
-  
-  
-  
-  
+
   okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   basic_col <- c("black", "green", "red", "gray", "cyan", "purple")
   gplot <- ggplot2::ggplot(data = hill_df, aes(x = x, y = y, color = Segment)) +
@@ -864,17 +861,14 @@ plot_inverse_illustration <- function(plot_reciprocal = F) {
     )) +
     ylab("Response") +
     labs(title = "Extending GCA with Reflection, Inverse") # , subtitle = "")
-  
+
   if (plot_reciprocal) {
     gplot <- gplot + coord_cartesian(xlim = c(-1, 5), ylim = c(-5, 5))
   } else {
     gplot <- gplot + coord_cartesian(xlim = c(-3, 4), ylim = c(-3, 4))
   }
-  
+
   print(gplot)
-  
-  # pdf("RGCA_symmetry_detail.pdf", width = 8 ,height = 5)
-  # png("RGCA_symmetry_full_neg.png",width = 8 ,height = 5, units = "in",res = 200)
 }
 
 
@@ -887,8 +881,8 @@ compare_exclude_include <- function() {
   plot_compare <- function(idx_set_list, conc_factor = 1, plt_title = NA) {
     reptit <- sapply(1:length(idx_set_list), FUN = function(x) length(idx_set_list[[x]]))
     EC_df <- cbind(mix_df[unlist(idx_set_list), ],
-                   "group" = rep(names(idx_set_list), reptit),
-                   "multp" = rep(conc_factor, reptit)
+      "group" = rep(names(idx_set_list), reptit),
+      "multp" = rep(conc_factor, reptit)
     )
     # calibrate actual dosage using the guide
     plot_df <- cbind(EC_df[, c(2, 4, 6)], EC_df[, c(6 + 15, 51, 52)])
@@ -907,9 +901,9 @@ compare_exclude_include <- function() {
       labs(title = plt_title)
     return(p)
   }
-  
-  
-  
+
+
+
   EC_AR_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49497"), 4:21])
   EC_all_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49538"), 4:21])
   EC_ER_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49517"), 4:21])
@@ -917,14 +911,14 @@ compare_exclude_include <- function() {
   mean(crat_1[crat_1 > 0])
   crat_2 <- EC_ER_guide / EC_all_guide
   mean(crat_2[crat_2 > 0])
-  
+
   idx_ec_ar <- which(mix_df$CAS == "NOCAS_49497") # EquiConc AR
   idx_ec_all <- which(mix_df$CAS == "NOCAS_49538") # EquiConc all
   idx_ec_er <- which(mix_df$CAS == "NOCAS_49517") # EquiConc ER
   idx_ep_ar2 <- which(mix_df$CAS == "NOCAS_49561") # EquiConc AR alt
   idx_set_list <- list("EC_all" = idx_ec_all, "EC_AR" = idx_ec_ar, "EC_ER" = idx_ec_er, "EC_AR2" = idx_ep_ar2)
   p1 <- plot_compare(idx_set_list, conc_factor = c(1, 1, 3, 1), plt_title = "Equiconcentration Comparison")
-  
+
   EP_all_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49537"), 4:21])
   EP_AR_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49496"), 4:21])
   EP_ER_guide <- as.numeric(mix_guide[which(mix_guide$CAS == "NOCAS_49516"), 4:21])
@@ -932,15 +926,15 @@ compare_exclude_include <- function() {
   mean(crat_1[crat_1 > 0])
   crat_2 <- EP_ER_guide / EP_all_guide
   mean(crat_2[crat_2 > 0])
-  
+
   idx_ep_all <- which(mix_df$CAS == "NOCAS_49537") # EquiPot all
   idx_ep_ar <- which(mix_df$CAS == "NOCAS_49496") # EquiPot AR
   idx_ep_er <- which(mix_df$CAS == "NOCAS_49516") # EquiPot ER
-  
+
   EP_set_list <- list("EP_all" = idx_ep_all, "EP_AR" = idx_ep_ar, "EP_ER" = idx_ep_er)
   p2 <- plot_compare(EP_set_list, conc_factor = c(1, 4, 2), plt_title = "Equipotent Comparison")
-  
-  
+
+
   plot_grid(p1, p2)
   # EC_all and EC_AR may be mixed up!
 }
@@ -948,148 +942,144 @@ compare_exclude_include <- function() {
 # Sim Study ####
 sim_study_boxplot <- function(record_MSE, data_col_names, record_CRPS = NA) {
   # Plot results as boxplot
-  if(!is.na(record_CRPS)){
+  if (!is.na(record_CRPS)) {
     record <- data.frame(rbind(cbind(record_MSE, "Score" = "MSE"), cbind(record_CRPS, "Score" = "CRPS")))
     names(record) <- data_col_names
     record_df <- reshape2::melt(record, id.vars = c("Score", "Mix_ID"))
     names(record_df) <- c("Score_Method", "Mix_ID", "Pred_Method", "Score")
-    record_df$Score = as.numeric(record_df$Score)
-    
-    
-    my_gplot = ggplot2::ggplot(record_df, aes(x = as.factor(Mix_ID), y = Score)) +
+    record_df$Score <- as.numeric(record_df$Score)
+
+
+    my_gplot <- ggplot2::ggplot(record_df, aes(x = as.factor(Mix_ID), y = Score)) +
       geom_boxplot(aes(colour = Pred_Method)) +
-      #facet_wrap(vars(Score_Method, Mix_ID), scales = "free") +
-      facet_grid(Score_Method~ Mix_ID, scales = "free")+
+      # facet_wrap(vars(Score_Method, Mix_ID), scales = "free") +
+      facet_grid(Score_Method ~ Mix_ID, scales = "free") +
       theme_bw() +
       xlab("True Mixture Model") +
-      theme(legend.position = "bottom")+
-      #coord_flip()+
+      theme(legend.position = "bottom") +
+      # coord_flip()+
       guides(colour = guide_legend(title = "Fitting Method"))
     return(my_gplot)
   }
-  record = data.frame(record_MSE)
-  #names(record) <- c("RGCA (2-step)", "RGCA", "GCA","CA", "IA", "Mix ID","N Chems")
+  record <- data.frame(record_MSE)
+  # names(record) <- c("RGCA (2-step)", "RGCA", "GCA","CA", "IA", "Mix ID","N Chems")
   names(record) <- data_col_names
   record_df <- reshape2::melt(record, id.vars = c("Num Chems", "Mix ID"))
-  names(record_df) <- c( "Num Chems", "Mix ID", "Pred_Method","MSE")
-  record_df$MSE = as.numeric(record_df$MSE)
-  record_df$`Num Chems` = as.numeric(record_df$`Num Chems`)
-  record_df = record_df[record_df$MSE<20,]
-  #record_df = record_df %>%filter(Pred_Method != "IA") # %>%filter(Pred_Method != "IA")
+  names(record_df) <- c("Num Chems", "Mix ID", "Pred_Method", "MSE")
+  record_df$MSE <- as.numeric(record_df$MSE)
+  record_df$`Num Chems` <- as.numeric(record_df$`Num Chems`)
+  record_df <- record_df[record_df$MSE < 20, ]
+  # record_df = record_df %>%filter(Pred_Method != "IA") # %>%filter(Pred_Method != "IA")
   ggplot2::ggplot(record_df, aes(x = as.factor(`Mix ID`), y = MSE)) +
     geom_boxplot(aes(colour = Pred_Method)) +
-    #facet_wrap(vars(Score_Method, Mix_ID), scales = "free") +
-    facet_grid(`Num Chems` ~ ., scales = "free")+
+    # facet_wrap(vars(Score_Method, Mix_ID), scales = "free") +
+    facet_grid(`Num Chems` ~ ., scales = "free") +
     theme_bw() +
     xlab("True Mixture Model") +
-    theme(legend.position = "bottom")+
-    coord_cartesian(ylim = c(0, 4))+
+    theme(legend.position = "bottom") +
+    coord_cartesian(ylim = c(0, 4)) +
     # scale_y_continuous(trans = "log10") +
-    #coord_flip()+
+    # coord_flip()+
     guides(colour = guide_legend(title = "Fitting Method"))
-  
-  
 }
 
 
 
 # Isobole ####
-create_RGCA_isobole_plot = function(){
-  isobole_df = data.frame()
-  for(a_val in c(-2,1,3,5)){#,-.75, -.5,-.1)){ #1,2
-    for(slope_val in c(.5,1,1.5)){#},1,1.5)){ #.5, 1, 1.5
-      # create a parameter input matrix 
-      param_matrix = as.matrix(cbind("a" = c(a_val,5), #2
-                                     "b" = c(.7,1),  #.8, 1.5
-                                     "c" = c(slope_val,1), #1
-                                     "max_R" = 5,
-                                     "d" = 0))
+create_RGCA_isobole_plot <- function() {
+  isobole_df <- data.frame()
+  for (a_val in c(-2, 1, 3, 5)) { # ,-.75, -.5,-.1)){ #1,2
+    for (slope_val in c(.5, 1, 1.5)) { # },1,1.5)){ #.5, 1, 1.5
+      # create a parameter input matrix
+      param_matrix <- as.matrix(cbind(
+        "a" = c(a_val, 5), # 2
+        "b" = c(.7, 1), # .8, 1.5
+        "c" = c(slope_val, 1), # 1
+        "max_R" = 5,
+        "d" = 0
+      ))
       # specify both chems in cluster 1 of 1
-      cluster_assign_vec = c(1,1)
+      cluster_assign_vec <- c(1, 1)
       # create a calculator to predict response given concentration
-      mix_pred = mix_function_generator(param_matrix, cluster_assign_vec)
+      mix_pred <- mix_function_generator(param_matrix, cluster_assign_vec)
       # create matrix of concentration values
-      c_val = seq(.05,5, by=.01)
-      n_pix = length(c_val)
-      c_mat = expand.grid(c_val,c_val)
+      c_val <- seq(.05, 5, by = .01)
+      n_pix <- length(c_val)
+      c_mat <- expand.grid(c_val, c_val)
       # apply calculator to concentrations
-      pred_effect = apply(c_mat, MARGIN=1, FUN = function(x) mix_pred(x) )
-      mix_df = data.frame(cbind(c_mat, pred_effect))
-      names(mix_df) = c("C1", "C2", "effect")
-      isobole_df = rbind(isobole_df, cbind(mix_df, "a"=a_val, "slope" = slope_val))
+      pred_effect <- apply(c_mat, MARGIN = 1, FUN = function(x) mix_pred(x))
+      mix_df <- data.frame(cbind(c_mat, pred_effect))
+      names(mix_df) <- c("C1", "C2", "effect")
+      isobole_df <- rbind(isobole_df, cbind(mix_df, "a" = a_val, "slope" = slope_val))
     }
   }
   # 2d contour plot
-  #pdf(file='Isoboles_RGCA_x.pdf',width=8, height = 6)
-  ggplot2::ggplot(isobole_df, aes(x=C1, y=C2, z=effect)) + 
-    geom_contour(bins = 30) + 
+  # pdf(file='Isoboles_RGCA_x.pdf',width=8, height = 6)
+  ggplot2::ggplot(isobole_df, aes(x = C1, y = C2, z = effect)) +
+    geom_contour(bins = 30) +
     facet_grid(cols = vars(a), rows = vars(slope))
-  #dev.off()
+  # dev.off()
   # 3d plot with 2d contour plot on floor
-  #mix_df$effect[mix_df$effect< -1000]=NA
-  plotly::plot_ly(x = (c_val),y=(c_val),z=matrix(mix_df$effect, nrow = n_pix)) %>% 
-    add_surface(contours= list( z = list(
-      show=TRUE,
-      usecolormap=TRUE,
-      highlightcolor="#ff0000",
-      project=list(z=TRUE)
-    ), zlim = c(0,3)
-    )) 
-  #%>% layout(scene = list(camera=list(eye = list(x=2, y=.5, z=.7))))
-  #%>% add_surface(z = matrix(pred_regular, nrow = n_pix), opacity = .4) 
-  #%>% add_surface(z = matrix(pred_agonist, nrow = n_pix), opacity = .4)
+  # mix_df$effect[mix_df$effect< -1000]=NA
+  plotly::plot_ly(x = (c_val), y = (c_val), z = matrix(mix_df$effect, nrow = n_pix)) %>%
+    add_surface(contours = list(z = list(
+      show = TRUE,
+      usecolormap = TRUE,
+      highlightcolor = "#ff0000",
+      project = list(z = TRUE)
+    ), zlim = c(0, 3)))
+  # %>% layout(scene = list(camera=list(eye = list(x=2, y=.5, z=.7))))
+  # %>% add_surface(z = matrix(pred_regular, nrow = n_pix), opacity = .4)
+  # %>% add_surface(z = matrix(pred_agonist, nrow = n_pix), opacity = .4)
   # plot_ly(z=matrix(mix_df$effect, nrow = n_pix), type = "contour")
 }
 
 
 
 
-# Uniqueness+Stability #### 
-plot_RGCA_solution_intersection <- function(){
-  solutions_df = data.frame()
-  for(a_val in c(-2, -.4, -.1)){ # -0.575: one solution .45, -.35,-.01, , -.75, -.35, -.1
-    for(slope_val in c(1.5, 1, 15)){
-      for(c1 in 3){
-        for(c2 in 1){
-          c3 = 1
-          param_matrix = as.matrix(cbind("a" = c(a_val,1), 
-                                         "b" = c(1, .6), 
-                                         "c" = c(slope_val, 1),
-                                         "max_R" = 1)
+# Uniqueness+Stability ####
+plot_RGCA_solution_intersection <- function() {
+  solutions_df <- data.frame()
+  for (a_val in c(-2, -.4, -.1)) { # -0.575: one solution .45, -.35,-.01, , -.75, -.35, -.1
+    for (slope_val in c(1.5, 1, 15)) {
+      for (c1 in 3) {
+        for (c2 in 1) {
+          c3 <- 1
+          param_matrix <- as.matrix(cbind(
+            "a" = c(a_val, 1),
+            "b" = c(1, .6),
+            "c" = c(slope_val, 1),
+            "max_R" = 1
+          ))
+          hill_inverse_list <- apply(param_matrix,
+            MARGIN = 1,
+            function(x) do.call(hill_invs_factry, as.list(x))
           )
-          hill_inverse_list = apply(param_matrix, 
-                                    MARGIN=1, 
-                                    function(x) do.call(hill_invs_factry,as.list(x)))
-          myfun = function(r) c1/hill_inverse_list[[1]](r) + c2/hill_inverse_list[[2]](r)#+c3/hill_inverse_list[[3]](r)
-          myseq = seq(-1, 1, by=.001)
-          curr_df = data.frame(rbind(cbind(myseq, c1/sapply(myseq, hill_inverse_list[[1]]), "C1", 1),
-                                     cbind(myseq, c2/sapply(myseq, hill_inverse_list[[2]]), "C2", 2),
-                                     #cbind(myseq, c3/sapply(myseq, hill_inverse_list[[3]]), "C3", 3),
-                                     cbind(myseq, sapply(myseq, myfun), "C3",4))
-          )
-          names(curr_df) = c("R", "x", "curveID", "color")
-          solutions_df = rbind(solutions_df, cbind(curr_df, "sill"=a_val, "slope" = slope_val, "c1" = c1, "c2" = c2))
+          myfun <- function(r) c1 / hill_inverse_list[[1]](r) + c2 / hill_inverse_list[[2]](r) #+c3/hill_inverse_list[[3]](r)
+          myseq <- seq(-1, 1, by = .001)
+          curr_df <- data.frame(rbind(
+            cbind(myseq, c1 / sapply(myseq, hill_inverse_list[[1]]), "C1", 1),
+            cbind(myseq, c2 / sapply(myseq, hill_inverse_list[[2]]), "C2", 2),
+            # cbind(myseq, c3/sapply(myseq, hill_inverse_list[[3]]), "C3", 3),
+            cbind(myseq, sapply(myseq, myfun), "C3", 4)
+          ))
+          names(curr_df) <- c("R", "x", "curveID", "color")
+          solutions_df <- rbind(solutions_df, cbind(curr_df, "sill" = a_val, "slope" = slope_val, "c1" = c1, "c2" = c2))
         }
       }
     }
   }
-  solutions_df$R = as.numeric(solutions_df$R); solutions_df$x = as.numeric(solutions_df$x)
-  solutions_df$c2 = as.factor(solutions_df$c2)
-  solutions_df$sill = paste("Sill:", solutions_df$sill)
-  solutions_df$slope = paste("Slope:", solutions_df$slope)
-  ggplot2::ggplot(solutions_df, aes(x=R, y=x,color = color)) + 
-    geom_line(linewidth = 1)+
-    ylim(-20, 20)+
-    geom_hline(yintercept = 1, linetype = 2)+
-    facet_grid(sill ~slope )+
-    scale_colour_viridis_d('Chemical', labels = c("Chem1", "Chem2", "Chem3", "Mix"),direction = -1)+#scale_colour_brewer
+  solutions_df$R <- as.numeric(solutions_df$R)
+  solutions_df$x <- as.numeric(solutions_df$x)
+  solutions_df$c2 <- as.factor(solutions_df$c2)
+  solutions_df$sill <- paste("Sill:", solutions_df$sill)
+  solutions_df$slope <- paste("Slope:", solutions_df$slope)
+  ggplot2::ggplot(solutions_df, aes(x = R, y = x, color = color)) +
+    geom_line(linewidth = 1) +
+    ylim(-20, 20) +
+    geom_hline(yintercept = 1, linetype = 2) +
+    facet_grid(sill ~ slope) +
+    scale_colour_viridis_d("Chemical", labels = c("Chem1", "Chem2", "Chem3", "Mix"), direction = -1) + # scale_colour_brewer
     theme(legend.position = "bottom")
-  #ggsave("RGCA_limit_-2_1p5.pdf", device = "pdf", height = 8, width = 9, units = "in")
+  # ggsave("RGCA_limit_-2_1p5.pdf", device = "pdf", height = 8, width = 9, units = "in")
 }
-
-
-
-
-
-
-

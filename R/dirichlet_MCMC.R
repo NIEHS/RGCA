@@ -27,10 +27,6 @@ remove_unused_phi <- function(c_i, phi_c) {
 }
 
 
-# could be: computed slopes from Hill?
-# y_i =  c(-1.48, -1.4, -1.16, -1.08, -1.02, 0.14, 0.51, 0.53, 0.78)
-# y_i = curve_fits[,3]
-# y_i = phi_c
 
 #' Dirichlet Process MCMC
 #'
@@ -127,7 +123,7 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
     # update sigma
     p <- length(phi_c)
     sigma_sqr <- 1 / rgamma(1,
-      shape = 10 + n / 2,  # was 10, .1
+      shape = 10 + n / 2, # was 10, .1
       rate = 1 + sum((y_i - phi_c[c_i])^2) / 2
     )
     # mean of IG is b/(a-1), var is b/(a+1)
@@ -139,8 +135,8 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
     # update the DP concentration alpha: large alpha = more clusters
     eta <- rbeta(n = 1, alpha + 1, n)
     # prior on alpha ~ G(a= 3/2, b= 1/2)
-    alpha_a <- 3/2  # 3/2
-    alpha_b <- 1/6  # 1/6
+    alpha_a <- 3 / 2 # 3/2
+    alpha_b <- 1 / 6 # 1/6
     # k = n_clusts = p
     mix_prob <- (alpha_a + k - 1) / (alpha_a + k - 1 + n * (alpha_b - log(eta)))
     # the posterior is a mixture; sample given eta
