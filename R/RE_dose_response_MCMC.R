@@ -1,0 +1,589 @@
+################################################################################
+# -------  MH/Gibbs sampler for the mixed effect model: ------------------------
+#-------------------------------------------------------------------------------
+#' y = (theta1 + u)/(1 + (theta2/x)^phi_c) + v + epsilon
+#' epsilon ~ N(0, sigma^2)
+#' theta1 ~ N(0, 1000)
+#' theta2 ~ Gamma(1e-3, 1e-3)
+#' phi_c ~ Gamma(0.3, 0.3)
+#' u ~ N(0, sigma_u^2)
+#' v ~ N(0, sigma_v^2)
+#' sigma^2 ~ InvGamma(0.1, 0.1) # indexed for each chemical, not global!
+#' sigma_u^2 ~ InvGamma(0.1, 0.1)
+#' sigma_v^2 ~ InvGamma(0.1, 0.1)
+#'
+################################################################################
+
+
+# code to fit a tox mixture model given individual dose response curve
+# models clustering through the hill slope parameter
+
+
+# boolean values deactive chunks of code when sourcing the file
+generate_data <- F
+fit_ind_curves <- F
+read_in_data <- F
+
+
+
+#### Generate data ####
+# For testing the MCMC method on simulated data
+if (generate_data) {
+  plot(x, hill_function(1, 1, 1, x) + 1.96 * .05, type = "l", col = 2, log = "x")
+  points(x, hill_function(1, 1, 1, x))
+  points(x, hill_function(1, 1, 1, x) - 1.96 * .05, type = "l", col = 2)
+  for (i in seq(-.5, .5, by = .05)) points(x, hill_function(1, 1, 1 + i, x), type = "l")
+  for (i in seq(-.5, .5, by = .05)) points(x, hill_function(1, 1 + i, 1, x), type = "l")
+
+
+  # sample some coefficients: theta_1, theta_2, phi_c
+  # generate curves at Cx, add noise
+  set.seed(112)
+
+  n_chems <- 10
+  n_replicates <- rep(3, n_chems)
+  # dosages observed
+  Cx <- seq(0, 20, by = .8)
+  max_dose <- 20
+  n_dose <- length(Cx)
+  # assume 3-4 clusters
+  theta_1_true <- rnorm(n_chems, mean = 1, sd = .3) # rgamma(n_chems, shape = 3, rate = 3)
+  theta_2_true <- rgamma(n_chems, shape = 3, rate = 1)
+  phi_c_true_vals <- c(2, 1, 3) # rgamma(4, shape = 1.5, rate = .5)
+  clust_pattern <- c(2, 5, 3)
+  # theta_1_true[11:12] = 0
+  true_clust_assign <- rep(1:length(clust_pattern), clust_pattern)
+  phi_ci_true <- rep(phi_c_true_vals, clust_pattern)
+
+  # random effects vary, allow for some larger variances
+  u_RE_sd_true <- c(rep(0, 10), rep(rep(c(.1, .3), c(5, 5)), 2))
+  # true RE: precompute
+  u_RE_true <- rnorm(sum(n_replicates), sd = u_RE_sd_true)
+  v_RE_sd_true <- c(rep(0, 10), rep(rep(c(.2, .4), c(5, 5)), 2))
+  v_RE_true <- rnorm(sum(n_replicates), sd = u_RE_sd_true)
+
+  # now generate curves for each chem
+  y_i <- matrix(nrow = sum(n_replicates), ncol = n_dose + 1)
+  for (i in 1:n_chems) {
+    for (r in 1:n_replicates[n_chems]) {
+      curr_idx <- i + (r - 1) * n_chems
+      print(curr_idx)
+      response_data <- hill_function(
+        theta_1_true[i] + u_RE_true[curr_idx], theta_2_true[i],
+        phi_ci_true[i], Cx
+      ) + v_RE_true[curr_idx] + rnorm(n_dose, sd = .05)
+      # save the chem idx for next step
+      y_i[curr_idx, ] <- c(i, response_data)
+    }
+  }
+
+
+  # visualize generated data
+  par(mfrow = c(3, 3))
+  for (i in 1:9) {
+    plot(y_i[i, -1])
+    points(y_i[i + n_chems, -1], pch = 2)
+    points(y_i[i + n_chems + 1, -1], pch = 3)
+  }
+  par(mfrow = c(1, 1))
+
+  # replicates require chem ID
+  replicate_sets <- c()
+  for (chem in unique(y_i[, 1])) {
+    rep_idx <- which(y_i[, 1] == chem)
+    replicate_sets <- c(replicate_sets, list(rep_idx))
+  }
+  # drop the ID col, have replicate set map
+  y_i <- y_i[, -1]
+
+  # create matrix to allow for different levels of each chem
+  Cx <- do.call(rbind, rep(list(Cx), sum(n_replicates)))
+}
+
+
+
+#### Read in data ####
+if (read_in_data) source("Desktop/tox_mixtures/code/tox21_prep_data.R")
+
+#### MCMCM ####
+# a function to make a list into a vector
+mk_vec <- function(arow) unlist(array(arow))
+# functions to take dot or matrix products when nulls present:
+vprod_NA <- function(a, b) {
+  mat_out <- (t(na.omit(as.matrix(a))) %*% na.omit(as.matrix(b)))
+  if (dim(a)[2] > 1) {
+    return(mat_out)
+  }
+  return(mat_out[1])
+}
+qprod_NA <- function(a, b, c) {
+  return((t(na.omit(as.matrix(a))) %*% diag(na.omit(b)) %*% na.omit(as.matrix(c)))[1])
+}
+oprod_NA <- function(a, b) {
+  return(outer(na.omit(a), na.omit(b)))
+}
+
+
+
+#' Builds a design matrix for replicates of dose response data for performing a
+#' simultaneous Gibbs update for the sill, sill random effect, and intercept
+#' random effect
+#'
+#' @param v_list a list with a vector for each replicate. Each vector is a
+#'   sequence of coefficients with length equal to the number of doses (ie
+#'   samples), computed according to the Hill model.
+#'
+#' @return a matrix built from the vectors of the input to mimic a design matrix
+#'   for a linear model
+#' @export
+#'
+#' @examples
+build_replicate_matrix <- function(v_list) {
+  num_repls <- length(v_list)
+  num_samples <- length(v_list[[1]])
+  # tot dim: reps* samples X 1+2*(reps-1)
+  V_mat <- matrix(0,
+    nrow = num_repls * num_samples,
+    ncol = 1 + 2 * (num_repls - 1)
+  )
+
+  V_mat[1:num_samples, 1] <- v_list[[1]] # sill part, no random effects (identifiability)
+  for (ri in 2:num_repls) {
+    # careful indexing when constructing matrix
+    r_start_idx <- 1 + (ri - 1) * num_samples
+    r_end_idx <- r_start_idx + num_samples - 1
+    r_idx <- r_start_idx:r_end_idx
+    V_mat[r_idx, 1] <- v_list[[ri]] # sill part for current replicate
+    V_mat[r_idx, ri] <- v_list[[ri]] # sill random effect part
+    V_mat[r_idx, ri + num_repls - 1] <- 1 # intercept random effect coefficient
+  }
+  return(V_mat)
+}
+
+
+# an older method to initialize the random effects, not used
+init_u_RE <- function(repl_matrix, take_RE = T) {
+  max_curve_values <- apply(repl_matrix,
+    MARGIN = 1,
+    function(x) max(x, na.rm = T)
+  )
+  offset <- max_curve_values - max_curve_values[1]
+  if (take_RE) {
+    return(offset)
+  }
+  return(median(max_curve_values))
+}
+
+
+# Fit RE hill model to arbitrary dose response data.
+# Input:
+# n_c = number of chemicals (with replicates, may be redundant)
+# n_d = number of doses
+# y_i : the chemical responses as a (n_c, n_d) matrix
+# Cx : the dosages for each chemical and response, a (n_c, n_d) matrix
+# replicate_sets :  A list of replicate indices for each chemical.
+
+
+#' Random Effect MCMC fitting
+#'
+#' Performs a Markov Chain Monte Carlo sampling procedure to create posterior
+#' samples for the random effect model specified above.  Uses Gibbs updates when
+#' possible and reverts to Metropolis-Hastings with Gaussian random walk
+#' proposals where needed.  The EC50 parameter varies over multiple orders of
+#' magnitude and involves a log normal proposal distribution.
+#'
+#'
+#' @param y_i a matrix of dose responses for individual chemicals.  Rows are
+#'   chemicals where each replicate has a separate row, columns are the dose,
+#'   and entries are the response.
+#' @param Cx a matrix of the doses given for individual chemicals.  Rows are
+#'   chemicals where each replicate has a separate row, columns are the index,
+#'   and the entry is the dose.  Should match y_i
+#' @param replicate_sets a list of vectors where each vector has the row index
+#'   of all replicates of a particular chemical.  The length of the list should
+#'   match the number of unique chemicals.
+#' @param n_iter the number of iterations, defaults to 10,000
+#' @param n_hill_par specifies if the full Hill model with 3 parameters is fit
+#'   (default) or if a simplified model with 2 parameters (slope =1) is fit.
+#'   Useful for comparing our method to standard GCA, whcih requires slope=1.
+#'
+#' @return a list with the full sampled chains for the parameters: slope (phi),
+#'   sill+ec50 (theta1 and theta2), noise variance (sigma), random effects,
+#'   random effect prior variances.
+#' @export
+#'
+#' @examples
+RE_MCMC_fit <- function(y_i, Cx, replicate_sets, n_iter = 10000, n_hill_par = 3) {
+  # parameter id:
+  # phi = slope
+  # theta_1 = sill
+  # theta_2 = EC50
+  n_chems <- length(replicate_sets)
+  n_replicates <- unlist(lapply(replicate_sets, length))
+  n_dose <- ncol(Cx)
+  # no clustering here, just do RE
+  alpha <- 1
+  c_i <- 1:n_chems
+  phi_c <- rep(1, n_chems)
+  theta_1 <- rep(1, n_chems)
+  theta_2 <- rep(1e-6, n_chems)
+
+  u_repl <- sapply(1:n_chems, FUN = function(x) list(rep(0, n_replicates[x]))) #
+  v_repl <- u_repl
+  sigma <- rep(1, n_chems) # noise for obs data
+  sigma_mh <- .1 # proposal distr for MH
+  sigma_u <- rep(10, length(u_repl)) # RE for sill
+  sigma_v <- rep(10, length(v_repl)) # RE for offset
+  phi_rate <- .3 # parameter for gamma prior on slope
+  phi_shape <- .3 # 2nd parameter for gamma prior on slope
+  ec50_rate <- 1e-3
+  ec50_shape <- 1e-3
+  sill_var <- 1000 # approximate non-informative prior for sill ~ N(0, var)
+  # lambda = rep(1, n_chems) # local variance, sill horseshoe prior
+  # tau = 1 # global var, sill horseshoe
+  # sill_var = (lambda*tau)^2
+  # n_iter = 50000
+  num_sampling_iters <- 5
+  record_assigned_mean <- matrix(nrow = n_iter, ncol = n_chems)
+  record_assigned_clust <- matrix(nrow = n_iter, ncol = n_chems)
+  record_sigma <- matrix(nrow = n_iter, ncol = n_chems)
+  record_tau <- matrix(nrow = n_iter, ncol = 1)
+  record_RE_u <- matrix(nrow = n_iter, ncol = sum(n_replicates))
+  record_RE_v <- matrix(nrow = n_iter, ncol = sum(n_replicates))
+  record_RE_u_sd <- matrix(nrow = n_iter, ncol = length(sigma_u))
+  record_RE_v_sd <- matrix(nrow = n_iter, ncol = length(sigma_v))
+  record_hill_params <- matrix(nrow = n_iter, ncol = 2 * n_chems)
+  n_iters_all_0 <- 0
+
+
+  # Rprof(line.profiling=T)
+  for (iter in 1:n_iter) {
+    # update phi
+    # If model is 2 parameter, fix phi to 1, do not update
+    if (n_hill_par > 2) {
+      for (j in 1:n_chems) {
+        # consider multiple MH steps
+        phi_curr <- phi_c[j]
+        for (itern in 1:num_sampling_iters) {
+          # MH:  use proposal distr of N(phi_curr, sigma_mh)
+          prop_phi_cj <- truncnorm::rtruncnorm(1, a = .1, mean = phi_curr, sd = sigma_mh)
+          # if symmetric proposal, just get alpha from ratio
+          total_llh_curr <- dgamma(phi_curr, shape = phi_shape, rate = phi_rate, log = T) +
+            log(truncnorm::dtruncnorm(prop_phi_cj, a = .1, mean = phi_curr, sd = sigma_mh))
+          total_llh_prop <- dgamma(prop_phi_cj, shape = phi_shape, rate = phi_rate, log = T) +
+            log(truncnorm::dtruncnorm(phi_curr, a = .1, mean = prop_phi_cj, sd = sigma_mh))
+          ## MH: allow for negative slopes
+          # prop_phi_cj = rnorm(1, mean = phi_curr , sd = sigma_mh)
+          # total_llh_curr = dnorm(prop_phi_cj, mean = 0, sd = 1)
+          # total_llh_prop = dnorm(phi_curr, mean = 0, sd = 1)
+          cluster_member_idx <- which(c_i == j)
+          for (clm in cluster_member_idx) {
+            for (rid in 1:n_replicates[clm]) {
+              act_idx <- replicate_sets[[clm]][rid]
+              u_RE <- u_repl[[clm]][rid]
+              v_RE <- v_repl[[clm]][rid]
+              # concatenate all relevant Conc, responses:  [y_1(C), y_2(C)], etc
+              active_X <- Cx[act_idx, ] # mk_vec(c(t(Cx[act_idx,])))
+              active_Y <- y_i[act_idx, ] # mk_vec(c(t(y_i[act_idx,])))
+
+              # sample conditional on the y_i assigned to phi
+              curr_denom <- 1 + (theta_2[j] / active_X)^phi_curr
+              curr_mean <- (theta_1[j] + u_RE) / curr_denom + v_RE
+              curr_sd_RE <- sigma[j] # sqrt(denom^2*sigma_u^2 + sigma_v^2+sigma^2)
+              llh_curr <- sum(dnorm(active_Y, mean = curr_mean, sd = curr_sd_RE, log = T),
+                na.rm = T
+              )
+              total_llh_curr <- total_llh_curr + llh_curr
+
+              prop_denom <- 1 + (theta_2[j] / active_X)^prop_phi_cj
+              prop_mean <- (theta_1[j] + u_RE) / (prop_denom) + v_RE
+              prop_sd_RE <- sigma[j] # sqrt(prop_denom^2*sigma_u^2 + sigma_v^2+sigma^2)
+              llh_prop <- sum(dnorm(active_Y, mean = prop_mean, sd = prop_sd_RE, log = T),
+                na.rm = T
+              )
+              total_llh_prop <- total_llh_prop + llh_prop
+            }
+          }
+          accept_thresh <- exp(total_llh_prop - total_llh_curr)
+          if (runif(1) < accept_thresh) {
+            phi_curr <- prop_phi_cj
+          }
+        }
+        phi_c[j] <- phi_curr
+      }
+    }
+
+    # update theta_1 and u v RE (va Gibbs): prior is N(0, 1000) and N(0,sig_u^2), likl is (y-aV-uV)sigm^-2(y-av-uV)
+    for (j in 1:n_chems) {
+      act_idx <- replicate_sets[[j]]
+      # concatenate all relevantresponses:  [y_1(C), y_2(C)], etc
+      active_Y <- c(t(y_i[act_idx, ]))
+      # compute the coefficients for the parameters of interest
+      V_ri <- lapply(act_idx, FUN = function(x) 1 / (1 + (theta_2[j] / Cx[x, ])^phi_c[c_i[j]]))
+      # build design matrix of coefficients for replicates
+      V_mat <- build_replicate_matrix(V_ri)
+      prec_RE <- 1 / sigma[j]^2
+
+      lin_terms_post_prec <- vprod_NA(V_mat, V_mat) * prec_RE +
+        diag(c(
+          1 / sill_var,
+          rep(sigma_u[j]^(-2), n_replicates[j] - 1),
+          rep(sigma_v[j]^(-2), n_replicates[j] - 1)
+        ))
+      lin_terms_post_var <- solve(lin_terms_post_prec + 1e-5 * diag(nrow(lin_terms_post_prec)))
+      # XY, RE: [from (XX)^-1 XY] for post mean is post_var * [v*prec_RE*y + prior_mean/prior var]
+      # XY_term = qprod_NA(theta1_coeff, prec_RE, active_Y)
+      XY_term <- vprod_NA(V_mat, active_Y) * prec_RE
+      lin_terms_post_mean <- vprod_NA(lin_terms_post_var, XY_term)
+      # sample from the post distribution
+      lin_term_sample <- t(chol(lin_terms_post_var)) %*% rnorm(length(lin_terms_post_mean)) + lin_terms_post_mean
+
+      theta_1[j] <- lin_term_sample[1]
+      fill_idx <- 2:n_replicates[j]
+      u_repl[[j]][fill_idx] <- lin_term_sample[fill_idx]
+      # dont update v_RE yet?
+      v_repl[[j]][fill_idx] <- lin_term_sample[fill_idx + n_replicates[j] - 1]
+    }
+
+    # update theta_2 (via MH).
+    for (j in 1:n_chems) {
+      act_idx <- replicate_sets[[j]]
+      # concatenate all relevant Conc, repsonses
+      active_X <- c(t(Cx[act_idx, ]))
+      active_Y <- c(t(y_i[act_idx, ]))
+      u_RE_vec <- c(sapply(u_repl[[j]], FUN = function(x) rep(x, n_dose)))
+      v_RE_vec <- c(sapply(v_repl[[j]], FUN = function(x) rep(x, n_dose)))
+      # for each index, do a few MH steps instead of 1
+      # as an adaptive type  update, use the current value for sd
+      # sigma_mh_theta_2 = signif(theta_2[j],1)*5
+      sigma_mh_theta_2 <- .1
+      # lower_bd = -12; upper_bd = -2
+      for (itern in 1:num_sampling_iters) {
+        # theta2_prop = truncnorm::rtruncnorm(1,a=0, mean = theta_2[j], sd = sigma_mh_theta_2)
+        # lognormal prior: maybe bounds unnecssary?
+        # log_theta2_prop = truncnorm::rtruncnorm(1,a=lower_bd, b=upper_bd,
+        #                                         mean = log10(theta_2[j]), sd = sigma_mh_theta_2)
+        log_theta2_prop <- rnorm(1, mean = log(theta_2[j]), sd = sigma_mh_theta_2)
+        theta2_prop <- exp(log_theta2_prop)
+        numerator <- theta_1[j] + u_RE_vec
+        curr_mean <- numerator / (1 + (theta_2[j] / active_X)^phi_c[c_i[j]]) + v_RE_vec
+        llh_curr <- sum(dnorm(active_Y, mean = curr_mean, sd = sigma[j], log = T),
+          na.rm = T
+        ) +
+          log(dlnorm(theta2_prop,
+            meanlog = log(theta_2[j]),
+            sdlog = sigma_mh_theta_2
+          )) +
+          dgamma(theta_2[j], shape = ec50_shape, rate = ec50_rate, log = T)
+
+        # log(truncnorm::dtruncnorm(log10(theta2_prop),a=lower_bd, b=upper_bd,
+        #                         mean = log10(theta_2[j]), sd = sigma_mh_theta_2))
+        # dgamma(theta_2[j], shape= .01, rate = .01, log=T)+
+        # log(truncnorm::dtruncnorm(theta2_prop, a=0, mean = theta_2[j], sd = sigma_mh_theta_2))
+
+
+        prop_mean <- numerator / (1 + (theta2_prop / active_X)^phi_c[c_i[j]]) + v_RE_vec
+        llh_prop <- sum(dnorm(active_Y, mean = prop_mean, sd = sigma[j], log = T),
+          na.rm = T
+        ) + log(dlnorm(theta_2[j],
+          meanlog = log(theta2_prop),
+          sdlog = sigma_mh_theta_2
+        )) +
+          dgamma(theta2_prop, shape = ec50_shape, rate = ec50_rate, log = T)
+        # log(truncnorm::dtruncnorm(log10(theta_2[j]), a=lower_bd, b=upper_bd,
+        #                           mean = log10(theta2_prop), sd = sigma_mh_theta_2))
+        # original version: Gamma prior, trunc norm 0 proposal likelihood
+        # dgamma(theta2_prop, shape = .01, rate = .01, log=T)+  # was 3/2,1/4
+        # log(truncnorm::dtruncnorm(theta_2[j], a=0, mean = theta2_prop, sd = sigma_mh_theta_2))
+
+        accept_p <- min(exp(llh_prop - llh_curr), 1)
+        if (runif(1) < accept_p) theta_2[j] <- theta2_prop
+      }
+    }
+
+
+    # update sigma: for each chem (vs across all data, originally)
+    p <- length(phi_c)
+    for (j in 1:n_chems) {
+      tot_error <- 0 # theta_2[j]^2/sill_var[j]
+      act_idx <- replicate_sets[[j]]
+      active_X <- c(t(Cx[act_idx, ]))
+      active_Y <- c(t(y_i[act_idx, ]))
+      u_RE_vec <- c(sapply(u_repl[[j]], FUN = function(x) rep(x, n_dose)))
+      v_RE_vec <- c(sapply(v_repl[[j]], FUN = function(x) rep(x, n_dose)))
+      numerator <- theta_1[j] + u_RE_vec
+      denom <- 1 + (theta_2[j] / active_X)^phi_c[c_i[j]]
+      sum_sqr_err <- sum((active_Y - numerator / denom - v_RE_vec)^2, na.rm = T)
+      tot_error <- tot_error + sum_sqr_err
+
+      sigma_sqr <- 1 / rgamma(1,
+        shape = .1 + n_dose * length(act_idx) / 2,
+        rate = .1 + tot_error / 2
+      )
+      # if sigma is global, sum all errors else update each term within loop
+      sigma[j] <- sqrt(sigma_sqr) # rep(sqrt(sigma_sqr), n_chems)
+    }
+
+    # Update RE sigma_u, sigma_v with Jeffrey, limit = IG(0,0)
+    G_beta_prior_u <- .1
+    G_alpha_prior_u <- .1
+    G_beta_prior_v <- .1
+    G_alpha_prior_v <- .1
+    for (j in 1:n_chems) {
+      act_idx <- replicate_sets[[j]]
+      G_beta_post_u <- G_beta_prior_u + u_repl[[j]] %*% u_repl[[j]] / 2
+      G_alpha_post_u <- G_alpha_prior_u + (n_replicates[j] - 1) / 2
+      sigma_u[j] <- sqrt(1 / rgamma(1, shape = G_alpha_post_u, rate = G_beta_post_u))
+
+      G_beta_post_v <- G_beta_prior_v + v_repl[[j]] %*% v_repl[[j]] / 2
+      G_alpha_post_v <- G_alpha_prior_v + (n_replicates[j] - 1) / 2
+      sigma_v[j] <- sqrt(1 / rgamma(1, shape = G_alpha_post_v, rate = G_beta_post_v))
+    }
+
+    record_RE_u[iter, ] <- mk_vec(u_repl)
+    record_RE_v[iter, ] <- mk_vec(v_repl)
+    record_RE_u_sd[iter, ] <- sigma_u
+    record_RE_v_sd[iter, ] <- sigma_v
+    record_sigma[iter, ] <- sigma
+    record_assigned_mean[iter, ] <- phi_c[c_i]
+    record_assigned_clust[iter, ] <- c_i
+    record_hill_params[iter, ] <- c(theta_1, theta_2)
+  }
+  return(list(
+    "slope_record" = record_assigned_mean,
+    "sill_mideffect_record" = record_hill_params,
+    "sigma" = record_sigma,
+    "tau" = record_tau,
+    "u_RE" = record_RE_u,
+    "v_RE" = record_RE_v,
+    "u_RE_sd" = record_RE_u_sd,
+    "v_RE_sd" = record_RE_v_sd
+  ))
+}
+
+# Rprof(NULL)
+# summaryRprof("Rprof.out")
+
+
+#### Plot MCMC ####
+# random plots for debugging, can be ignored
+if (F) {
+  plot(record_hill_params[seq(1000, n_iter, by = 10), 8])
+  plot(record_assigned_mean[seq(1000, n_iter, by = 10), 5])
+  plot(record_hill_params[seq(10000, n_iter, by = 10), 12])
+  plot(record_sigma[seq(1000, n_iter, by = 10)])
+
+  pori <- par(mfrow = c(3, 2))
+  for (i in 1:6) plot(record_RE_u[seq(1000, n_iter, by = 20), i])
+  par(pori)
+  plot(record_RE_u[seq(1000, n_iter, by = 20), 18]) # sum(n_replicates[1:4])+5])
+  plot(record_RE_u_sd[seq(1000, n_iter, by = 10), 7])
+  plot(record_RE_v[seq(1000, n_iter, by = 10), 15])
+  plot(record_RE_v_sd[seq(1000, n_iter, by = 10), 4])
+
+
+  # compare RE and parameter estimate
+  u_all <- colMeans(record_RE_u[seq(1000, n_iter, by = 10), ])
+  repl_idx <- unlist(replicate_sets)
+  u_RE_sort <- rep(1, sum(n_replicates))
+  u_RE_sort[repl_idx] <- u_all
+  cbind(u_RE_true, u_RE_sort)
+
+
+  u_sd_all <- colMeans(record_RE_u_sd[seq(1000, n_iter, by = 10), ])
+  cbind(u_RE_sd_true, u_sd_all)
+  v_sd_all <- colMeans(record_RE_v_sd[seq(1000, n_iter, by = 10), ])
+  cbind(v_RE_sd_true, v_sd_all)
+
+  v_all <- colMeans(record_RE_v[seq(1000, n_iter, by = 10), ])
+  repl_idx <- unlist(replicate_sets)
+  v_RE_sort <- rep(1, sum(n_replicates))
+  v_RE_sort[repl_idx] <- v_all
+  cbind(v_RE_true, v_RE_sort)
+
+
+
+  idx1 <- replicate_sets[[pi_idx]][2]
+  plot(Cx[idx1, ], y_i[idx1, ], log = "x", type = "l", ylim = c(0, .5))
+  for (i in replicate_sets[[pi_idx]][-2]) points(Cx[i, ], y_i[i, ], type = "l")
+
+  points(Cx[idx1, ], hill_function(
+    theta1_est[pi_idx], theta2_est[pi_idx],
+    phi_c_est_vec[pi_idx], Cx[idx1, ]
+  ))
+
+
+  estimated_thetas <- colMeans(record_hill_params[seq(10000, n_iter, by = 10), ])
+  theta1_est <- estimated_thetas[1:length(replicate_sets) + 1] # cbind(theta1_est, theta_1_true)
+  theta2_est <- estimated_thetas[1:length(replicate_sets) + 1 + length(replicate_sets)] # cbind(theta2_est, theta_2_true)
+  cbind(theta_1_true, theta1_est)
+  cbind(theta_2_true, theta2_est)
+  est_clust_assign <- as.numeric(strsplit(top_clust, split = " ")[[1]])
+
+
+  cbind(phi_ci_true, colMeans(record_assigned_mean))
+
+  ### Plot RE, simulations####
+  pidx <- 1 # plot all RE for chem pidx
+  re_number <- 1
+  re_idx <- n_chems * (re_number - 1) + pidx
+  cbind(
+    c(v_RE_true[re_idx], theta_1_true[pidx], u_RE_true[re_idx], theta_2_true[pidx], phi_ci_true[pidx]),
+    c(v_RE_sort[re_idx], theta_1[pidx], u_RE_sort[re_idx], theta_2[pidx], phi_c[c_i[pidx]])
+  )
+
+  plot(Cx[pidx, ], v_RE_true[re_idx] + hill_function(
+    theta_1_true[pidx] + u_RE_true[re_idx], theta_2_true[pidx],
+    phi_ci_true[pidx], Cx[pidx, ]
+  ),
+  ylim = c(0, 2), log = "x", type = "l", lty = 2
+  )
+  points(Cx[pidx, ], y_i[re_idx, ])
+  lines(Cx[pidx, ], v_RE_sort[re_idx] + hill_function(
+    theta_1[pidx] + u_RE_sort[re_idx],
+    theta_2[pidx], phi_c[c_i[pidx]], Cx[pidx, ]
+  ))
+  for (re_number in 2:length(replicate_sets[[pidx]])) {
+    re_idx <- n_chems * (re_number - 1) + pidx
+    # plot data
+    points(Cx[pidx, ], y_i[re_idx, ], col = re_number)
+    # plot true curve generating data
+    lines(Cx[pidx, ], v_RE_true[re_idx] + hill_function(
+      theta_1_true[pidx] + u_RE_true[re_idx], theta_2_true[pidx],
+      phi_ci_true[pidx], Cx[pidx, ]
+    ), col = re_number, lty = 2)
+    # plot fitted curve
+    lines(Cx[pidx, ], v_RE_sort[re_idx] + hill_function(
+      theta_1[pidx] + u_RE_sort[re_idx],
+      theta_2[pidx], phi_c[c_i[pidx]], Cx[pidx, ]
+    ),
+    col = re_number
+    )
+  }
+
+
+  ### Plot RE,  Tox21  ####
+  pidx <- 7 # plot all RE for chem pidx
+  re_number <- 1
+  re_idx <- replicate_sets[[pidx]][re_number]
+  plot(Cx[re_idx, ], y_i[re_idx, ], log = "x")
+  lines(Cx[re_idx, ], v_RE_sort[re_idx] + hill_function(
+    theta_1[pidx] + u_RE_sort[re_idx],
+    theta_2[pidx], phi_c[c_i[pidx]], Cx[re_idx, ]
+  ))
+  clridx <- 2
+  for (re_idx in replicate_sets[[pidx]][-1]) {
+    print(re_idx)
+    # plot data
+    points(Cx[re_idx, ], y_i[re_idx, ], col = clridx)
+    # plot fitted curve
+    lines(Cx[re_idx, ],
+      v_RE_sort[re_idx] + hill_function(
+        theta_1[pidx] + u_RE_sort[re_idx],
+        theta_2[pidx], phi_c[c_i[pidx]], Cx[re_idx, ]
+      ),
+      col = clridx
+    )
+    clridx <- clridx + 1
+  }
+}
