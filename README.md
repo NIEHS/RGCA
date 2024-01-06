@@ -1,5 +1,8 @@
 [![R-CMD-check](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml)
 [![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml)
+[![codecov](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/RGCA/graph/badge.svg?token=KSNSLY1ULL)](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/RGCA)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 # RGCA
 Reflected Generalized Concentration Addition
