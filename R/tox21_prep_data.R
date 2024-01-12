@@ -22,8 +22,6 @@ oprod_NA <- function(a, b) {
   return(outer(na.omit(a), na.omit(b)))
 }
 
-
-
 # read in data
 # notes about input data
 # AR-luc is best in terms of not having synergy/antagonism and no dose issues
@@ -31,7 +29,6 @@ oprod_NA <- function(a, b) {
 # ER-luc has a dose issue with zearalenone, throwing off a lot of estimates
 # ER-bla (same issue as ER-luc?)
 #
-
 
 #' Read preprocessed Tox21 Input data
 #'
@@ -42,8 +39,7 @@ oprod_NA <- function(a, b) {
 #' @export
 #'
 #' @examples
-read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
-  df <- read.delim(paste("Input/", input_file, sep = ""))
+read_prepared_Tox21_data <- function(df, mix_guide) {
   # head(df)
   # pull mix data for computing concentrations of mixture components
   mix_df <<- df %>% filter(substr(CAS, 1, 5) == "NOCAS")
@@ -53,37 +49,25 @@ read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
   cas_rep_idx <- c(2, 4)
   conc_idx_T21_matrix <- 6:20 # concentration values (x)
   conc_colnames <- colnames(pure_df)[conc_idx_T21_matrix]
-  resp_idx <- 21:35 # response values (y)
+  conc_idx <<- conc_idx_T21_matrix
+  resp_idx <<- 21:35 # response values (y)
   resp_colnames <- colnames(pure_df)[resp_idx]
   mask_idx <- 36:50 # masked values due to cytotoxicity, etc
   mask_colnames <- colnames(pure_df)[mask_idx]
   # correct for duplicated replicates:  add 3
   dup_replicates <- duplicated(pure_df[, cas_rep_idx])
   pure_df$ReplicateSet[dup_replicates] <- pure_df$ReplicateSet[dup_replicates] + 3
-
-  Cx_T21 <- pure_df[, c(cas_rep_idx, conc_idx_T21_matrix)]
-  y_i_T21 <- pure_df[, c(cas_rep_idx, resp_idx)]
-  mask_T21 <- cbind(pure_df[, cas_rep_idx], pure_df[, mask_idx] == T)
-
-  # simple replicate handling:  rowbind
-  # y_i_T21reps = y_i_T21 %>%
-  #   pivot_wider(names_from = "ReplicateSet", values_from = all_of(resp_colnames) )
-  #
-  # Cx_T21reps = Cx_T21 %>%
-  #   pivot_wider(names_from = "ReplicateSet", values_from = all_of(conc_colnames) )
-  #
-  # mask_reps = mask_T21 %>%
-  #   pivot_wider(names_from = "ReplicateSet", values_from = all_of(mask_colnames) )
-
-
-  # better replicate handling:  merge CAS and replicate ID and specify random effect
+  Cx_T21 <<- pure_df[, c(cas_rep_idx, conc_idx_T21_matrix)]
+  y_i_T21 <<- pure_df[, c(cas_rep_idx, resp_idx)]
+  mask_T21 <<- cbind(pure_df[, cas_rep_idx], pure_df[, mask_idx] == TRUE)
+  # replicate handling:  merge CAS and replicate ID and specify random effect
   n_chems <<- length(unique(pure_df$CAS))
   rep_table <- table(pure_df$CAS)
   n_replicates_per_chem <<- unlist(array(rep_table))
   chem_id <<- names(rep_table)
 
   replicate_sets <<- c()
-  pure_unique_CAS <- chem_id # unique(y_i_T21$CAS)
+  pure_unique_CAS <<- chem_id # unique(y_i_T21$CAS)
 
 
   for (chem in pure_unique_CAS) {
@@ -98,16 +82,8 @@ read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
   Cx <- Cx_T21[, 3:ncol(y_i_T21)]
   Cx[mask_layer] <- NA
   Cx <<- as.matrix(unname(Cx))
-  # scale control from 100 to 1
-  # y_i = y_i / 100
 
-
-
-
-  # Pull out mixtures:  need mixdf for effect,
-  mix_guide <<- readxl::read_xls("Input/AllMixtureComponentsARER.xls")
   # need chemical order, apply to concentration
-
   CAS_nums <<- colnames(mix_guide)[4:21]
   c_cm <- mix_guide[, 4:21]
   mix_conc_df <<- mix_df[, conc_idx_T21_matrix]
@@ -151,8 +127,15 @@ read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
   # pure unique ordering for plotting ####
   relevant_guide_CASs <<- which(CAS_nums %in% pure_unique_CAS)
   # reorder the concentration from the guide to match the read-in data
-  pure_ordering <<- sapply(pure_unique_CAS, FUN = function(x) which(x == CAS_nums[relevant_guide_CASs]))
-  chem_map_plain <- sapply(names(pure_ordering), FUN = function(cas_num) pure_df$Sample.Name[which(pure_df$CAS == cas_num)[1]])
+  pure_ordering <<- sapply(pure_unique_CAS,
+                           FUN = function(x) {
+                             which(x == CAS_nums[relevant_guide_CASs])
+                           })
+  chem_map_plain <<- sapply(names(pure_ordering),
+                            FUN = function(cas_num) {
+                              pure_df$Sample.Name[which(pure_df$CAS ==
+                                                          cas_num)[1]]
+                            })
   chem_map <<- chem_map_plain
   chem_map[AR_agonist_rows] <<- paste("*", chem_map[AR_agonist_rows])
   names(pure_ordering) <<- chem_map
@@ -173,17 +156,17 @@ read_prepared_Tox21_data <- function(input_file = "AR-luc.txt") {
 #' @export
 #'
 #' @examples
-generate_mixture_subset <- function(drop_no_effect = F,
-                                    use_graded_filter = T,
-                                    filter_graded_with_all_nonzero = F,
-                                    use_binary_filter = F,
-                                    ignore_no_effect_mix = F,
-                                    skip_zearalenone = F) {
+generate_mixture_subset <- function(drop_no_effect = FALSE,
+                                    use_graded_filter = TRUE,
+                                    filter_graded_with_all_nonzero = FALSE,
+                                    use_binary_filter = FALSE,
+                                    ignore_no_effect_mix = FALSE,
+                                    skip_zearalenone = FALSE) {
   # collect which mixtures have desired descriptions
   valid_idx <- c()
   for (mix_idx in 1:nrow(mix_df)) {
     # skip replicates
-    skip_plot <- ifelse(mix_df$ReplicateSet[mix_idx] > 1, T, F)
+    skip_plot <- ifelse(mix_df$ReplicateSet[mix_idx] > 1, TRUE, FALSE)
     if (skip_plot) next
 
     # check for graded mixtures and equiconcentration

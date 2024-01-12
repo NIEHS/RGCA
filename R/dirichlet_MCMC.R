@@ -56,7 +56,6 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
   c_i <- rep(1, n)
   # initialize group mean at data mean
   phi_c <- c(mean(y_i)) # c(rnorm(1))
-  # sig_sqr_c = c(1/rgamma(1,3,1))
   m <- 3 # num aux
   alpha <- 1 # length(y_i)/6 # dirichlet prior concentration
   sigma <- sigma_in # noise variance
@@ -84,13 +83,15 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
         phi_m <- phi_m[-1]
       }
       # sample cluster assignment according to likelihood of obs
-      n_phis <- k_minus + length(phi_m) + last_of_group # same regardless of lone cluster
+      # same regardless of lone cluster
+      n_phis <- k_minus + length(phi_m) + last_of_group 
       potential_phs <- c(phi_c, phi_m)
       prob_c_vals <- rep(0, n_phis)
       for (k in 1:n_phis) {
         n_ic <- sum(remain_c_i == k)
         if (n_ic == 0) n_ic <- alpha / m
-        prob_c_vals[k] <- n_ic / (n - 1 + alpha) * dnorm(y_i[j], mean = potential_phs[k], sd = sigma)
+        prob_c_vals[k] <- n_ic / (n - 1 + alpha) * 
+          dnorm(y_i[j], mean = potential_phs[k], sd = sigma)
       }
       prob_c_vals <- prob_c_vals / sum(prob_c_vals)
       sampling_set <- 1:n_phis
@@ -114,7 +115,7 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
     for (j in 1:n_phi) {
       # sample conditional on the y_i assigned to phi
       y_condition <- y_i[c_i == j]
-      post_var <- sigma^2 / (length(y_condition) + lambda) # assume mean 0, var 1 prior
+      post_var <- sigma^2 / (length(y_condition) + lambda) # assume N(0,1) prior
       post_mean <- (sum(y_condition) + phi_c[j] * lambda) / sigma^2 * post_var
       new_phi_val <- rnorm(1, post_mean, sqrt(post_var))
       phi_c[j] <- new_phi_val
@@ -130,14 +131,11 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
     sigma <- sqrt(sigma_sqr)
     record_sigma[iter] <- sigma
 
-
-
     # update the DP concentration alpha: large alpha = more clusters
     eta <- rbeta(n = 1, alpha + 1, n)
     # prior on alpha ~ G(a= 3/2, b= 1/2)
     alpha_a <- 3 / 2 # 3/2
     alpha_b <- 1 / 6 # 1/6
-    # k = n_clusts = p
     mix_prob <- (alpha_a + k - 1) / (alpha_a + k - 1 + n * (alpha_b - log(eta)))
     # the posterior is a mixture; sample given eta
     alpha <- ifelse(runif(1) < mix_prob,
@@ -190,8 +188,8 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
 #' y_i <- c(-1.48, -1.4, -1.16, -1.08, -1.02, 0.14, 0.51, 0.53, 0.78)
 #' cluster_chain <- DP_MCMC_fit(y_i)
 #' clust_centers_w_prob <- cluster_centers(cluster_chain, n_top = 20)
-cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = T) {
-  record_assigned_mean <- cluster_chain$mean
+cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = TRUE) {
+  record_assgnd_mean <- cluster_chain$mean
   record_assigned_clust <- cluster_chain$cluster
   # check how many clusters there are per sample, for histogram
   n_clust_over_time <- apply(X = record_assigned_clust, MARGIN = 1, max)
@@ -203,13 +201,13 @@ cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = T) {
     FUN = function(x) paste(x, collapse = " ")
   )
   # for each element in cluster, get the mean for the (slope) parameters
-  cluster_table <- sort(table(clust_arrange), decreasing = T)
+  cluster_table <- sort(table(clust_arrange), decreasing = TRUE)
   clust_centers <- matrix(0, nrow = n_top, ncol = ncol(record_assigned_clust))
   clust_sds <- matrix(0, nrow = n_top, ncol = ncol(record_assigned_clust))
   for (cidx in 1:n_top) {
     clust_name <- names(cluster_table[cidx])
     clust_arrange[which(clust_arrange == clust_name)]
-    cluster_samples <- record_assigned_mean[which(clust_arrange == clust_name), ]
+    cluster_samples <- record_assgnd_mean[which(clust_arrange == clust_name), ]
     # allow for a top cluster to occur once?
     if (is.null(dim(cluster_samples))) {
       clust_centers[cidx, ] <- cluster_samples
@@ -248,12 +246,14 @@ cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = T) {
 #' @export
 #'
 #' @examples
-convert_DP_pack_obj <- function(dp_fit_obj, n_top = 5) {
+convert_DP_pack_obj <- function(dp_fit, n_top = 5) {
   plot(dp_fit$alphaChain[seq(1, clust_iter, by = 10)])
 
   record_assigned_clust <- dp_fit$labelsChain
   # check how many clusters there are per sample, for histogram
-  n_clust_over_time <- unlist(lapply(X = record_assigned_clust, MARGIN = 1, max))
+  n_clust_over_time <- unlist(lapply(X = record_assigned_clust, 
+                                     MARGIN = 1,
+                                     max))
   hist(n_clust_over_time)
   # Change cluster ID from vector to a string, for filtering commong clusters
   clust_arrange <- unlist(lapply(record_assigned_clust,
@@ -262,7 +262,7 @@ convert_DP_pack_obj <- function(dp_fit_obj, n_top = 5) {
     }
   ))
   # for each element in cluster, get the mean for the (slope) parameters
-  cluster_table <- sort(table(clust_arrange), decreasing = T)
+  cluster_table <- sort(table(clust_arrange), decreasing = TRUE)
   clust_centers <- matrix(0, nrow = n_top, ncol = length(dp_fit$data))
   clust_sds <- matrix(0, nrow = n_top, ncol = length(dp_fit$data))
   for (cidx in 1:n_top) {
@@ -296,28 +296,3 @@ convert_DP_pack_obj <- function(dp_fit_obj, n_top = 5) {
 }
 
 
-# additional qc
-if (F) {
-  plot(record_assigned_mean[seq(1, n_iter, by = 10), 6])
-  plot(record_alpha)
-  mean(record_alpha)
-  plot(record_sigma)
-  mean(record_sigma)
-  mu_post <- colMeans(record_assigned_mean)
-  tail(record_assigned_clust)
-  cbind(mu_post, y_i)
-  top_five <- top_clusters(record_assigned_clust)
-  numeric_clusterings <- sapply(ordered_clusterings, FUN = function(x) list(as.numeric(strsplit(x, " ")[[1]])))
-
-  end_mat <- matrix(rep(0, n^2), nrow = n)
-  for (i in 1:n) {
-    for (j in i:n) {
-      end_mat[i, j] <- mean(record_assigned_clust[, i] == record_assigned_clust[, j])
-    }
-  }
-
-  tail(record_assigned_clust)
-
-  mean(record_assigned_mean[, 1] == record_assigned_mean[, 2])
-  image.plot(cor(record_assigned_mean))
-}
