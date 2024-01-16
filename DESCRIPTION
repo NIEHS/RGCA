@@ -11,7 +11,6 @@ License: GPL (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-VignetteBuilder: knitr, rmarkdown
 Imports: ggplot2, reshape2, nimble, dplyr, cowplot, scoringRules, tables, tidyr, beepr, CVXR, coda, scales, readxl, plotly, drc, truncnorm
 URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA,
 https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/
