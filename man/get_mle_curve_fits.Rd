@@ -16,7 +16,8 @@ and replicates (rows)}
 indices of replicates for a particular chemical}
 }
 \value{
-a matrix of parameters with a row for each chemical and columns corresponding to ()
+a matrix of parameters with a row for each chemical and columns
+corresponding to ()
 }
 \description{
 Wrapper function to apply the drc (dose response curve) package to the input

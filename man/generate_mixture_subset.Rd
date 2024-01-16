@@ -6,12 +6,12 @@
 satisfy the boolean input conditions}
 \usage{
 generate_mixture_subset(
-  drop_no_effect = F,
-  use_graded_filter = T,
-  filter_graded_with_all_nonzero = F,
-  use_binary_filter = F,
-  ignore_no_effect_mix = F,
-  skip_zearalenone = F
+  drop_no_effect = FALSE,
+  use_graded_filter = TRUE,
+  filter_graded_with_all_nonzero = FALSE,
+  use_binary_filter = FALSE,
+  ignore_no_effect_mix = FALSE,
+  skip_zearalenone = FALSE
 )
 }
 \arguments{

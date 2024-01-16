@@ -4,10 +4,10 @@
 \alias{convert_DP_pack_obj}
 \title{Convert output from dirichletprocess package}
 \usage{
-convert_DP_pack_obj(dp_fit_obj, n_top = 5)
+convert_DP_pack_obj(dp_fit, n_top = 5)
 }
 \arguments{
-\item{dp_fit_obj}{output from \code{\link[dirichletprocess:DirichletProcessGaussian]{dirichletprocess::DirichletProcessGaussian()}}}
+\item{dp_fit}{output from \code{\link[dirichletprocess:DirichletProcessGaussian]{dirichletprocess::DirichletProcessGaussian()}}}
 
 \item{n_top}{integer number of top clusters to select}
 }

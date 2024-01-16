@@ -4,11 +4,13 @@
 \alias{read_prepared_Tox21_data}
 \title{Read preprocessed Tox21 Input data}
 \usage{
-read_prepared_Tox21_data(input_file = "AR-luc.txt")
+read_prepared_Tox21_data(df, mix_guide)
 }
 \arguments{
-\item{input_file}{processed data sets from Tox21 with mixtures, included
-with package}
+\item{df}{dataframe with the processed data sets from Tox21.  Includes single
+chemical mixtures for computing dose responses and mixtures.}
+
+\item{mix_guide}{dataframe with ingredients and doses for each mixture.}
 }
 \description{
 Read preprocessed Tox21 Input data

@@ -4,7 +4,7 @@
 \alias{cluster_centers}
 \title{Get the cluster results}
 \usage{
-cluster_centers(cluster_chain, n_top = 5, plot_hist = T)
+cluster_centers(cluster_chain, n_top = 5, plot_hist = TRUE)
 }
 \arguments{
 \item{cluster_chain}{the list of MCMC samples returned by \code{\link[=DP_MCMC_fit]{DP_MCMC_fit()}}}

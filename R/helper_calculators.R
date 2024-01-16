@@ -908,18 +908,14 @@ if (FALSE) {
 #' @export
 #'
 #' @examples
-#' A= matrix(1, nrow=3, ncol=3)
-#' conc = matrix(c(4,9, 7), nrow=3, ncol=1)
-#' binding_affinity = c(-2, -1, -0.5)
-#' adjust_concentrations(conc, binding_affinity, A)
+#' A_full <- matrix(1, nrow=3, ncol=3)
+#' conc <- matrix(c(4,9, 7), nrow=3, ncol=1)
+#' binding_affinity <- c(-2, -1, -0.5)
 adjust_concentrations <- function(conc, R, A_full) {
-  require(CVXR)
   # scale conc for numerical accuracy?
   active_chems <- which(conc > 0)
   n_chem <- length(active_chems)
-  if (n_chem == 1) {
-    return(conc)
-  }
+  if (n_chem == 1) return(conc)
   #normalize concentrations so that the smallest conc has value 1
   scale_factor <- 1 / min(conc[conc > 0])
   conc <- conc * scale_factor
@@ -927,20 +923,20 @@ adjust_concentrations <- function(conc, R, A_full) {
   active_weight <- R[active_chems]
   # subset the substitution matrix for building constrained optimization
   A <- A_full[active_chems, active_chems]
-  K <- Variable(rows = n_chem, cols = n_chem)
+  K <- CVXR::Variable(rows = n_chem, cols = n_chem)
   j_vec <- matrix(1, nrow = n_chem, ncol = 1)
   Jo <- matrix(1, nrow = n_chem, ncol = n_chem)
   diag(Jo) <- -1
   # total concentration conserved
   constraint_1 <- K %*% j_vec == active_conc
   # allocation bounded by diagonals
-  constraint_2 <- diag(t(K) %*% Jo) <= 0
+  constraint_2 <- (diag(t(K) %*% Jo) <= 0)
   # nonnegativity
   constraint_3 <- K >= 0
   # Ligand-Ligand (L-L) binding respected
   constraint_4 <- K * (1 - A) == 0
-  probl <- Problem(
-    objective = Minimize(sum(diag(active_weight) %*% t(K) %*% j_vec)),
+  probl <- CVXR::Problem(
+    objective = CVXR::Minimize(sum(diag(active_weight) %*% t(K) %*% j_vec)),
     constraints = list(
       constraint_1,
       constraint_2,
@@ -955,7 +951,7 @@ adjust_concentrations <- function(conc, R, A_full) {
   }
   Kp <- result$getValue(K)
   new_conc <- rep(0, length(conc))
-  new_conc[active_chems] <- diag(Kp)
+  new_conc[active_chems] <- base::diag(Kp)
   # machine precision issues, zero out small vals
   new_conc[new_conc < 1e-8] <- 0
   new_conc <- new_conc / scale_factor

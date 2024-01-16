@@ -4,7 +4,7 @@
 \alias{create_mix_calc_sample_row}
 \title{Get a function that computes the mixture response}
 \usage{
-create_mix_calc_sample_row(idx, par_list, add_RE = T)
+create_mix_calc_sample_row(idx, par_list, add_RE = TRUE)
 }
 \arguments{
 \item{idx}{Specifies which clustering to apply to the parameters}

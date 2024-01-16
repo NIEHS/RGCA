@@ -7,7 +7,8 @@
 plot_sample_indv(df)
 }
 \arguments{
-\item{df}{a data frame with the prepared tox21 data from source("Code/tox21_prep_data.R")}
+\item{df}{a data frame with the prepared tox21 data from
+source("Code/tox21_prep_data.R")}
 }
 \value{
 a ggplot with four examples of the tox21 data

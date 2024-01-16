@@ -35,3 +35,8 @@ If the highest weight chemical has high enough concentration, it can dominate
 and result in a mixture with only one effective chemical.  We can set rules
 for which chemicals can substitute others using a matrix A_full.
 }
+\examples{
+A_full <- matrix(1, nrow=3, ncol=3)
+conc <- matrix(c(4,9, 7), nrow=3, ncol=1)
+binding_affinity <- c(-2, -1, -0.5)
+}

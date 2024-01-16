@@ -14,8 +14,8 @@ list of calculators can be applied to a}
 mix_function_generator(
   param_matrix,
   clust_assign,
-  get_counts = F,
-  scale_CA = F,
+  get_counts = FALSE,
+  scale_CA = FALSE,
   synergy_const = 0
 )
 }

@@ -6,7 +6,6 @@
 library(ggplot2)
 library(reshape2)
 library(scoringRules)
-
 library(drc)
 
 
@@ -35,17 +34,16 @@ source("R/tox21_prep_data.R")
 # DONE check if slopes are significantly away from 0, Tukey HSD:  means are always sign diff, since sample is large; but
 
 # Run MLE via drc package
-run_pipe <- TRUE
+run_pipe <- FALSE
 small_run <- TRUE
 
 
 
 
 if (run_pipe) {
-  input_df <- read.delim("Input/AR-luc.txt")
+  input_df <- read.delim("input/AR-luc.txt")
   # mix guide describes doses of components in each mixture 
-  mix_guide <- readxl::read_xls("Input/AllMixtureComponentsARER.xls")
-  
+  mix_guide <- readxl::read_xls("input/AllMixtureComponentsARER.xls")
   read_prepared_Tox21_data(input_df, mix_guide)
   # get dose response parameters from existing pacakge
   curve_fits <- get_mle_curve_fits(y_i, Cx, replicate_sets)
@@ -77,7 +75,7 @@ if (run_pipe) {
 
 
   # diagnostic for MCMC ###
-  run_diagnostic <- TRUE
+  run_diagnostic <- FALSE
   if (run_diagnostic) {
     set.seed(123)
     re_chains2 <- RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
@@ -308,12 +306,12 @@ if (run_pipe) {
         create_mix_calc(x, RGCA_par_list, add_RE = TRUE)
     )
   # use nimble generated parameters
-  sampled_mix_funs_RGCA_nimble <-
-    sapply(
-      rep(1, n_bootstraps),
-      FUN = function(x)
-        create_mix_calc(x, RGCA_par_list_nimble, add_RE = TRUE)
-    )
+  # sampled_mix_funs_RGCA_nimble <-
+  #   sapply(
+  #     rep(1, n_bootstraps),
+  #     FUN = function(x)
+  #       create_mix_calc(x, RGCA_par_list_nimble, add_RE = TRUE)
+  #   )
   # sampled_mix_funs_RGCA_ARER_nimble <- sapply(rep(1, n_bootstraps), FUN = function(x) create_mix_calc(x, RGCA_ARER_par_list_nimble, add_RE = TRUE))
   sampled_mix_funs_RGCA_ARER <- sapply(
     rep(1, n_bootstraps),
@@ -336,9 +334,9 @@ if (run_pipe) {
   bootstrap_calc_list <- list(
     "RGCA" = sampled_mix_funs_RGCA,
     # "RGCA_MOA" = sampled_mix_funs_RGCA_ARER,
-    #"RGCA_kMeans" = sampled_kmeans_clustered_RGCA,
+    "RGCA_kMeans" = sampled_kmeans_clustered_RGCA,
     # "RGCA_DP" = sampled_sill_DPclustered_RGCA,
-    # "RGCA_mean" = list(RGCA_single_calculator),
+    "RGCA_mean" = list(RGCA_single_calculator),
     # "Nimble" = sampled_mix_funs_RGCA_nimble,
     # "Nimble_MOA" = sampled_mix_funs_RGCA_ARER_nimble,
     "Random_RGCA" = random_clustered_RGCA,
@@ -366,7 +364,7 @@ if (run_pipe) {
   plot_mix_vs_individuals(mix_idx = 34, ymax = 120)
 
   # if using QSAR or docking scores, compute
-  QSAR <- TRUE
+  QSAR <- FALSE
   if (QSAR) {
     get_CAS <- function(long_cas) {
       paste(strsplit(long_cas, split = "-")[[1]][1:3], collapse = "-")
@@ -381,7 +379,6 @@ if (run_pipe) {
       which(x == AR_scores$Ligand_id)
     })
     mol_weight <- mol_weight_unordered[score_ordering]
-    cbind(tot_par_list$slope_params, dock_scores[score_ordering], mol_weight)
   }
 
 
@@ -414,7 +411,7 @@ if (run_pipe) {
   # pdf(file = "Output/ARluc_Binary_InverseSlope_DR_%02d.pdf",onefile=TRUE, width=9, height = 5)
   # pdf(file = "Output/ARluc_KM_inverseSlope.pdf",onefile=TRUE, width=9, height = 5)
   score_matrix <- plot_mixture_response(
-    binary_mixes, mix_df, mix_conc_df, mix_guide,
+    mix_idx, mix_df, mix_conc_df, mix_guide,
     bootstrap_calc_list
   )
   # dev.off()
@@ -431,15 +428,6 @@ if (run_pipe) {
   )
 
   ## Violin Plot for Scores ####
-  bcl <- list(
-    "RGCA" = 1,
-    "RGCA_MOA" = 2,
-    "RGCA_kMeans" = 4,
-    "RGCA_DP" = 3,
-    "Random_RGCA" = 5,
-    "GCA" = 1,
-    "CA" = 8
-  )
   method_names <- c(
     "RGCA",
     "RGCA Sill",
@@ -452,7 +440,7 @@ if (run_pipe) {
   method_levels <- method_names[c(4:1, 5, 7, 6)]
   names(bootstrap_calc_list) <- method_names
   #if saving: pdf(file = "Output/boxplot_slope_invert_set1.pdf", onefile= TRUE, width=8, height = 4)
-  plot_scores(score_df[setdiff(1:69, set_1), ],
+  plot_scores(score_df,
               bootstrap_calc_list,
               method_levels = method_levels)
   # dev.off()
@@ -468,41 +456,9 @@ if (run_pipe) {
   score_df <- cbind("Mix Desc" = mix_descriptions, score_df)
   score_df <- cbind("Mix CAS" = mix_CAS, score_df)
   # score_df = score_df[,-2]
-  write.csv(score_df, "Output/AR_comparexxx.csv")
+  # write.csv(score_df, "Output/AR_comparexxx.csv")
   # matplot(x =Cx_axis_values, t(curve_data), type = "l", log = "x", add=TRUE)
   # points(Cx_axis_values, resp_y_values, lwd=3 )
   # plot(Cx_axis_values, resp_y_values, lwd=3 ,log="x")
 
-
-
-  ### check which. mixtures have 0 agonists
-  no_effect_mix <- c()
-  for (mix_idx in 1:nrow(mix_df)) {
-    if (mix_df$ReplicateSet[mix_idx] > 1) next
-    chem_conc_matr <- get_conc_matrix(mix_idx)
-    if (all(chem_conc_matr[, AR_agonist_rows] == 0)) {
-      no_effect_mix <- c(no_effect_mix, mix_idx)
-    }
-  }
-
-  score_df_filt <- (score_df[-no_effect_mix, ])
-
-  # among the cases w/o synergy or antagnoism, best?
-  best_crps_by_mix <- apply(score_df[set_4x, 9:15],
-                            MARGIN = 1,
-                            FUN = function(rx) which(rx == min(rx)))
-  table(best_crps_by_mix)
-  for (rgc_bet in as.numeric(names(which(best_crps_by_mix == 1)))) {
-    print(paste(rgc_bet,
-                mix_guide$Description[which(mix_guide$CAS == 
-                                              mix_df$CAS[rgc_bet])]))
-  }
-  valid_cols <- apply(score_df[set_1, 16:22],
-                      MARGIN = 1,
-                      FUN = function(rx) all(is.finite(rx)))
-  apply(score_df[set_1, 16:22], MARGIN = 2, FUN = function(rx) sum(is.finite(rx)))
-  # Compare mixtures with and without no-effect chemicals
-  # if saving,  pdf(file = "Output/No_effect_EC_EP.pdf", onefile= TRUE, width=10, height = 5)
-  compare_exclude_include()
-  # close save dev.off()
 }

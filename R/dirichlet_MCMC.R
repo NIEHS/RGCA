@@ -239,7 +239,7 @@ cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = TRUE) {
 #' [cluster_centers()] output.  This allows us to reuse our visualize functions
 #' or use their code for the pipeline.
 #'
-#' @param dp_fit_obj output from [dirichletprocess::DirichletProcessGaussian()]
+#' @param dp_fit output from [dirichletprocess::DirichletProcessGaussian()]
 #' @param n_top integer number of top clusters to select
 #'
 #' @return a list with the same attributes as the [cluster_centers()] output

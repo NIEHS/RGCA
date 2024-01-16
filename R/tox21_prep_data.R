@@ -32,9 +32,10 @@ oprod_NA <- function(a, b) {
 
 #' Read preprocessed Tox21 Input data
 #'
-#' @param input_file processed data sets from Tox21 with mixtures, included
-#' with package
-#'
+#' @param df dataframe with the processed data sets from Tox21.  Includes single
+#'   chemical mixtures for computing dose responses and mixtures.
+#' @param mix_guide dataframe with ingredients and doses for each mixture.
+#' 
 #' @return
 #' @export
 #'

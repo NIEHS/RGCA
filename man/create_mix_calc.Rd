@@ -4,20 +4,22 @@
 \alias{create_mix_calc}
 \title{Get a function that computes the mixture response.}
 \usage{
-create_mix_calc(idx, par_list, add_RE = T, unit_slopes = F)
+create_mix_calc(idx, par_list, add_RE = TRUE, unit_slopes = FALSE)
 }
 \arguments{
 \item{idx}{Specifies which clustering to apply to the parameters}
 
-\item{par_list}{a data frame with individual chemical dose response parameters}
+\item{par_list}{a data frame with individual chemical dose response
+parameters}
 
 \item{add_RE}{boolean to include or exclude random effect variances}
 
-\item{unit_slopes}{boolean to fix slopes to 1 (but still use slope clustering)
-Used for special case of GCA, where slope = 1}
+\item{unit_slopes}{boolean to fix slopes to 1 (but still use slope
+clustering) Used for special case of GCA, where slope = 1}
 }
 \value{
-function to take a concentration vector as input and response as output
+function to take a concentration vector as input and response as
+output
 }
 \description{
 A factory method that returns a function that computes the mixture response.
