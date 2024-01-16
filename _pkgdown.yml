@@ -6,3 +6,17 @@ template:
 
 development:
   mode: auto
+
+reference:
+  - title: RGCA functions
+    desc: All of the current RGCA functions
+    contents:
+      - DP_simulation_study
+      - RE_DP_pipeline_tox21
+      - RE_dose_response_MCMC
+      - RE_nimble
+      - dirichlet_MCMC
+      - helper_calulators
+      - helper_pipeline
+      - helper_plots
+      - tox21_prep_data
