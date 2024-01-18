@@ -2,9 +2,9 @@
 # -------  Gibbs sampler provided in the Neal 1999 paper for the model: --------
 #-------------------------------------------------------------------------------
 # y|phi, c ~ N(phi_c, 1)
-# c | p ~ Discrete(p_1,...,p_K)
+# Grouping c | p ~ Discrete(p_1,...,p_K)
 # phi ~ G_0
-# p ~ Dir(a/K,...,a/K)
+# probabilities p ~ Dir(a/K,...,a/K)
 ################################################################################
 
 
@@ -55,14 +55,11 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
   n <- length(y_i)
   c_i <- rep(1, n)
   # initialize group mean at data mean
-  phi_c <- c(mean(y_i)) # c(rnorm(1))
+  phi_c <- c(mean(y_i))
   m <- 3 # num aux
-  alpha <- 1 # length(y_i)/6 # dirichlet prior concentration
+  alpha <- 1 # dirichlet prior concentration
   sigma <- sigma_in # noise variance
   lambda <- 1 # prior var phi_c
-  var_y_i <- var(y_i)
-  n_clust_expect <- ceiling(log(length(y_i)))
-  # n_iter = 10000
   record_assigned_mean <- matrix(nrow = n_iter, ncol = n)
   record_assigned_clust <- matrix(nrow = n_iter, ncol = n)
   record_sigma <- matrix(nrow = n_iter, ncol = 1)
@@ -84,13 +81,13 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
       }
       # sample cluster assignment according to likelihood of obs
       # same regardless of lone cluster
-      n_phis <- k_minus + length(phi_m) + last_of_group 
+      n_phis <- k_minus + length(phi_m) + last_of_group
       potential_phs <- c(phi_c, phi_m)
       prob_c_vals <- rep(0, n_phis)
       for (k in 1:n_phis) {
         n_ic <- sum(remain_c_i == k)
         if (n_ic == 0) n_ic <- alpha / m
-        prob_c_vals[k] <- n_ic / (n - 1 + alpha) * 
+        prob_c_vals[k] <- n_ic / (n - 1 + alpha) *
           dnorm(y_i[j], mean = potential_phs[k], sd = sigma)
       }
       prob_c_vals <- prob_c_vals / sum(prob_c_vals)
@@ -134,8 +131,8 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
     # update the DP concentration alpha: large alpha = more clusters
     eta <- rbeta(n = 1, alpha + 1, n)
     # prior on alpha ~ G(a= 3/2, b= 1/2)
-    alpha_a <- 3 / 2 # 3/2
-    alpha_b <- 1 / 6 # 1/6
+    alpha_a <- 3 / 2
+    alpha_b <- 1 / 6
     mix_prob <- (alpha_a + k - 1) / (alpha_a + k - 1 + n * (alpha_b - log(eta)))
     # the posterior is a mixture; sample given eta
     alpha <- ifelse(runif(1) < mix_prob,
@@ -251,7 +248,7 @@ convert_DP_pack_obj <- function(dp_fit, n_top = 5) {
 
   record_assigned_clust <- dp_fit$labelsChain
   # check how many clusters there are per sample, for histogram
-  n_clust_over_time <- unlist(lapply(X = record_assigned_clust, 
+  n_clust_over_time <- unlist(lapply(X = record_assigned_clust,
                                      MARGIN = 1,
                                      max))
   hist(n_clust_over_time)
@@ -294,5 +291,3 @@ convert_DP_pack_obj <- function(dp_fit, n_top = 5) {
     "unused_samples" = unused
   ))
 }
-
-

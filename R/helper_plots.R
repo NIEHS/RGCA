@@ -24,8 +24,7 @@ plot_sample_indv <- function(df) {
                      "Progesterone",
                      "Fluoxymestrone",
                      "Ethylenediamine")
-  # get the names of all chemicals in the data
-  sample_names <- unique(pure_df$Sample.Name)
+  # get the names of all chemicals in the data withg unique(pure_df$Sample.Name)
   # take indices from Global env, set during data prep
   conc_idx <- .GlobalEnv$conc_idx
   resp_idx <- .GlobalEnv$resp_idx
@@ -340,7 +339,6 @@ plot_mixture_response <- function(plot_set, mix_df, mix_conc_df, mix_guide,
                                                  chem_conc_matr_reordered,
                                                  bootstrap_calc_list)
     Cx_axis_values <- array(unlist(mix_conc_df[mix_idx, ]))[1:n_dose]
-    mix_replicates <- which(mix_df$CAS == mix_df$CAS[mix_idx])
     resp_y_values <- array(unlist(mix_df[mix_idx, resp_idx]))
     # allow extrapolation; match dim of Cx by adding null values to y observed
     y_response_ext <- c(resp_y_values, rep(NA, n_dose - length(resp_y_values)))
@@ -545,7 +543,7 @@ visualize_clusters_blocks <- function(slopes,
     for (cid in unique(clust_assign)) {
       points(
         x = slopes,
-        y = rep(n_clust - clust_id,length(slopes)),
+        y = rep(n_clust - clust_id, length(slopes)),
         xlim = c(min(slopes), 2),
         pch = ".", ylim = c(0, n_clust + 1), yaxt = "n", ylab = NA
       )
@@ -715,13 +713,11 @@ plot_reflection_illustration <- function(slope_in = .5) {
     scale_colour_manual(values = basic_col, breaks = lgnd_brks) +
     xlab("Concentration (uM)") +
     coord_cartesian(xlim = c(-2.5, 2), ylim = c(-1.5, 3)) +
-    guides(colour =
-             guide_legend(nrow = 1, 
-                          override.aes = 
-                            list(linetype =c(3, 1, 1, 1, 1, 1)))) +
+    guides(colour = guide_legend(nrow = 1, override.aes =
+                                   list(linetype = c(3, 1, 1, 1, 1, 1)))) +
     ylab("Response") +
     labs(title = "Extending GCA with Reflection")
-  x_test <- seq(0.01, 5, by = .01) # 1*10^(seq(-8, .5, by=.1))
+  x_test <- seq(0.01, 5, by = .01)
   for (slope_c in c(seq(.1, .8, by = .05), seq(1, 4, by = .2))) {
     pt1 <- cbind(x_test, a / (1 + (b / x_test)^(slope_c)), 1, 1, "Alt")
     pt2 <- cbind(
@@ -736,7 +732,6 @@ plot_reflection_illustration <- function(slope_in = .5) {
       sapply(y_test_bey, function(x) hilly_inverse_test(x, slope_c)),
       y_test_bey, 4, 1, "Alt"
     )
-    
     hill_df <- data.frame(rbind(pt_gca, pt1, pt2, pt3, pt4, pt1_ghost))
     names(hill_df) <- c("x", "y", "subcurve", "line", "Segment")
     hill_df$x <- as.numeric(hill_df$x)
@@ -993,7 +988,6 @@ create_RGCA_isobole_plot <- function() {
   # can:  %>% layout(scene = list(camera=list(eye = list(x=2, y=.5, z=.7))))
   # can:  %>% add_surface(z = matrix(pred_regular, nrow = n_pix), opacity = .4)
   # can:  %>% add_surface(z = matrix(pred_agonist, nrow = n_pix), opacity = .4)
-  # alternate: plot_ly(z=matrix(mix_df$effect, nrow = n_pix), type = "contour")
 }
 
 # Uniqueness and Stability ####

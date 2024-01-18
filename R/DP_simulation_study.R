@@ -20,7 +20,6 @@ run_comparison_simulation <- function(save_plot = FALSE) {
   ) # , "Synergy")
   models_to_run <- 1:6
   show_plots <- FALSE
-  n_top <- 5
   mix_size <- c(10, 20)
   n_big_iters <- 50
   # record metrics
@@ -238,30 +237,6 @@ run_comparison_simulation <- function(save_plot = FALSE) {
         sim_mix_funs_2step <- sapply(1:n_bootstraps,
           FUN = function(x) joint_model_fun_rand(x)
         )
-
-        if (FALSE) {
-          # RGCA 2-STEP, DP on sill
-          cluster_prob <- clust_centers_w_prob$probs
-          cluster_assign <- clust_centers_w_prob$assign
-          samp_idx <- sample(1:n_top,
-            size = n_bootstraps,
-            prob = cluster_prob, replace = TRUE
-          )
-          cluster_par_list_sim_sill <- c(
-            sim_fixed_params,
-            list(
-              "cluster_assign" = cluster_assign,
-              "centers" = slope_vec,
-              "cent_sd" = rep(0, n_chems)
-            )
-          )
-          joint_model_fun_sill <- function(x) {
-            create_mix_calc_from_summary(x, cluster_par_list_sim_sill)
-          }
-          sim_mix_funs_2step_DP <-
-            sapply(samp_idx, FUN = function(x) joint_model_fun_sill(x))
-        }
-
         sim_mix_funs_2step_KM <- mix_function_generator(
           param_matrix_RGCA,
           KM_clust
@@ -275,7 +250,7 @@ run_comparison_simulation <- function(save_plot = FALSE) {
         curve_data_CA <- matrix(0, ncol = n_samps, nrow = 1)
         curve_data_IA <- matrix(0, ncol = n_samps, nrow = 1)
         for (row_idx in 1:n_samps) {
-          conc_val <- conc_mat[row_idx, ] #+1e-40
+          conc_val <- conc_mat[row_idx, ]
           curve_data_2step[, row_idx] <- sapply(sim_mix_funs_2step,
             FUN = function(x) x(conc_val)
           )
@@ -300,7 +275,6 @@ run_comparison_simulation <- function(save_plot = FALSE) {
 
         # get MSE, Logscore, CRPS  ####
         n_x_values <- ncol(Cx)
-        RGCA_llh <- 0
         RGCA_mse <- 0
         RGCA_crps <- 0
         GCA_llh <- 0
@@ -309,16 +283,14 @@ run_comparison_simulation <- function(save_plot = FALSE) {
         IA_llh <- 0
         IA_mse <- 0
         IA_crps <- 0
-        RGCA_2step_llh <- 0
         RGCA_2step_mse <- 0
         RGCA_2step_crps <- 0
-        RGCA_2stepKM_llh <- 0
         RGCA_2stepKM_mse <- 0
         RGCA_2stepKM_crps <- 0
         CA_mse <- 0
         CA_crps <- 0
 
-        # average % difference from EC50?
+        # mean % difference from EC50?
         RGCA_mpd <- 0
         GCA_mpd <- 0
         CA_mpd <- 0
@@ -328,10 +300,6 @@ run_comparison_simulation <- function(save_plot = FALSE) {
 
         # loop through each dose and get pointwise scores across all samples
         for (x_idx in 1:n_x_values) {
-          ClGCA_llh <- ClGCA_llh + get_emp_llh(
-            true_response_equipot[x_idx],
-            curve_data[, x_idx]
-          )
           GCA_llh <- GCA_llh + get_emp_llh(
             true_response_equipot[x_idx],
             curve_data_GCA[, x_idx]
@@ -370,43 +338,42 @@ run_comparison_simulation <- function(save_plot = FALSE) {
               true_response_equipot[x_idx],
               curve_data_IA[, x_idx]
             )
-
           RGCA_2step_mse <- RGCA_2step_mse +
             (true_response_equipot[x_idx] -
-              median(curve_data_2step[, x_idx]))^2 / n_x_values
+               median(curve_data_2step[, x_idx]))^2 / n_x_values
           RGCA_2stepKM_mse <- RGCA_2stepKM_mse +
             (true_response_equipot[x_idx] -
-              median(curve_data_2stepKM[, x_idx]))^2 / n_x_values
+               median(curve_data_2stepKM[, x_idx]))^2 / n_x_values
           RGCA_mse <- RGCA_mse +
             (true_response_equipot[x_idx] -
-              median(curve_data_RGCA[, x_idx]))^2 / n_x_values
+               median(curve_data_RGCA[, x_idx]))^2 / n_x_values
           GCA_mse <- GCA_mse +
             (true_response_equipot[x_idx] -
-              median(curve_data_GCA[, x_idx]))^2 / n_x_values
+               median(curve_data_GCA[, x_idx]))^2 / n_x_values
           CA_mse <- CA_mse + (true_response_equipot[x_idx] -
-            median(curve_data_CA[, x_idx]))^2 / n_x_values
+                                median(curve_data_CA[, x_idx]))^2 / n_x_values
           IA_mse <- IA_mse + (true_response_equipot[x_idx] -
-            median(curve_data_IA[, x_idx]))^2 / n_x_values
-
+                                median(curve_data_IA[, x_idx]))^2 / n_x_values
           RGCA_2step_mpd <- RGCA_2step_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_2step[, x_idx])) / true_response_equipot[x_idx]
-          RGCA_2stepKM_mpd <- RGCA_2stepKM_mpd +
+               median(curve_data_2step[, x_idx])) / true_response_equipot[x_idx]
+          RGCA_2stepKM_mpd <-
+            RGCA_2stepKM_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_2stepKM[, x_idx])) /
-              true_response_equipot[x_idx]
+             median(curve_data_2stepKM[, x_idx])) /
+            true_response_equipot[x_idx]
           RGCA_mpd <- RGCA_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_RGCA[, x_idx])) / true_response_equipot[x_idx]
+               median(curve_data_RGCA[, x_idx])) / true_response_equipot[x_idx]
           GCA_mpd <- GCA_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_GCA[, x_idx])) / true_response_equipot[x_idx]
+               median(curve_data_GCA[, x_idx])) / true_response_equipot[x_idx]
           CA_mpd <- CA_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_CA[, x_idx])) / true_response_equipot[x_idx]
+               median(curve_data_CA[, x_idx])) / true_response_equipot[x_idx]
           IA_mpd <- IA_mpd +
             (true_response_equipot[x_idx] -
-              median(curve_data_IA[, x_idx])) / true_response_equipot[x_idx]
+               median(curve_data_IA[, x_idx])) / true_response_equipot[x_idx]
         }
 
         curr_idx <- curr_idx + 1
@@ -451,7 +418,15 @@ run_comparison_simulation <- function(save_plot = FALSE) {
 
   if (save_plot) {
     pdf(file = "sim_study_invertx.pdf", width = 7, height = 5)
-    data_col_names <- c("RGCA (2-step)", "RGCA (2-step KM)", "RGCA", "GCA", "CA", "IA", "Mix ID", "Num Chems")
+    data_col_names <-
+      c("RGCA (2-step)",
+        "RGCA (2-step KM)",
+        "RGCA",
+        "GCA",
+        "CA",
+        "IA",
+        "Mix ID",
+        "Num Chems")
     sim_study_boxplot(record_MSE, data_col_names)
     dev.off()
   }
