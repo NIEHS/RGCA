@@ -3,6 +3,13 @@ library(nimble, warn.conflicts = TRUE)
 # -----------  nimble: mixed effect -------------
 ################################################################
 # -----------  samples + replicates  -------------
+#' Fit a random effect dose response model using Nimble for fast MCMC.  Nimble
+#' creates a compiled sampler that can run iterations much faster than the
+#' manually implemented version.
+#'
+#' @return nimble_samples: a list of MCMC chains with an entry for each
+#'   parameter of the model.
+#' @export
 run_RE_nimble <- function() {
   code <- nimbleCode({
     for (chm in 1:CM) {

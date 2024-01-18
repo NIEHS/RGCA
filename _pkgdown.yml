@@ -8,15 +8,34 @@ development:
   mode: auto
 
 reference:
-  - title: RGCA functions
-    desc: All of the current RGCA functions
+  - title: RGCA MCMC functions
+    desc: Functions related to MCMC parameter estimation
     contents:
-      - DP_simulation_study
-      - RE_DP_pipeline_tox21
-      - RE_dose_response_MCMC
-      - RE_nimble
-      - dirichlet_MCMC
-      - helper_calulators
-      - helper_pipeline
-      - helper_plots
-      - tox21_prep_data
+    - matches("MCMC")
+  - title: RGCA Plotting functions
+    desc: Functions to create plots from the manuscript
+    contents:
+    - matches("plot")
+    - matches("visualize")
+    - matches("curve_fits")
+  - title: RGCA Mixture calculators
+    desc: Functions that compute mixture responses
+    contents:
+    - matches("calc")
+    - matches("calc")
+    - matches("hill")
+    - matches("adjust")
+    - matches("response")
+    - matches("function_generator")
+  - title: RGCA Simulation functions
+    desc: Functions related to the simulation study of the manuscript
+    contents:
+    - matches("generate")
+  - title: RGCA Miscellaneous functions
+    desc: Other helpful functions
+    contents:
+    - matches("build")
+    - matches("cluster_centers")
+    - matches("mixpred")
+    - matches("convert_DP")
+    - matches("prepared")
