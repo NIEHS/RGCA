@@ -1,0 +1,6 @@
+linters: linters_with_defaults(
+    object_name_linter = NULL,
+    seq_linter = NULL,
+    object_usage_linter = NULL,
+    cyclocomp_linter = NULL
+  )
