@@ -4,6 +4,11 @@ template:
   bootstrap: 5
   bootswatch: minty
 
+navbar:
+  structure:
+    left:  [reference, articles]
+    right: [search, github]
+
 development:
   mode: auto
 
