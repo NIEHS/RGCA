@@ -18,6 +18,7 @@ manuscript/
 *-Ex.R
 
 # Other files 
+DS_Store
 ../.DS_Store
 ../._.DS_Store
 ../._create-prediction-grid.Rmd
