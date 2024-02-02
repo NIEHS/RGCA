@@ -560,7 +560,23 @@ visualize_clusters_blocks <- function(slopes,
 }
 
 
-# Violin Plot for Scores ####
+
+#' Create a violin plot given a data frame with scores.  In this context the
+#' plot compares different mixture prediction methods using the different
+#' scoring methods.
+#'
+#' @param score_df The score data frame is a matrix where the columns represent
+#'   different score calculations and prediction methods while the rows
+#'   represent different data sets.
+#' @param bootstrap_calc_list The named list of prediction functions, only used
+#'   to extract the names.
+#' @param method_levels Optional vector of the bootstrap_calc_list names used to
+#'   adjust the order of the methods as they appear in the plot.
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plot_scores <- function(score_df, bootstrap_calc_list, method_levels = NA) {
   plot_df <- score_df
   names(plot_df) <- c("Mix Desc", rep(names(bootstrap_calc_list), 3))

@@ -15,6 +15,5 @@ Imports: ggplot2, reshape2, nimble, dplyr, cowplot, scoringRules, tables, tidyr,
 URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA,
 https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/
 Suggests:
-    knitr,
-    rmarkdown
-VignetteBuilder: rmarkdown
+    knitr
+VignetteBuilder: knitr

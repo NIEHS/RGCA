@@ -116,10 +116,22 @@ modes <- function(dats) {
   dens$x[max_i]
 }
 
+#' Given an MCMC chain fit by RE_MCMC_fit, estimate the parameter values using a
+#' summary statistic applied to the posterior samples.
+#'
+#' @param re_chains output from RE_MCMC_fit consisting of a list of parameter
+#'   chains, where each chain is a vector of posterior samples
+#' @param summry_stat the statistic used to summarize the posterior.  Default is
+#'   median, but can be mean or any other similar measure of the center.
+#'
+#' @return a list of parameter estimates
+#' @export
+#'
+#' @examples
 pull_summary_parameters <- function(re_chains,
                                     summry_stat = median) {
   burnin <- 5000
-  # exlicit call to global env
+  # explicit call to global env
   n_chems <- .GlobalEnv$n_chems
   re_iter <- .GlobalEnv$re_iter
   if (re_iter < burnin) burnin <- 100
@@ -161,6 +173,21 @@ pull_summary_parameters <- function(re_chains,
   ))
 }
 
+
+
+#' Given an MCMC chain fit by RE_MCMC_fit, pull out the chains representing the
+#' parameter posteriors and compute some estimates of the parameters by applying
+#' the summary statistic function to the posterior samples.
+#'
+#' @param re_chains output from RE_MCMC_fit consisting of a list of parameter
+#'   chains, where each chain is a vector of posterior samples
+#' @param summry_stat the statistic used to summarize the posterior.  Default is
+#'   median, but can be mean or any other similar measure of the center.
+#'
+#' @return a list with posterior samples and summary estimates of the parameters
+#' @export
+#'
+#' @examples
 pull_parameters <- function(re_chains, summry_stat = median) {
   burnin <- 5000
   # explicit call to global env
@@ -703,34 +730,33 @@ hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
     # case 4, reflection of extension, slope inverted
     return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
   }
-  
-  # the following method change was suggested by I. Song to reduce cyclomatic
-  # complexity
+  # the following method change was suggested by Insang Song to reduce
+  # cyclomatic complexity
   hilly_inverse_low_cyclo <- function(y) {
     # input y: the response to invert
     # force: in case values change before function is used
     force(a)
     force(b)
     force(c)
-    if (a*y == 0) {
+    if (a * y == 0) {
       return(0)
     }
     # case 1, y extended to small negative conc, invert slope
-    if (a*y < 0) {
+    if (a * y < 0) {
       return(-b / (1 + (-a / y)^(1 / c)))
     }
     # case 2, standard inverse
-    if (a*(y-a)<0) {
+    if (a * (y - a) < 0) {
       return(b / (a / y - 1)^(1 / c))
     }
     # case 3, reflected part of the standard inverse
-    if (a*(y-2*a) < 0) {
+    if (a * (y - 2 * a) < 0) {
       return(-2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
     }
     # case 4, reflection of extension, slope inverted
     return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
   }
-  return(hilly_inverse_low_cyclo)
+  return(hilly_inverse)
 }
 
 

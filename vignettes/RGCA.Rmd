@@ -1,17 +1,27 @@
 ---
-title: "RGCA_Manuscript_Code"
-format: html
+title: "RGCA"
 output: rmarkdown::html_vignette
-editor: visual
 vignette: >
   %\VignetteIndexEntry{RGCA}
-  %\VignetteEngine{knitr::knitr}
-  %\usepackage[UTF-8]
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
 
 ## The Mixture Prediction Pipeline
 
-This script predicts a response to a mixture of chemicals given an input data of individual dose responses and the concentrations of the components of the mixture. The procedure followed in this pipeline is as follows: 1. Load all inputs 2. Fit individual dose response curves 3. Cluster the individual dose response slope parameters 4. Create a collection of predictors ("calculators") by sampling the slope cluster and parameters 5. Given a mixture, predict a response with each calculator. The plots show the 5, 50, and 95 percentile. \### Loading data To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
+This script predicts a response to a mixture of chemicals given an input data of individual dose responses and the concentrations of the components of the mixture. The procedure followed in this pipeline is as follows: 1. Load all inputs 2. Fit individual dose response curves 3. Cluster the individual dose response slope parameters 4. Create a collection of predictors ("calculators") by sampling the slope cluster and parameters 5. Given a mixture, predict a response with each calculator. The plots show the 5, 50, and 95 percentile.
+
+### Loading data
+
+To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
 
 ```{r Input}
 #| output: false
@@ -20,22 +30,25 @@ library(cowplot)
 library(reshape2)
 library(drc)
 library(readxl)
+library(dplyr)
 library(scoringRules)
-source("../R/helper_plots.R")
-source("../R/helper_calculators.R")
-source("../R/RE_dose_response_MCMC.R")
-source("../R/dirichlet_MCMC.R")
-source("../R/RE_nimble.R")
+library(RGCA)
+library(utils)
+#source("../R/helper_plots.R")
+#source("../R/helper_calculators.R")
+#source("../R/RE_dose_response_MCMC.R")
+#source("../R/dirichlet_MCMC.R")
+#source("../R/RE_nimble.R")
 
 # read in data
-source("../R/tox21_prep_data.R")
+#source("../R/tox21_prep_data.R")
 ```
 
 Next we read the prepared Tox21 data, which creates a series of objects including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates. Null values are present in the data to indicate an anomalous response, such as cell death. Some chemicals have 3 replicates and some have 6.
 
 ```{r prepped input}
-input_df <- read.delim("../Input/AR-luc.txt")
-mix_guide <- readxl::read_xls("../Input/AllMixtureComponentsARER.xls")
+input_df <- utils::read.delim("../input/AR-luc.txt")
+mix_guide <- readxl::read_xls("../input/AllMixtureComponentsARER.xls")
 read_prepared_Tox21_data(input_df, mix_guide)
 message("Observed response")
 head(y_i)
