@@ -17,6 +17,8 @@ reference:
     desc: Functions related to MCMC parameter estimation
     contents:
     - matches("MCMC")
+    - matches("pull")
+    - matches("nimble")
   - title: RGCA Plotting functions
     desc: Functions to create plots from the manuscript
     contents:
