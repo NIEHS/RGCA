@@ -2,7 +2,11 @@
 % Please edit documentation in R/helper_calculators.R
 \name{hill_invs_factry}
 \alias{hill_invs_factry}
-\title{Title}
+\title{The inverse function is used with a single dose response curve, which is
+assumed to be a Hill function.  A factory method is used to avoid repeatedly
+passing in the curve parameters; once generated, the inverse calculator only
+needs a response point y to return an inverse (dose) required to get that
+response.}
 \usage{
 hill_invs_factry(a, b, c, max_R = 1, d = 0)
 }
@@ -21,7 +25,11 @@ hill_invs_factry(a, b, c, max_R = 1, d = 0)
 a function to compute the inverse given a mixture response R
 }
 \description{
-Title
+The inverse function is used with a single dose response curve, which is
+assumed to be a Hill function.  A factory method is used to avoid repeatedly
+passing in the curve parameters; once generated, the inverse calculator only
+needs a response point y to return an inverse (dose) required to get that
+response.
 }
 \examples{
 NA

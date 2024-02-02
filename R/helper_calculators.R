@@ -662,7 +662,11 @@ get_empr_CRPS <- function(obs_res, boot_vals) {
 # Inverse Hill Functions ####
 
 
-#' Title
+#' The inverse function is used with a single dose response curve, which is
+#' assumed to be a Hill function.  A factory method is used to avoid repeatedly
+#' passing in the curve parameters; once generated, the inverse calculator only
+#' needs a response point y to return an inverse (dose) required to get that
+#' response.
 #'
 #' @param a sill (max effect)
 #' @param b EC50
@@ -699,7 +703,34 @@ hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
     # case 4, reflection of extension, slope inverted
     return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
   }
-  return(hilly_inverse)
+  
+  # the following method change was suggested by I. Song to reduce cyclomatic
+  # complexity
+  hilly_inverse_low_cyclo <- function(y) {
+    # input y: the response to invert
+    # force: in case values change before function is used
+    force(a)
+    force(b)
+    force(c)
+    if (a*y == 0) {
+      return(0)
+    }
+    # case 1, y extended to small negative conc, invert slope
+    if (a*y < 0) {
+      return(-b / (1 + (-a / y)^(1 / c)))
+    }
+    # case 2, standard inverse
+    if (a*(y-a)<0) {
+      return(b / (a / y - 1)^(1 / c))
+    }
+    # case 3, reflected part of the standard inverse
+    if (a*(y-2*a) < 0) {
+      return(-2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
+    }
+    # case 4, reflection of extension, slope inverted
+    return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
+  }
+  return(hilly_inverse_low_cyclo)
 }
 
 

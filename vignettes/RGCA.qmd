@@ -1,7 +1,12 @@
 ---
 title: "RGCA_Manuscript_Code"
 format: html
+output: rmarkdown::html_vignette
 editor: visual
+vignette: >
+  %\VignetteIndexEntry{RGCA}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]
 ---
 
 ## The Mixture Prediction Pipeline
