@@ -17,7 +17,9 @@ manuscript/
 # Example code in package build process
 *-Ex.R
 
-# Other files 
+# Other files
+DS_Store
+.DS_Store
 ../.DS_Store
 ../._.DS_Store
 ../._create-prediction-grid.Rmd
