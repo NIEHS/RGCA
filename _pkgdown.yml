@@ -10,7 +10,7 @@ navbar:
     right: [search, github]
 
 development:
-  mode: auto
+  mode: unreleased
 
 reference:
   - title: RGCA MCMC functions

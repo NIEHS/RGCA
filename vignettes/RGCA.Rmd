@@ -23,8 +23,7 @@ This script predicts a response to a mixture of chemicals given an input data of
 
 To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
 
-```{r Input}
-#| output: false
+```{r Input, results='hide'}
 library(ggplot2)
 library(cowplot)
 library(reshape2)
@@ -319,16 +318,14 @@ bootstrap_calc_list <- list(
 
 Before proceeding with actual mixtures, we can check that sham mixtures with only one chemical are correctly modeled.
 
-```{r}
-#| warning: false
+```{r, warning = FALSE}
 plot_dummy_mixture(Cx, y_i, tot_par_list, replicate_sets,
                    bootstrap_calc_list, test_idx =6)
 ```
 
 Now we can proceed to predicting with the actual data. The sets of indices are chosen based on the descriptions of the mixtures. This part is solving the two-step model with the bootstrapped calculators built on our fitted parameters and clustering, and can take a few minutes per mixture
 
-```{r}
-#| warning: false
+```{r, warning = FALSE}
 # all mixtures where the Estrogen Receptor agonists are at 4x their fitted EC50
 set_4x = c( 1, 12, 20, 29, 43, 52, 55, 57)
 # mixtures from set_4x plus all other mixtures with all chemicals or all
@@ -347,8 +344,7 @@ score_matrix = plot_mixture_response(mix_idx, mix_df, mix_conc_df, mix_guide,
 
 Finally, we format the score matrix and plot the results of the score comparisons. Since this demonstration only runs one mixture by default, the violin plots appear as lines.
 
-```{r}
-#| warning: false
+```{r, warning = FALSE}
 score_df = data.frame(score_matrix)
 # drop rows of 0, in case some mixtures were skipped
 score_df = score_df[apply(score_df, MARGIN=1, FUN = function(rx) any(rx>0)),]
