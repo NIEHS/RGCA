@@ -1,5 +1,6 @@
 ---
 title: "RGCA"
+author: "Daniel Zilber"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{RGCA}
@@ -33,14 +34,6 @@ library(dplyr)
 library(scoringRules)
 library(RGCA)
 library(utils)
-#source("../R/helper_plots.R")
-#source("../R/helper_calculators.R")
-#source("../R/RE_dose_response_MCMC.R")
-#source("../R/dirichlet_MCMC.R")
-#source("../R/RE_nimble.R")
-
-# read in data
-#source("../R/tox21_prep_data.R")
 ```
 
 Next we read the prepared Tox21 data, which creates a series of objects including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates. Null values are present in the data to indicate an anomalous response, such as cell death. Some chemicals have 3 replicates and some have 6.

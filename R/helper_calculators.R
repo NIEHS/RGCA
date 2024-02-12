@@ -699,13 +699,12 @@ get_empr_CRPS <- function(obs_res, boot_vals) {
 #' @param b EC50
 #' @param c slope
 #' @param max_R maximum effect across all chemicals
-#' @param d minimum effect
 #'
 #' @return a function to compute the inverse given a mixture response R
 #' @export
 #'
 #' @examples NA
-hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
+hill_invs_factry <- function(a, b, c, max_R = 1) {
   hilly_inverse <- function(y) {
     # input y: the response to invert
     # force: in case values change before function is used

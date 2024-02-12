@@ -10,7 +10,14 @@ navbar:
     right: [search, github]
 
 development:
-  mode: unreleased
+  mode: auto
+
+articles:
+  - title: RGCA Vignettes
+    navbar: Navbar RGCA
+    contents: 
+    - RGCA
+    - Simple_RGCA
 
 reference:
   - title: RGCA MCMC functions
