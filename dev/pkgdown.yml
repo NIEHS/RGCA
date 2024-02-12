@@ -1,0 +1,11 @@
+pandoc: 2.19.2
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  RGCA: RGCA.html
+  Simple_RGCA: Simple_RGCA.html
+last_built: 2024-02-12T21:41Z
+urls:
+  reference: https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/reference
+  article: https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/articles
+
