@@ -22,7 +22,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">RGCA</a>
 
@@ -35,6 +35,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item">
+  <a class="nav-link" href="../articles/RGCA.html">Get started</a>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
@@ -106,8 +109,34 @@ there are three chemicals with known Hill parameters.</p>
 <span><span class="va">mix_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mix_function_generator.html">mix_function_generator</a></span><span class="op">(</span><span class="va">param_matrix</span>, <span class="va">cluster_assign_vec</span><span class="op">)</span></span></code></pre></div>
 <p>To create a mixture, we need to specify the concentration of each
 chemical.</p>
-<p>Now we can plot the two predicted mixture responses.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># generate mix concentrations:  each row of the matrix is one dose of the mix</span></span>
+<span><span class="va">n_samps</span> <span class="op">&lt;-</span> <span class="fl">30</span></span>
+<span><span class="co"># equipotent mixture: concentrations scaled by EC50</span></span>
+<span><span class="va">equipot_conc_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="va">n_samps</span>, ncol <span class="op">=</span> <span class="va">n_chems</span><span class="op">)</span></span>
+<span><span class="co"># equimolar mixture: equal concentration of all chemicals</span></span>
+<span><span class="va">equimol_conc_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="va">n_samps</span>, ncol <span class="op">=</span> <span class="va">n_chems</span><span class="op">)</span></span>
+<span><span class="co"># generate concentrations on the log scale</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">chem_idx</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_chems</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">equipot_conc_matrix</span><span class="op">[</span>, <span class="va">chem_idx</span><span class="op">]</span> <span class="op">&lt;-</span></span>
+<span>    <span class="va">ec50_vec</span><span class="op">[</span><span class="va">chem_idx</span><span class="op">]</span> <span class="op">/</span> <span class="op">(</span><span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">n_samps</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">equimol_conc_matrix</span><span class="op">[</span>, <span class="va">chem_idx</span><span class="op">]</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fl">1</span> <span class="op">/</span> <span class="op">(</span><span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">3</span>, <span class="op">-</span><span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">n_samps</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co">#create the mixture concentration vector for plotting</span></span>
+<span><span class="va">equipot_conc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">equipot_conc_matrix</span><span class="op">)</span></span>
+<span><span class="va">equimol_conc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">equimol_conc_matrix</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply the pediction function to the concentrations of interest</span></span>
+<span><span class="va">pred_equipot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">equipot_conc_matrix</span>,</span>
+<span>                      MARGIN <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                      FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mix_pred</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pred_equimol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">equimol_conc_matrix</span>,</span>
+<span>                      MARGIN <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                      FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mix_pred</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Now we can plot the two predicted mixture responses.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">equimol_conc</span>, <span class="va">pred_equimol</span>, log <span class="op">=</span> <span class="st">"x"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">equipot_conc</span>, <span class="va">pred_equimol</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Simple_RGCA_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
