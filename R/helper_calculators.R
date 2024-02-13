@@ -705,7 +705,7 @@ get_empr_CRPS <- function(obs_res, boot_vals) {
 #' @export
 #'
 #' @examples NA
-hill_invs_factry <- function(a, b, c, max_R = 1, d=0) {
+hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
   hilly_inverse <- function(y) {
     # input y: the response to invert
     # force: in case values change before function is used

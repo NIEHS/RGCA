@@ -1,6 +1,6 @@
 Package: RGCA
 Title: Reflected Generalized Concentration Addition
-Version: 1.0.0.0000
+Version: 1.0.0
 Authors@R: 
     c(person("Daniel", "Zilber", , "daszilber@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID")),

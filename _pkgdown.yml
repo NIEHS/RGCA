@@ -14,7 +14,7 @@ development:
 
 articles:
   - title: RGCA Vignettes
-    navbar: Navbar RGCA
+    navbar: ~
     contents: 
     - RGCA
     - Simple_RGCA
