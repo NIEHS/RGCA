@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">RGCA</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">1.0.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,12 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Simple_RGCA.html">Simple Application of RGCA</a>
+  </div>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -63,6 +69,8 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>RGCA</h1>
+                        <h4 data-toc-skip class="author">Daniel
+Zilber</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/blob/HEAD/vignettes/RGCA.Rmd" class="external-link"><code>vignettes/RGCA.Rmd</code></a></small>
@@ -117,15 +125,7 @@ or MCMC scripts, and a script that parses the input data.</p>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/FK83/scoringRules" class="external-link">scoringRules</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA" class="external-link">RGCA</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">utils</span><span class="op">)</span></span>
-<span><span class="co">#source("../R/helper_plots.R")</span></span>
-<span><span class="co">#source("../R/helper_calculators.R")</span></span>
-<span><span class="co">#source("../R/RE_dose_response_MCMC.R")</span></span>
-<span><span class="co">#source("../R/dirichlet_MCMC.R")</span></span>
-<span><span class="co">#source("../R/RE_nimble.R")</span></span>
-<span></span>
-<span><span class="co"># read in data</span></span>
-<span><span class="co">#source("../R/tox21_prep_data.R")</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">utils</span><span class="op">)</span></span></code></pre></div>
 <p>Next we read the prepared Tox21 data, which creates a series of
 objects including the observed dose response <span class="math inline">\(y_i\)</span>, the concentration for the observed
 dose response <span class="math inline">\(Cx\)</span>, and a list to
