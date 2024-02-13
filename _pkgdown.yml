@@ -2,22 +2,9 @@ url: https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/
 
 template:
   bootstrap: 5
-  bootswatch: minty
-
-navbar:
-  structure:
-    left:  [reference, articles]
-    right: [search, github]
 
 development:
   mode: auto
-
-articles:
-  - title: RGCA Vignettes
-    navbar: ~
-    contents: 
-    - RGCA
-    - Simple_RGCA
 
 reference:
   - title: RGCA MCMC functions

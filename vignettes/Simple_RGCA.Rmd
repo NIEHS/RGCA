@@ -38,7 +38,7 @@ mix_pred <- mix_function_generator(param_matrix, cluster_assign_vec)
 
 To create a mixture, we need to specify the concentration of each chemical.
 
-```{r pressure, echo=FALSE}
+```{r pressure}
 # generate mix concentrations:  each row of the matrix is one dose of the mix
 n_samps <- 30
 # equipotent mixture: concentrations scaled by EC50
