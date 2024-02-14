@@ -1,0 +1,351 @@
+---
+title: "RGCA"
+author: "Daniel Zilber"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RGCA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## The Mixture Prediction Pipeline
+
+This script predicts a response to a mixture of chemicals given an input data of individual dose responses and the concentrations of the components of the mixture. The procedure followed in this pipeline is as follows: 1. Load all inputs 2. Fit individual dose response curves 3. Cluster the individual dose response slope parameters 4. Create a collection of predictors ("calculators") by sampling the slope cluster and parameters 5. Given a mixture, predict a response with each calculator. The plots show the 5, 50, and 95 percentile.
+
+### Loading data
+
+To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
+
+```{r Input, results='hide'}
+library(ggplot2)
+library(cowplot)
+library(reshape2)
+library(drc)
+library(readxl)
+library(dplyr)
+library(scoringRules)
+library(RGCA)
+library(utils)
+```
+
+Next we read the prepared Tox21 data, which creates a series of objects including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates. Null values are present in the data to indicate an anomalous response, such as cell death. Some chemicals have 3 replicates and some have 6.
+
+```{r prepped input}
+input_df <- utils::read.delim("../input/AR-luc.txt")
+mix_guide <- readxl::read_xls("../input/AllMixtureComponentsARER.xls")
+read_prepared_Tox21_data(input_df, mix_guide)
+message("Observed response")
+head(y_i)
+message("Concentration")
+head(Cx)
+message("Replicates by index")
+head(replicate_sets)
+```
+
+### Fitting Dose Responses
+
+A random effect model is fit to each chemical indexed by $i$, $$  R_i(c) =f_i(c|a_i,\theta_i,\beta_i, u_{ij}, v_{ij}) =
+\frac{a_i+u_{ij}}{1+\left(\frac{\theta_i}{c}\right)^{\beta_i}} + v_{ij} +
+\epsilon_{ijc} $$ The MCMC script uses standard methods and an alternative script is available for Nimble.
+
+```{r RE-MCMC}
+re_iter = 1e4 #for manuscript we use 2.5e4 = 25,000 iterations
+set.seed(102)
+# fit random effects model
+re_chains = RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
+```
+
+The beginning 5000 iterations of the chains are removed and the remaining iterations thinned. The thinned samples for relevant parameters are then provided in a list for sampling downstream, or as objects with the median parameters for methods that do not need uncertainty quantification.
+
+```{r}
+re_par_list = pull_parameters(re_chains)
+# Pull RGCA MCMC parameters estimates without uncertainty
+re_par_summary <-
+  pull_summary_parameters(re_chains, summry_stat = median)
+# Collect the main parameters for clustering
+RE_curve_fits <- as.data.frame(list(
+  "sill" = re_par_summary$sill_params,
+  "ec50" = re_par_summary$ec50_params,
+  "slope" = re_par_summary$slope_params
+))
+```
+
+### Clustering
+
+Clustering is determined either randomly, by sign of the sill, or by a K-means algorithm. First we generate some random clusters
+
+```{r Random Clustering}
+# RGCA + random sampling
+# create 20 random clusters: 1 GCA, 1 IA, and then 4x2,5x3,5x4,4x5
+set.seed(1331)
+rand_clust_mat <- c(
+  rep(1, 18),
+  sample(1:2, 18 * 10, replace = TRUE),
+  sample(1:3, 18 * 20, replace = TRUE),
+  sample(1:4, 18 * 30, replace = TRUE),
+  sample(1:5, 18 * 38, replace = TRUE),
+  1:18
+) |> matrix(ncol = 18, byrow = TRUE)
+rand_clust_assign <- rep(1, nrow(rand_clust_mat))
+# This naming approach sets the cluster assignment as a name to each entry, and
+# each entry is the weight of that assignment.  Using a vector of 1's implies
+# all clusterings are equally weighted.  This allows for the clustering to be
+# sampled if more bootstrapped samples are desired.
+names(rand_clust_assign) <-
+  apply(
+    rand_clust_mat,
+    MARGIN = 1,
+    FUN = function(rx)
+      do.call(paste, as.list(rx))
+  )
+randclust_par_list <- list("cluster_assign" = rand_clust_assign)
+# save a parameter list with the clustering and MCMC results from before
+RGCA_randclust_par_list <- c(re_par_list, randclust_par_list)
+```
+
+We follow a similar procedure for the agonist-based (ie sill sign) clustering.
+
+```{r Agonist Cluster}
+# 
+one_clust_assign <- 1
+clust_by_agonist <- rep(1, n_chems)
+clust_by_agonist[AR_agonist_rows] <- 2
+names(one_clust_assign) <- do.call(paste, as.list(clust_by_agonist))
+RGCA_ARER_clust_par_list <- list(
+  "centers" = matrix(re_par_summary$slope_params, nrow = 1),
+  "cluster_assign" = one_clust_assign,
+  "cent_sd" = matrix(rep(0, n_chems), nrow = 1)
+)
+RGCA_ARER_par_list <- c(re_par_list, RGCA_ARER_clust_par_list)
+```
+
+and then for K-means clustering.
+
+```{r KMeans Clustering}
+# RGCA+Kmeans
+kmeans_clust_mat <- matrix(0, nrow = 6, ncol = n_chems)
+# test 1 to 6 cluster centers
+for (i in 1:6) {
+  kmeans_clust_mat[i,] <- kmeans(RE_curve_fits, i)$cluster
+  # print the ratio of the between-set sum of squares and total to compare
+  print(kmeans(RE_curve_fits, i)$betweenss / kmeans(RE_curve_fits, i)$totss)
+}
+kmeans_clust_assign <- rep(1, nrow(kmeans_clust_mat))
+names(kmeans_clust_assign) <-
+  apply(
+    kmeans_clust_mat,
+    MARGIN = 1,
+    FUN = function(rx)
+      do.call(paste, as.list(rx)
+      )
+  )
+kmeans_clust_list <- list("cluster_assign" = kmeans_clust_assign)
+# save a parameter list with the clustering and MCMC results from before
+RGCA_kmeansclust_par_list <- c(re_par_list, kmeans_clust_list)
+```
+
+### Special cases
+
+One of the special cases we test is to use the Reflected GCA but without the clustering. Hence we create one large cluster (like GCA) and keep the fitted slopes. Regular GCA must set the slope values to 1.
+
+```{r}
+# RGCA alone ####
+one_clust_assign <- 1
+names(one_clust_assign) <- do.call(paste, as.list(rep(1, n_chems)))
+RGCA_clust_par_list <- list(
+  "centers" = matrix(re_par_summary$slope_params, nrow = 1),
+  "cluster_assign" = one_clust_assign,
+  "cent_sd" = matrix(rep(0, n_chems), nrow = 1)
+)
+RGCA_par_list <- c(re_par_list, RGCA_clust_par_list)
+
+```
+
+### Creating Calculators
+
+After all the parameter settings are established, we can generate the calculator functions that take as input the doses for the various chemicals and output a predicted response. For the methods with uncertainty quantification, we bootstrap the calculators by using the function "create_mix_calc," which will take a sample from the MCMC posterior.
+
+```{r Create Calculators}
+set.seed(1026)
+# Random cluster calculators
+n_bootstraps <- 100
+random_clustered_RGCA <-
+  sapply(
+    1:n_bootstraps,
+    FUN = function(x)
+      create_mix_calc(x, RGCA_randclust_par_list, add_RE = TRUE)
+  )
+# KMeans clustering calculator
+kmeans_samp_idx <- sample(1:6, size = n_bootstraps, replace = TRUE)
+sampled_kmeans_clustered_RGCA <-
+  sapply(
+    kmeans_samp_idx,
+    FUN = function(x)
+      create_mix_calc(x, RGCA_kmeansclust_par_list, add_RE = TRUE)
+  )
+# No cluster (pure RGCA) calculator
+sampled_mix_funs_RGCA <-
+  sapply(
+    rep(1, n_bootstraps),
+    FUN = function(x)
+      create_mix_calc(x, RGCA_par_list, add_RE = TRUE)
+  )
+# Sill clustered calculator
+sampled_mix_funs_RGCA_ARER <- sapply(
+  rep(1, n_bootstraps),
+  FUN = function(x) {
+    create_mix_calc(x,
+                    RGCA_ARER_par_list,
+                    add_RE = TRUE)
+  }
+)
+```
+
+### Standard Methods: IA and GCA
+
+GCA fixes the slope parameters to 1, but we want to allow the other parameters to adjust to that constraint so we rerun the MCMC algorithm with the slope fixed to 1.
+
+```{r GCA MCMC}
+set.seed(1025)
+# specify the MCMC to fit 2 - parameter Hill models for GCA
+re_chains_2param <-
+  RE_MCMC_fit(y_i,
+              Cx,
+              replicate_sets,
+              n_iter = re_iter,
+              n_hill_par = 2)
+re_2par_list <- pull_parameters(re_chains_2param)
+# Pull parameter estimates without uncertainty
+re_2par_summary <- pull_summary_parameters(re_chains_2param)
+
+```
+
+We now make the parameter lists for the simpler Independent Action (IA) and regular GCA models. IA uses the parameter estimates from the RGCA MCMC fit. Neither IA nor GCA nor CA takes advantage of the uncertainty; this is to demonstrate the utility of the Bayesian method, but in principle they can all be resampled like RGCA to generate credible intervals.
+
+First, we finish with GCA and then create the calculator for CA, which requires the sill parameter to be equal across all chemicals.
+
+```{r}
+# GCA single calculator: first create the parameter specification
+GCA_assign <- 1
+names(GCA_assign) <- do.call(paste, as.list(rep(1, n_chems)))
+GCA_assign_vec <-
+  as.numeric(strsplit(names(GCA_assign), split = " ")[[1]])
+param_matrix_GCA <- as.matrix(
+  cbind(
+    "a" = re_2par_summary$sill_params,
+    "b" = re_2par_summary$ec50_params,
+    "c" = re_2par_summary$slope_params,
+    "max_R" = max(re_par_summary$sill_params),
+    "d" = 0
+  )
+)
+# Next use the parameters to instantiate the predictive calculator
+GCA_calculator <-
+  mix_function_generator(param_matrix_GCA, GCA_assign_vec)
+
+# CA single calculator ####
+param_matrix_CA <- as.matrix(
+  cbind(
+    "a" = re_par_summary$sill_params,
+    "b" = re_par_summary$ec50_params,
+    "c" = re_par_summary$slope_params,
+    "max_R" = 1,
+    "d" = 0
+  )
+)
+# simple CA calculator:  force all sill params to be equal
+CA_calculator <- mix_function_generator(param_matrix_CA,
+                                        GCA_assign_vec, 
+                                        scale_CA = TRUE)
+```
+
+Next we create the calculator for IA.
+
+```{r}
+#  IA single assignment, all chemicals are separate
+IA_assign <- 1
+names(IA_assign) <- do.call(paste, as.list(1:n_chems))
+IA_assign_vec <-
+  as.numeric(strsplit(names(IA_assign), split = " ")[[1]])
+param_matrix_IA <- as.matrix(
+  cbind(
+    "a" = re_par_summary$sill_params,
+    "b" = re_par_summary$ec50_params,
+    "c" = re_par_summary$slope_params,
+    "max_R" = max(re_par_summary$sill_params),
+    "d" = 0
+  )
+)
+# build the calculator to predict a response given a dose vector
+IA_calculator <-
+  mix_function_generator(param_matrix_IA, IA_assign_vec)
+```
+
+### Calculator Set
+
+We can collect the calculators into a list, commenting out calculators as desired to have less cluttered plots. Note
+
+```{r Calc List}
+# select which methods to use for prediction and plotting
+bootstrap_calc_list <- list(
+  "RGCA" = sampled_mix_funs_RGCA,
+  "RGCA_MOA" = sampled_mix_funs_RGCA_ARER,
+  "RGCA_kMeans" = sampled_kmeans_clustered_RGCA,
+  "Random_RGCA" = random_clustered_RGCA,
+  "GCA" = list(GCA_calculator),
+  "IA" = list(IA_calculator),
+  "CA" = list(CA_calculator)
+)
+
+```
+
+##Predicting Mixture responses
+
+Before proceeding with actual mixtures, we can check that sham mixtures with only one chemical are correctly modeled.
+
+```{r, warning = FALSE}
+plot_dummy_mixture(Cx, y_i, tot_par_list, replicate_sets,
+                   bootstrap_calc_list, test_idx =6)
+```
+
+Now we can proceed to predicting with the actual data. The sets of indices are chosen based on the descriptions of the mixtures. This part is solving the two-step model with the bootstrapped calculators built on our fitted parameters and clustering, and can take a few minutes per mixture
+
+```{r, warning = FALSE}
+# all mixtures where the Estrogen Receptor agonists are at 4x their fitted EC50
+set_4x = c( 1, 12, 20, 29, 43, 52, 55, 57)
+# mixtures from set_4x plus all other mixtures with all chemicals or all
+# Androgen receptor agonists present
+set_1 = c(1, 5, 10, 12, 20, 25, 29, 30, 31, 32, 43, 45, 50, 52, 55, 57, 62)
+# a single index for testing
+mix_idx = 1# choose one! 16, 8, 27
+# a sampling of mixtures with only two components
+binary_mixes = c(8, 34, 37, 61)
+# a sampling of chemicals with 3-5 components
+small_mixes = c(6, 26, 47 )
+# just plot one index for demonstration
+score_matrix = plot_mixture_response(mix_idx, mix_df, mix_conc_df, mix_guide,
+                                     bootstrap_calc_list)
+```
+
+Finally, we format the score matrix and plot the results of the score comparisons. Since this demonstration only runs one mixture by default, the violin plots appear as lines.
+
+```{r, warning = FALSE}
+score_df = data.frame(score_matrix)
+# drop rows of 0, in case some mixtures were skipped
+score_df = score_df[apply(score_df, MARGIN=1, FUN = function(rx) any(rx>0)),]
+names(score_df) = c("Mix id", paste(names(bootstrap_calc_list), c("LLH")),
+                    paste(names(bootstrap_calc_list), c("MSE")),
+                    paste(names(bootstrap_calc_list), c("CRPS")))
+
+## Violin Plot for Scores ####
+plot_scores(score_df[1,], bootstrap_calc_list)
+
+```
