@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/RGCA_manuscript.html">RGCA</a>
+    <a class="dropdown-item" href="../articles/RGCA_manuscript.html">RGCA Manuscript Pipeline</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -168,12 +168,12 @@ scoring methods.</dd>
           
           <code><a href="create_mix_calc.html">create_mix_calc()</a></code> 
         </dt>
-        <dd>Get a function that computes the mixture response.</dd>
+        <dd>Mixture Response Calculator Wrapper for Manuscript, with Sampling</dd>
       </dl><dl><dt>
           
           <code><a href="create_mix_calc_clustered.html">create_mix_calc_clustered()</a></code> 
         </dt>
-        <dd>Get a function that computes the mixture response.</dd>
+        <dd>Mixture Response Calculator Wrapper for Manuscript, using DP</dd>
       </dl><dl><dt>
           
           <code><a href="create_mix_calc_from_summary.html">create_mix_calc_from_summary()</a></code> 
@@ -185,7 +185,7 @@ Get a function that computes mixture response</dd>
           
           <code><a href="create_mix_calc_sample_row.html">create_mix_calc_sample_row()</a></code> 
         </dt>
-        <dd>Get a function that computes the mixture response</dd>
+        <dd>Mixture Response Calculator Wrapper for Manuscript, matched index</dd>
       </dl><dl><dt>
           
           <code><a href="hill_function.html">hill_function()</a></code> 
@@ -195,30 +195,17 @@ Get a function that computes mixture response</dd>
           
           <code><a href="hill_invs_factry.html">hill_invs_factry()</a></code> 
         </dt>
-        <dd>The inverse function is used with a single dose response curve, which is
-assumed to be a Hill function.  A factory method is used to avoid repeatedly
-passing in the curve parameters; once generated, the inverse calculator only
-needs a response point y to return an inverse (dose) required to get that
-response.</dd>
+        <dd>Inverse Hill Function Factory</dd>
       </dl><dl><dt>
           
           <code><a href="adjust_concentrations.html">adjust_concentrations()</a></code> 
         </dt>
-        <dd>Given input concentrations, suppose some chemicals "deactivate" other
-chemicals if they have a higher weight (eg molecular weight, docking score,
-or affinity).  This function will adjust the true concentrations to reflect
-how the higher weight chemicals will substitute the lower weight chemicals.
-If the highest weight chemical has high enough concentration, it can dominate
-and result in a mixture with only one effective chemical.  We can set rules
-for which chemicals can substitute others using a matrix A_full.</dd>
+        <dd>Correcting Responses assuming Deactivation</dd>
       </dl><dl><dt>
           
           <code><a href="eff_response_opt.html">eff_response_opt()</a></code> 
         </dt>
-        <dd>A factory function that returns a function with one input that can be
-optimized with respect to that input. The returned function computes the
-generalized concentration addition formula for the input set of chemicals and
-input concentrations.</dd>
+        <dd>Mixture Response Optimization Routine</dd>
       </dl><dl><dt>
           
           <code><a href="plot_mixture_response.html">plot_mixture_response()</a></code> 
@@ -228,24 +215,17 @@ input concentrations.</dd>
           
           <code><a href="predict_mix_response.html">predict_mix_response()</a></code> 
         </dt>
-        <dd>Predict the mixture response</dd>
+        <dd>Predict Responses for a List of Calculators</dd>
       </dl><dl><dt>
           
           <code><a href="predict_mix_response_many.html">predict_mix_response_many()</a></code> 
         </dt>
-        <dd>Predict the mixture response</dd>
+        <dd>Predict Responses for a List of Calculators, generic</dd>
       </dl><dl><dt>
           
           <code><a href="mix_function_generator.html">mix_function_generator()</a></code> 
         </dt>
-        <dd>Factory method to return a function that predicts the mixture response given
-the concentrations of the mixture component chemicals. A factory method is
-used because the uncertainty quantification is based on a bootstrapped
-collection of feasible parameters, and each set of parameters leads to a
-different predictor for the mixture effect.  Rather than keeping track of
-lists of parameters, we immediately convert the sampled parameter set to a
-function (a "calculator") that takes the mixture concentration as input. The
-list of calculators can be applied to a</dd>
+        <dd>Mixture Response Calculator</dd>
       </dl></div><div class="section level2">
       <h2 id="rgca-simulation-functions">RGCA Simulation functions<a class="anchor" aria-label="anchor" href="#rgca-simulation-functions"></a></h2>
       
@@ -304,7 +284,7 @@ random effect</dd>
           
           <code><a href="compute_mixpred_scores.html">compute_mixpred_scores()</a></code> 
         </dt>
-        <dd>Score the predictions</dd>
+        <dd>Compute Scores for Mixture Predictions</dd>
       </dl><dl><dt>
           
           <code><a href="convert_DP_pack_obj.html">convert_DP_pack_obj()</a></code> 
