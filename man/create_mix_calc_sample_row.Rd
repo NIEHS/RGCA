@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{create_mix_calc_sample_row}
 \alias{create_mix_calc_sample_row}
-\title{Get a function that computes the mixture response}
+\title{Mixture Response Calculator Wrapper for Manuscript, matched index}
 \usage{
 create_mix_calc_sample_row(idx, par_list, add_RE = TRUE)
 }

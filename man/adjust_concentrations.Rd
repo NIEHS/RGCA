@@ -2,13 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{adjust_concentrations}
 \alias{adjust_concentrations}
-\title{Given input concentrations, suppose some chemicals "deactivate" other
-chemicals if they have a higher weight (eg molecular weight, docking score,
-or affinity).  This function will adjust the true concentrations to reflect
-how the higher weight chemicals will substitute the lower weight chemicals.
-If the highest weight chemical has high enough concentration, it can dominate
-and result in a mixture with only one effective chemical.  We can set rules
-for which chemicals can substitute others using a matrix A_full.}
+\title{Correcting Responses assuming Deactivation}
 \usage{
 adjust_concentrations(conc, R, A_full)
 }

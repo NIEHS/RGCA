@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{predict_mix_response}
 \alias{predict_mix_response}
-\title{Predict the mixture response}
+\title{Predict Responses for a List of Calculators}
 \usage{
 predict_mix_response(
   sampled_mix_funs,

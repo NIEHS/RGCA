@@ -2,14 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{mix_function_generator}
 \alias{mix_function_generator}
-\title{Factory method to return a function that predicts the mixture response given
-the concentrations of the mixture component chemicals. A factory method is
-used because the uncertainty quantification is based on a bootstrapped
-collection of feasible parameters, and each set of parameters leads to a
-different predictor for the mixture effect.  Rather than keeping track of
-lists of parameters, we immediately convert the sampled parameter set to a
-function (a "calculator") that takes the mixture concentration as input. The
-list of calculators can be applied to a}
+\title{Mixture Response Calculator}
 \usage{
 mix_function_generator(
   param_matrix,

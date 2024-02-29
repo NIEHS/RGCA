@@ -2,10 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{eff_response_opt}
 \alias{eff_response_opt}
-\title{A factory function that returns a function with one input that can be
-optimized with respect to that input. The returned function computes the
-generalized concentration addition formula for the input set of chemicals and
-input concentrations.}
+\title{Mixture Response Optimization Routine}
 \usage{
 eff_response_opt(
   hill_inverse_list,
@@ -37,8 +34,8 @@ a function GCA_over_list that has a response r as a input and a
 norm (measure of optimality according to GCA) as output
 }
 \description{
-A factory function that returns a function with one input that can be
-optimized with respect to that input. The returned function computes the
+An internal factory function that returns a function with one input that can
+be optimized with respect to that input. The returned function computes the
 generalized concentration addition formula for the input set of chemicals and
 input concentrations.
 }

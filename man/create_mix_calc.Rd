@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{create_mix_calc}
 \alias{create_mix_calc}
-\title{Get a function that computes the mixture response.}
+\title{Mixture Response Calculator Wrapper for Manuscript, with Sampling}
 \usage{
 create_mix_calc(idx, par_list, add_RE = TRUE, unit_slopes = FALSE)
 }
@@ -23,7 +23,7 @@ output
 }
 \description{
 A factory method that returns a function that computes the mixture response.
-Samples directly from the posterior MCMC chains for the EC50 and sill
-parameters. Slope is taken from the clustering.  Noise is added to some
-parameters according to the random effect variance.
+Samples directly from the posterior MCMC chains for the Hill parameters of
+slope, sill and EC50.  Noise is added to some parameters according to the
+random effect variance.
 }

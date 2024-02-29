@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{compute_mixpred_scores}
 \alias{compute_mixpred_scores}
-\title{Score the predictions}
+\title{Compute Scores for Mixture Predictions}
 \usage{
 compute_mixpred_scores(mix_df, mix_idx, unplotted_repl, curve_data_list)
 }

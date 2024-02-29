@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{create_mix_calc_clustered}
 \alias{create_mix_calc_clustered}
-\title{Get a function that computes the mixture response.}
+\title{Mixture Response Calculator Wrapper for Manuscript, using DP}
 \usage{
 create_mix_calc_clustered(idx, par_list, add_RE = TRUE, unit_slopes = FALSE)
 }

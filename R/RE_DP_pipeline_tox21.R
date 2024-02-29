@@ -31,9 +31,9 @@ run_pipe <- FALSE # avoid long build times
 small_run <- TRUE
 
 if (run_pipe) {
-  input_df <- read.delim("input/AR-luc.txt")
+  input_df <- read.delim("inst/extdata/AR-luc.txt")
   # mix guide describes doses of components in each mixture
-  mix_guide <- readxl::read_xls("input/AllMixtureComponentsARER.xls")
+  mix_guide <- readxl::read_xls("inst/extdata/AllMixtureComponentsARER.xls")
   read_prepared_Tox21_data(input_df, mix_guide)
   # get dose response parameters from existing pacakge
   curve_fits <- get_mle_curve_fits(y_i, Cx, replicate_sets)

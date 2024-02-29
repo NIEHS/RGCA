@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{predict_mix_response_many}
 \alias{predict_mix_response_many}
-\title{Predict the mixture response}
+\title{Predict Responses for a List of Calculators, generic}
 \usage{
 predict_mix_response_many(
   n_dose,

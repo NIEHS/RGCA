@@ -324,13 +324,12 @@ create_mix_calc_from_summary <- function(idx, par_list) {
 }
 
 
-#' Get a function that computes the mixture response.
+#' Mixture Response Calculator Wrapper for Manuscript, with Sampling
 #'
 #' A factory method that returns a function that computes the mixture response.
-#' Samples directly from the posterior MCMC chains for the EC50 and sill
-#' parameters. Slope is taken from the clustering.  Noise is added to some
-#' parameters according to the random effect variance.
-#'
+#' Samples directly from the posterior MCMC chains for the Hill parameters of
+#' slope, sill and EC50.  Noise is added to some parameters according to the
+#' random effect variance.
 #'
 #' @param idx Specifies which clustering to apply to the parameters
 #' @param par_list a data frame with individual chemical dose response
@@ -384,7 +383,7 @@ create_mix_calc <- function(idx, par_list, add_RE = TRUE, unit_slopes = FALSE) {
   return(mixture_calculator)
 }
 
-#' Get a function that computes the mixture response.
+#' Mixture Response Calculator Wrapper for Manuscript, using DP
 #'
 #' A factory method that returns a function that computes the mixture response.
 #' Samples directly from the posterior MCMC chains for the EC50 and sill
@@ -444,7 +443,7 @@ create_mix_calc_clustered <- function(idx,
   return(mixture_calculator)
 }
 
-#' Get a function that computes the mixture response
+#' Mixture Response Calculator Wrapper for Manuscript, matched index
 #'
 #' A slight variation on the standard create_mix_calc, the parameters are still
 #' sampled from the posterior MCMC but they are sampled with a single index so
@@ -459,7 +458,6 @@ create_mix_calc_clustered <- function(idx,
 #'
 #' @return a function to take a concentration vector as input and response as
 #'   output
-#' @export
 #'
 create_mix_calc_sample_row <- function(idx, par_list, add_RE = TRUE) {
   # bootstrap the cluster slope from top clusters
@@ -504,7 +502,7 @@ create_mix_calc_sample_row <- function(idx, par_list, add_RE = TRUE) {
 
 
 
-#' Predict the mixture response
+#' Predict Responses for a List of Calculators
 #'
 #' This is a convenience function that applies the lists of bootstrapped mixture
 #' response calculators to the matrix of concentrations that define the doses
@@ -526,7 +524,6 @@ create_mix_calc_sample_row <- function(idx, par_list, add_RE = TRUE) {
 #'   be set to null NA to aid in plotting.
 #'
 #' @return
-#' @export
 #'
 predict_mix_response <- function(sampled_mix_funs, sampled_mix_funs_GCA,
                                  sampled_mix_funs_IA, n_dose, chem_conc_matr,
@@ -551,7 +548,7 @@ predict_mix_response <- function(sampled_mix_funs, sampled_mix_funs_GCA,
 }
 
 
-#' Predict the mixture response
+#' Predict Responses for a List of Calculators, generic
 #'
 #' A similar function to predict_mix_response.  This is a convenience function
 #' that takes a list of lists as input and iteratively applies the elements,
@@ -592,7 +589,7 @@ predict_mix_response_many <- function(n_dose,
   return(curve_list)
 }
 
-#' Score the predictions
+#' Compute Scores for Mixture Predictions
 #'
 #' Computes the log likelihood, mean square error, and continuous rank
 #' probability score for predictions of the mixture response compared to the
@@ -684,11 +681,10 @@ get_empr_CRPS <- function(obs_res, boot_vals) {
   return(CRPS_val)
 }
 
-
-
 # Inverse Hill Functions ####
 
-
+#' Inverse Hill Function Factory
+#'
 #' The inverse function is used with a single dose response curve, which is
 #' assumed to be a Hill function.  A factory method is used to avoid repeatedly
 #' passing in the curve parameters; once generated, the inverse calculator only
@@ -756,15 +752,13 @@ hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
     # case 4, reflection of extension, slope inverted
     return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
   }
-  return(hilly_inverse)
+  return(hilly_inverse_low_cyclo)
 }
 
-
-
-
-
-#' A factory function that returns a function with one input that can be
-#' optimized with respect to that input. The returned function computes the
+#' Mixture Response Optimization Routine
+#'
+#' An internal factory function that returns a function with one input that can
+#' be optimized with respect to that input. The returned function computes the
 #' generalized concentration addition formula for the input set of chemicals and
 #' input concentrations.
 #'
@@ -814,8 +808,8 @@ eff_response_opt <- function(hill_inverse_list,
   return(GCA_over_list)
 }
 
-
-
+#' Mixture Response Calculator
+#'
 #' Factory method to return a function that predicts the mixture response given
 #' the concentrations of the mixture component chemicals. A factory method is
 #' used because the uncertainty quantification is based on a bootstrapped
@@ -945,6 +939,8 @@ if (FALSE) {
     geom_tile(aes(fill = z))
 }
 
+#' Correcting Responses assuming Deactivation
+#'
 #' Given input concentrations, suppose some chemicals "deactivate" other
 #' chemicals if they have a higher weight (eg molecular weight, docking score,
 #' or affinity).  This function will adjust the true concentrations to reflect
