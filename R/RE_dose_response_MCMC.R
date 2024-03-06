@@ -1,17 +1,17 @@
 ################################################################################
 # -------  MH/Gibbs sampler for the mixed effect model: ------------------------
 #-------------------------------------------------------------------------------
-#' y = (theta1 + u)/(1 + (theta2/x)^phi_c) + v + epsilon
-#' epsilon ~ N(0, sigma^2)
-#' theta1 ~ N(0, 1000)
-#' theta2 ~ Gamma(1e-3, 1e-3)
-#' phi_c ~ Gamma(0.3, 0.3)
-#' u ~ N(0, sigma_u^2)
-#' v ~ N(0, sigma_v^2)
-#' sigma^2 ~ InvGamma(0.1, 0.1) # indexed for each chemical, not global!
-#' sigma_u^2 ~ InvGamma(0.1, 0.1)
-#' sigma_v^2 ~ InvGamma(0.1, 0.1)
-#'
+# y = (theta1 + u)/(1 + (theta2/x)^phi_c) + v + epsilon
+# epsilon ~ N(0, sigma^2)
+# theta1 ~ N(0, 1000)
+# theta2 ~ Gamma(1e-3, 1e-3)
+# phi_c ~ Gamma(0.3, 0.3)
+# u ~ N(0, sigma_u^2)
+# v ~ N(0, sigma_v^2)
+# sigma^2 ~ InvGamma(0.1, 0.1) # indexed for each chemical, not global!
+# sigma_u^2 ~ InvGamma(0.1, 0.1)
+# sigma_v^2 ~ InvGamma(0.1, 0.1)
+#
 ################################################################################
 
 

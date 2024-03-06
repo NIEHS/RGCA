@@ -116,6 +116,8 @@ modes <- function(dats) {
   dens$x[max_i]
 }
 
+#' Pull parameters from an MCMC chain
+#' 
 #' Given an MCMC chain fit by RE_MCMC_fit, estimate the parameter values using a
 #' summary statistic applied to the posterior samples.
 #'
@@ -175,6 +177,8 @@ pull_summary_parameters <- function(re_chains,
 
 
 
+#' Pull parameter posterior chains from an MCMC object.
+#' 
 #' Given an MCMC chain fit by RE_MCMC_fit, pull out the chains representing the
 #' parameter posteriors and compute some estimates of the parameters by applying
 #' the summary statistic function to the posterior samples.
@@ -268,7 +272,7 @@ random_assignment <- function(n_chems, n_clust) {
 #' The wrappers provide different ways of sampling the parameters.
 
 
-#' Get a function that computes mixture response
+#' Creates a function that computes mixture response.
 #'
 #' A factory method that returns a function that computes the mixture response.
 #' Uses summary statistics to create a random sample rather than directly
