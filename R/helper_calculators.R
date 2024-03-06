@@ -117,7 +117,7 @@ modes <- function(dats) {
 }
 
 #' Pull parameters from an MCMC chain
-#' 
+#'
 #' Given an MCMC chain fit by RE_MCMC_fit, estimate the parameter values using a
 #' summary statistic applied to the posterior samples.
 #'
@@ -178,7 +178,7 @@ pull_summary_parameters <- function(re_chains,
 
 
 #' Pull parameter posterior chains from an MCMC object.
-#' 
+#'
 #' Given an MCMC chain fit by RE_MCMC_fit, pull out the chains representing the
 #' parameter posteriors and compute some estimates of the parameters by applying
 #' the summary statistic function to the posterior samples.

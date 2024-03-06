@@ -561,11 +561,11 @@ visualize_clusters_blocks <- function(slopes,
 
 
 
-#' Create a violin plot given a data frame with scores.  
-#' 
+#' Create a violin plot given a data frame with scores.
+#'
 #' In this context the plot compares different mixture prediction methods using
 #' the different scoring methods.
-#' 
+#'
 #' @param score_df The score data frame is a matrix where the columns represent
 #'   different score calculations and prediction methods while the rows
 #'   represent different data sets.

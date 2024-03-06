@@ -4,7 +4,7 @@ library(nimble, warn.conflicts = TRUE)
 ################################################################
 # -----------  samples + replicates  -------------
 #' Nimble MCMC script to fit the manuscript model to the Tox21 data.
-#' 
+#'
 #' Fit a random effect dose response model using Nimble for fast MCMC.  Nimble
 #' creates a compiled sampler that can run iterations much faster than the
 #' manually implemented version.
