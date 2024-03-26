@@ -1,0 +1,97 @@
+test_that("rgca hill inverse works", {
+  a <- 2
+  b <- 3
+  c <- 0.5
+  y <- -1
+  # case 1, y extended to small negative conc, invert slope
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -b / (1 + (-a / y)^(1 / c)))
+  # negate a and y
+  a <- -a
+  y <- -y
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -b / (1 + (-a / y)^(1 / c)))
+  # case 2, standard inverse, y<a
+  a <- 2
+  y <- 1
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               b / (a / y - 1)^(1 / c))
+  # negate a and y
+  a <- -a
+  y <- -y
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               b / (a / y - 1)^(1 / c))
+  # case 3, reflected part of the standard inverse, y < 2a
+  a <- 2
+  y <- 3.5
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
+  # negate a and y
+  a <- -a
+  y <- -y
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
+  # case 4, reflection of extension, slope inverted
+  a <- 2
+  y <- 6
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
+  y <- -y
+  a <- -a
+  expect_equal(hill_invs_factry(a, b, c)(y),
+               -2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
+})
+
+test_that("mix_response_prediction_works", {
+  # specify a set of chemicals
+  sills <- c(6, 3, 4, 8)
+  ec50_vec <- c(1.2, 2.1, 0.1, 4.1)
+  slopes <- c(0.5, 1.1, 2.0, 1.2)
+  # Rmax is used to scale IA across clusters, can copy sills
+  param_matrix <- as.matrix(cbind("a" = sills,
+                                  "b" = ec50_vec,
+                                  "c" = slopes,
+                                  "max_R" = sills))
+  
+  
+  # create the inverse function list used in denominator of GCA
+  hill_inverse_list <- apply(param_matrix,
+                             MARGIN = 1,
+                             function(x) {
+                               do.call(hill_invs_factry, as.list(x))
+                             })
+  # create the GCA function to optimize over
+  GCA_function  = eff_response_opt(hill_inverse_list, 
+                                   conc_vec = c(1,2,3), 
+                                   synergy_const = 0, 
+                                   interval_sign = 1)
+  # Check GCA equation solving, match saved state (snapshot April 2024)
+  expect_snapshot(optimize(GCA_function,
+                           interval = c(-20, 10),
+                           tol = .Machine$double.eps))
+  # test the negative case as well
+  GCA_function_neg <- eff_response_opt(hill_inverse_list,
+                                       conc_vec = c(1,2,3),
+                                       synergy_const = 0,
+                                       interval_sign = -1)
+  expect_snapshot(optimize(GCA_function_neg,
+                           interval = c(-20, 10),
+                           tol = .Machine$double.eps))
+  
+  
+  
+  # specify a clustering
+  clust_assign = c(1,1,2,1)
+  # generate the mix response function
+  mix_function = mix_function_generator(param_matrix,
+                                        clust_assign,
+                                        get_counts = FALSE,
+                                        scale_CA = FALSE,
+                                        synergy_const = 0)
+  # specify some mixture doses to test
+  dose_range = seq(0, 10,length.out = 3)
+  # create a matrix of mixture doses
+  dose_matrix = expand_grid(dose_range, dose_range, dose_range, dose_range)
+  # test that mixture doses give expected response (snapshot April 2024)
+  expect_snapshot(apply(dose_matrix, MARGIN = 1, mix_function))
+})

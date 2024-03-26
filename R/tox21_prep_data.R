@@ -130,8 +130,11 @@ read_prepared_Tox21_data <- function(df, mix_guide) {
 }
 
 
-#' Generate a string based on the vector of mixture indices that
-#' satisfy the boolean input conditions
+#' Find mixtures satisfying criteria.
+#'
+#' Generates a vector of mixture indices that satisfy the boolean input
+#' conditions, such as "Only involves ER agonists" or "Binary mixtures." The
+#' vector is converted to a string for convenient copying and pasting elsewhere.
 #'
 #' @param drop_no_effect fix agonists for other assays to 0
 #' @param use_graded_filter mixtures with the term "graded" in description

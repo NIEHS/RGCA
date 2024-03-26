@@ -60,7 +60,7 @@ get_mle_curve_fits <- function(y_i, Cx, replicate_sets) {
 
 
 get_MCMC_diagnostics <- function(re_chains, re_chains2, re_chains3) {
-  # exlicit call to global env
+  # explicit call to global env
   n_chems <- .GlobalEnv$n_chems
   get_GR_Diagnostic <- function(data_id, input_cols) {
     mcmc1 <- coda::as.mcmc(re_chains[[data_id]][, input_cols])
@@ -135,8 +135,8 @@ pull_summary_parameters <- function(re_chains,
   burnin <- 5000
   # explicit call to global env
   n_chems <- .GlobalEnv$n_chems
-  re_iter <- .GlobalEnv$re_iter
-  if (re_iter < burnin) burnin <- 100
+  re_iter <- nrow(re_chains$slope_record)
+  if (re_iter <= burnin) burnin <- 100
   thin_idx <- seq(burnin, re_iter - 100, by = 20)
   chain_sill_ec_param <- re_chains$sill_mideffect_record
   sill_params <- apply(chain_sill_ec_param[thin_idx, 1:n_chems],
@@ -196,8 +196,8 @@ pull_parameters <- function(re_chains, summry_stat = median) {
   burnin <- 5000
   # explicit call to global env
   n_chems <- .GlobalEnv$n_chems
-  re_iter <- .GlobalEnv$re_iter
-  if (re_iter < burnin) burnin <- 100
+  re_iter <- nrow(re_chains$slope_record)
+  if (re_iter <= burnin) burnin <- 100
   thin_idx <- seq(burnin, re_iter - 100, by = 20)
   sill_sample <- re_chains$sill_mideffect_record[thin_idx, 1:n_chems]
   sill_params <- apply(re_chains$sill_mideffect_record[thin_idx, 1:n_chems],
@@ -919,28 +919,6 @@ mix_function_generator <- function(param_matrix,
     return(total_response)
   }
   return(mix_effect_fun)
-}
-
-# some testing for GCA with antagonists
-if (FALSE) {
-  a1 <- .5
-  a2 <- -1
-  theta1 <- 1
-  theta2 <- 1
-  test_gca <- function(c) {
-    c1 <- c[1]
-    c2 <- c[2]
-    return((c1 * a1 / theta1 + c2 * a2 / theta2) /
-             (1 + c1 / theta1 + c2 / theta2))
-  }
-  xy_grid <- expand_grid(seq(0, 4, by = .1), seq(0, 4, by = .1))
-  z_val <- apply(expand_grid(seq(0, 4, by = .1), seq(0, 4, by = .1)),
-                 MARGIN = 1,
-                 test_gca)
-  my_tib <- cbind(xy_grid, z_val)
-  names(my_tib) <- c("x", "y", "z")
-  ggplot(my_tib, aes(x = x, y = y)) +
-    geom_tile(aes(fill = z))
 }
 
 #' Correcting Responses assuming Deactivation
