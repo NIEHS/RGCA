@@ -52,8 +52,7 @@ test_that("mix_response_prediction_works", {
                                   "b" = ec50_vec,
                                   "c" = slopes,
                                   "max_R" = sills))
-  
-  
+
   # create the inverse function list used in denominator of GCA
   hill_inverse_list <- apply(param_matrix,
                              MARGIN = 1,
@@ -61,9 +60,9 @@ test_that("mix_response_prediction_works", {
                                do.call(hill_invs_factry, as.list(x))
                              })
   # create the GCA function to optimize over
-  GCA_function  = eff_response_opt(hill_inverse_list, 
-                                   conc_vec = c(1,2,3), 
-                                   synergy_const = 0, 
+  GCA_function <- eff_response_opt(hill_inverse_list,
+                                   conc_vec = c(1, 2, 3),
+                                   synergy_const = 0,
                                    interval_sign = 1)
   # Check GCA equation solving, match saved state (snapshot April 2024)
   expect_snapshot(optimize(GCA_function,
@@ -71,27 +70,26 @@ test_that("mix_response_prediction_works", {
                            tol = .Machine$double.eps))
   # test the negative case as well
   GCA_function_neg <- eff_response_opt(hill_inverse_list,
-                                       conc_vec = c(1,2,3),
+                                       conc_vec = c(1, 2, 3),
                                        synergy_const = 0,
                                        interval_sign = -1)
   expect_snapshot(optimize(GCA_function_neg,
                            interval = c(-20, 10),
                            tol = .Machine$double.eps))
-  
-  
-  
+
   # specify a clustering
-  clust_assign = c(1,1,2,1)
+  clust_assign <- c(1, 1, 2, 1)
   # generate the mix response function
-  mix_function = mix_function_generator(param_matrix,
-                                        clust_assign,
-                                        get_counts = FALSE,
-                                        scale_CA = FALSE,
-                                        synergy_const = 0)
+  mix_function <- mix_function_generator(param_matrix,
+                                         clust_assign,
+                                         get_counts = FALSE,
+                                         scale_CA = FALSE,
+                                         synergy_const = 0)
   # specify some mixture doses to test
-  dose_range = seq(0, 10,length.out = 3)
+  dose_range <- seq(0, 10, length.out = 3)
   # create a matrix of mixture doses
-  dose_matrix = expand_grid(dose_range, dose_range, dose_range, dose_range)
+  dose_matrix <- tidyr::expand_grid(dose_range, dose_range,
+                                    dose_range, dose_range)
   # test that mixture doses give expected response (snapshot April 2024)
   expect_snapshot(apply(dose_matrix, MARGIN = 1, mix_function))
 })

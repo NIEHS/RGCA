@@ -35,7 +35,7 @@ test_that("Random Effect MCMC works", {
     }
   }
   # visualize generated data
-  if(FALSE){
+  if (FALSE) {
     par(mfrow = c(3, 3))
     for (i in 1:9) {
       plot(y_i[i, -1])
@@ -60,6 +60,5 @@ test_that("Random Effect MCMC works", {
                               replicate_sets,
                               n_iter = 100,
                               n_hill_par = 3))
-  # for testing, MCMC run is too short to get good estimates.
-  # pull_summary_parameters(re_chain_list)
+  # MCMC run is too short to test against true params
 })
