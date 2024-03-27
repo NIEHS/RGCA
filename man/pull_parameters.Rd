@@ -12,6 +12,8 @@ chains, where each chain is a vector of posterior samples}
 
 \item{summry_stat}{the statistic used to summarize the posterior.  Default is
 median, but can be mean or any other similar measure of the center.}
+
+\item{input_replicates}{The list of indices of replicates for each chemical}
 }
 \value{
 a list with posterior samples and summary estimates of the parameters
