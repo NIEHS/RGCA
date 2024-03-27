@@ -74,22 +74,17 @@
           
           <code><a href="pull_parameters.html">pull_parameters()</a></code> 
         </dt>
-        <dd>Given an MCMC chain fit by RE_MCMC_fit, pull out the chains representing the
-parameter posteriors and compute some estimates of the parameters by applying
-the summary statistic function to the posterior samples.</dd>
+        <dd>Pull parameter posterior chains from an MCMC object.</dd>
       </dl><dl><dt>
           
           <code><a href="pull_summary_parameters.html">pull_summary_parameters()</a></code> 
         </dt>
-        <dd>Given an MCMC chain fit by RE_MCMC_fit, estimate the parameter values using a
-summary statistic applied to the posterior samples.</dd>
+        <dd>Pull parameters from an MCMC chain</dd>
       </dl><dl><dt>
           
           <code><a href="run_RE_nimble.html">run_RE_nimble()</a></code> 
         </dt>
-        <dd>Fit a random effect dose response model using Nimble for fast MCMC.  Nimble
-creates a compiled sampler that can run iterations much faster than the
-manually implemented version.</dd>
+        <dd>Nimble MCMC script to fit the manuscript model to the Tox21 data.</dd>
       </dl></div><div class="section level2">
       <h2 id="rgca-plotting-functions">RGCA Plotting functions<a class="anchor" aria-label="anchor" href="#rgca-plotting-functions"></a></h2>
       
@@ -135,9 +130,7 @@ manually implemented version.</dd>
           
           <code><a href="plot_scores.html">plot_scores()</a></code> 
         </dt>
-        <dd>Create a violin plot given a data frame with scores.  In this context the
-plot compares different mixture prediction methods using the different
-scoring methods.</dd>
+        <dd>Create a violin plot given a data frame with scores.</dd>
       </dl><dl><dt>
           
           <code><a href="visualize_clusters.html">visualize_clusters()</a></code> 
@@ -180,7 +173,7 @@ scoring methods.</dd>
         </dt>
         <dd>These functions are wrappers for the factory method mix_function_generator.
 The wrappers provide different ways of sampling the parameters.
-Get a function that computes mixture response</dd>
+Creates a function that computes mixture response.</dd>
       </dl><dl><dt>
           
           <code><a href="create_mix_calc_sample_row.html">create_mix_calc_sample_row()</a></code> 
@@ -239,24 +232,9 @@ Get a function that computes mixture response</dd>
 
       <dl><dt>
           
-          <code><a href="generate_data.html">generate_data</a></code> 
-        </dt>
-        <dd>y = (theta1 + u)/(1 + (theta2/x)^phi_c) + v + epsilon
-epsilon ~ N(0, sigma^2)
-theta1 ~ N(0, 1000)
-theta2 ~ Gamma(1e-3, 1e-3)
-phi_c ~ Gamma(0.3, 0.3)
-u ~ N(0, sigma_u^2)
-v ~ N(0, sigma_v^2)
-sigma^2 ~ InvGamma(0.1, 0.1) # indexed for each chemical, not global!
-sigma_u^2 ~ InvGamma(0.1, 0.1)
-sigma_v^2 ~ InvGamma(0.1, 0.1)</dd>
-      </dl><dl><dt>
-          
           <code><a href="generate_mixture_subset.html">generate_mixture_subset()</a></code> 
         </dt>
-        <dd>Generate a string based on the vector of mixture indices that
-satisfy the boolean input conditions</dd>
+        <dd>Find mixtures satisfying criteria.</dd>
       </dl></div><div class="section level2">
       <h2 id="rgca-miscellaneous-functions">RGCA Miscellaneous functions<a class="anchor" aria-label="anchor" href="#rgca-miscellaneous-functions"></a></h2>
       
