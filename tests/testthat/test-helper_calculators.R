@@ -93,3 +93,31 @@ test_that("mix_response_prediction_works", {
   # test that mixture doses give expected response (snapshot April 2024)
   expect_snapshot(apply(dose_matrix, MARGIN = 1, mix_function))
 })
+
+
+test_that("summary_stats_are_correct", {
+  set.seed(100)
+  #create fake mcmc chains
+  fake_MCMC <- list()
+  iters <- 300
+  n_chems <- 10
+  n_reps <- 3
+  fake_MCMC$slope_record <- matrix(rnorm(n_chems * iters), nrow = iters)
+  fake_MCMC$sill_mideffect_record <- matrix(rnorm(2 * n_chems * iters),
+                                            nrow = iters)
+  fake_MCMC$sigma <- matrix(rnorm(n_chems * iters), nrow = iters)
+  fake_MCMC$tau <- matrix(rnorm(iters), nrow = iters)
+  fake_MCMC$u_RE <- matrix(rnorm(n_reps * n_chems * iters), nrow = iters)
+  fake_MCMC$v_RE <- matrix(rnorm(n_reps * n_chems * iters), nrow = iters)
+  fake_MCMC$u_RE_sd <- matrix(rnorm(n_chems * iters), nrow = iters)
+  fake_MCMC$v_RE_sd <- matrix(rnorm(n_chems * iters), nrow = iters)
+
+  # the summary stats should correspond to the median of the thinned samples
+  expect_snapshot(pull_summary_parameters(fake_MCMC))
+
+  # for the second parameter summary function, need replicate sets
+  repl_fun <- function(idx) idx + ((1:n_reps) - 1) * 10
+  replicate_sets <<- lapply(1:n_chems, repl_fun)
+  # the pulled parameters should correspond to the thinned samples only
+  expect_snapshot(pull_parameters(fake_MCMC, input_replicates = replicate_sets))
+})

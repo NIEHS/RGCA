@@ -2,9 +2,7 @@
 % Please edit documentation in R/helper_plots.R
 \name{plot_scores}
 \alias{plot_scores}
-\title{Create a violin plot given a data frame with scores.  In this context the
-plot compares different mixture prediction methods using the different
-scoring methods.}
+\title{Create a violin plot given a data frame with scores.}
 \usage{
 plot_scores(score_df, bootstrap_calc_list, method_levels = NA)
 }
@@ -20,7 +18,6 @@ to extract the names.}
 adjust the order of the methods as they appear in the plot.}
 }
 \description{
-Create a violin plot given a data frame with scores.  In this context the
-plot compares different mixture prediction methods using the different
-scoring methods.
+In this context the plot compares different mixture prediction methods using
+the different scoring methods.
 }

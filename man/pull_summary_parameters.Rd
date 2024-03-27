@@ -2,8 +2,7 @@
 % Please edit documentation in R/helper_calculators.R
 \name{pull_summary_parameters}
 \alias{pull_summary_parameters}
-\title{Given an MCMC chain fit by RE_MCMC_fit, estimate the parameter values using a
-summary statistic applied to the posterior samples.}
+\title{Pull parameters from an MCMC chain}
 \usage{
 pull_summary_parameters(re_chains, summry_stat = median)
 }

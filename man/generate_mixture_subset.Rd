@@ -2,8 +2,7 @@
 % Please edit documentation in R/tox21_prep_data.R
 \name{generate_mixture_subset}
 \alias{generate_mixture_subset}
-\title{Generate a string based on the vector of mixture indices that
-satisfy the boolean input conditions}
+\title{Find mixtures satisfying criteria.}
 \usage{
 generate_mixture_subset(
   drop_no_effect = FALSE,
@@ -28,6 +27,7 @@ generate_mixture_subset(
 \item{skip_zearalenone}{Data issues for ER data, skipped}
 }
 \description{
-Generate a string based on the vector of mixture indices that
-satisfy the boolean input conditions
+Generates a vector of mixture indices that satisfy the boolean input
+conditions, such as "Only involves ER agonists" or "Binary mixtures." The
+vector is converted to a string for convenient copying and pasting elsewhere.
 }

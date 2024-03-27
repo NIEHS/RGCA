@@ -134,7 +134,7 @@ pull_summary_parameters <- function(re_chains,
                                     summry_stat = median) {
   burnin <- 5000
   # explicit call to global env
-  n_chems <- .GlobalEnv$n_chems
+  n_chems <- ncol(re_chains$slope_record)
   re_iter <- nrow(re_chains$slope_record)
   if (re_iter <= burnin) burnin <- 100
   thin_idx <- seq(burnin, re_iter - 100, by = 20)
@@ -192,10 +192,12 @@ pull_summary_parameters <- function(re_chains,
 #' @export
 #'
 #' @examples
-pull_parameters <- function(re_chains, summry_stat = median) {
+pull_parameters <- function(re_chains, summry_stat = median,
+                            input_replicates = NA) {
+  if (is.list(input_replicates)) replicate_sets <- input_replicates
   burnin <- 5000
   # explicit call to global env
-  n_chems <- .GlobalEnv$n_chems
+  n_chems <- ncol(re_chains$slope_record)
   re_iter <- nrow(re_chains$slope_record)
   if (re_iter <= burnin) burnin <- 100
   thin_idx <- seq(burnin, re_iter - 100, by = 20)

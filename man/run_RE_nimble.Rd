@@ -2,9 +2,7 @@
 % Please edit documentation in R/RE_nimble.R
 \name{run_RE_nimble}
 \alias{run_RE_nimble}
-\title{Fit a random effect dose response model using Nimble for fast MCMC.  Nimble
-creates a compiled sampler that can run iterations much faster than the
-manually implemented version.}
+\title{Nimble MCMC script to fit the manuscript model to the Tox21 data.}
 \usage{
 run_RE_nimble()
 }

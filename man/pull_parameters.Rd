@@ -2,11 +2,9 @@
 % Please edit documentation in R/helper_calculators.R
 \name{pull_parameters}
 \alias{pull_parameters}
-\title{Given an MCMC chain fit by RE_MCMC_fit, pull out the chains representing the
-parameter posteriors and compute some estimates of the parameters by applying
-the summary statistic function to the posterior samples.}
+\title{Pull parameter posterior chains from an MCMC object.}
 \usage{
-pull_parameters(re_chains, summry_stat = median)
+pull_parameters(re_chains, summry_stat = median, input_replicates = NA)
 }
 \arguments{
 \item{re_chains}{output from RE_MCMC_fit consisting of a list of parameter

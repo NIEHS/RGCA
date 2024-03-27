@@ -4,7 +4,7 @@
 \alias{create_mix_calc_from_summary}
 \title{These functions are wrappers for the factory method mix_function_generator.
 The wrappers provide different ways of sampling the parameters.
-Get a function that computes mixture response}
+Creates a function that computes mixture response.}
 \usage{
 create_mix_calc_from_summary(idx, par_list)
 }
