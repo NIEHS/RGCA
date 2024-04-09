@@ -1,6 +1,5 @@
 [![R-CMD-check](https://github.com/kyle-messier/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/kyle-messier/RGCA/actions/workflows/check-standard.yaml)
 [![lint](https://github.com/kyle-messier/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/kyle-messier/RGCA/actions/workflows/lint.yaml)
-[![codecov](https://codecov.io/gh/kyle-messier/RGCA/graph/badge.svg?token=KSNSLY1ULL)](https://codecov.io/gh/kyle-messier/RGCA)
 [![cov](https://kyle-messier.github.io/RGCA/badges/coverage.svg)](https://github.com/kyle-messier/RGCA/actions)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
