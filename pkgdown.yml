@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   RGCA: RGCA.html
   RGCA_manuscript: RGCA_manuscript.html
-last_built: 2024-04-09T14:15Z
+last_built: 2024-04-09T14:24Z
 urls:
   reference: https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/reference
   article: https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/articles
