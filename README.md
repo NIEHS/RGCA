@@ -1,6 +1,7 @@
-[![R-CMD-check](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/check-standard.yaml)
-[![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/actions/workflows/lint.yaml)
-[![codecov](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/RGCA/graph/badge.svg?token=KSNSLY1ULL)](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/RGCA)
+[![R-CMD-check](https://github.com/kyle-messier/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/kyle-messier/RGCA/actions/workflows/check-standard.yaml)
+[![lint](https://github.com/kyle-messier/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/kyle-messier/RGCA/actions/workflows/lint.yaml)
+[![codecov](https://codecov.io/gh/kyle-messier/RGCA/graph/badge.svg?token=KSNSLY1ULL)](https://codecov.io/gh/kyle-messier/RGCA)
+[![cov](https://kyle-messier/RGCA/badges/coverage.svg)](https://github.com/kyle-messier/RGCA/actions)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
