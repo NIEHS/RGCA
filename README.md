@@ -1,6 +1,7 @@
 [![R-CMD-check](https://github.com/NIEHS/RGCA/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/check-standard.yaml)
 [![lint](https://github.com/NIEHS/RGCA/actions/workflows/lint.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/lint.yaml)
-[![test-coverage-local](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml)
+[![test-coverage](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml)
+[![cov](https://NIEHS.github.io/RGCA/badges/coverage.svg)](https://github.com/NIEHS/RGCA/actions)
 [![pkgdown](https://github.com/NIEHS/RGCA/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/pkgdown.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
