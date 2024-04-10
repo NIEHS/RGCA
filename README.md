@@ -9,6 +9,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 # RGCA
 Reflected Generalized Concentration Addition: A geometric, piecewise inverse function for 3+ parameter sigmoidal (e.g. hill) models used in chemical mixture concentration-response modeling
 
+[Zilber, Daniel, and Kyle Messier. "Reflected generalized concentration addition and Bayesian hierarchical models to improve chemical mixture prediction." Plos one 19.3 (2024): e0298687.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0298687)
+
 ---
 ## Key Inverse Function:  
 
