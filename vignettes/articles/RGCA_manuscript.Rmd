@@ -18,11 +18,19 @@ knitr::opts_chunk$set(
 
 ## The Mixture Prediction Pipeline
 
-This script predicts a response to a mixture of chemicals given an input data of individual dose responses and the concentrations of the components of the mixture. The procedure followed in this pipeline is as follows: 1. Load all inputs 2. Fit individual dose response curves 3. Cluster the individual dose response slope parameters 4. Create a collection of predictors ("calculators") by sampling the slope cluster and parameters 5. Given a mixture, predict a response with each calculator. The plots show the 5, 50, and 95 percentile.
+This script predicts a response to a mixture of chemicals given an input data of
+individual dose responses and the concentrations of the components of the
+mixture. The procedure followed in this pipeline is as follows: 1. Load all
+inputs 2. Fit individual dose response curves 3. Cluster the individual dose
+response slope parameters 4. Create a collection of predictors ("calculators")
+by sampling the slope cluster and parameters 5. Given a mixture, predict a
+response with each calculator. The plots show the 5, 50, and 95 percentile.
 
 ### Loading data
 
-To start, we load the required packages, files with helper functions or MCMC scripts, and a script that parses the input data.
+To start, we load the required packages, including RGCA, and some auxiliary
+files for plotting and reading the Tox21 data.  These are not part of the
+package because they are specific to the manuscript.
 
 ```{r Input, results='hide'}
 library(ggplot2)
@@ -34,6 +42,12 @@ library(dplyr)
 library(scoringRules)
 library(RGCA)
 library(utils)
+
+source("../inst/manuscript_plots.R")
+source("../inst/tox21_prep_data.R")
+source("../inst/helper_pipeline.R")
+
+
 ```
 
 Next we read the prepared Tox21 data, which creates a series of objects including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates. Null values are present in the data to indicate an anomalous response, such as cell death. Some chemicals have 3 replicates and some have 6.

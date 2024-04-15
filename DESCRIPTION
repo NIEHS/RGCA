@@ -3,7 +3,7 @@ Title: Reflected Generalized Concentration Addition
 Version: 1.0.0
 Authors@R: 
     c(person("Daniel", "Zilber", , "daniel.zilber@nih.gov", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           comment = c(ORCID = "0000-0002-4387-0271")),
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut"),
            comment = c(ORCID = "YOUR-ORCID-ID")))
 Description: This package estimates dose response curves using a Bayesian calculation and then combines the dose responses using a two-step approach to estimate the dose response for an arbitrary mixture of the chemicals.  Our RGCA allows the mixture estimation to use three parameter models for the individual dose response curves.
@@ -11,11 +11,12 @@ License: GPL (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: ggplot2, reshape2, nimble, dplyr, cowplot, scoringRules, tables, tidyr, beepr, CVXR, coda, scales, readxl, plotly, drc, truncnorm
-URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA,
-https://spatiotemporal-exposures-and-toxicology.github.io/RGCA/
+Imports: nimble, drc, truncnorm, methods
+URL: https://github.com/NIEHS/RGCA,
+https: //niehs.github.io/RGCA/
 Suggests:
     knitr,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/Needs/website: rmarkdown

@@ -4,3 +4,7 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^R/manuscript$
+^output$
+^\.lintr$
+^vignettes/articles$

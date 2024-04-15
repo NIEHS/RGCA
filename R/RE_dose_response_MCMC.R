@@ -32,19 +32,19 @@ if (read_in_data) source("Desktop/tox_mixtures/code/tox21_prep_data.R")
 mk_vec <- function(arow) unlist(array(arow))
 # functions to take dot or matrix products when nulls present:
 vprod_NA <- function(a, b) {
-  mat_out <- (t(na.omit(as.matrix(a))) %*% na.omit(as.matrix(b)))
+  mat_out <- (t(stats::na.omit(as.matrix(a))) %*% stats::na.omit(as.matrix(b)))
   if (dim(a)[2] > 1) {
     return(mat_out)
   }
   return(mat_out[1])
 }
 qprod_NA <- function(a, b, c) {
-  return((t(na.omit(as.matrix(a))) %*%
-            diag(na.omit(b)) %*%
-            na.omit(as.matrix(c)))[1])
+  return((t(stats::na.omit(as.matrix(a))) %*%
+            diag(stats::na.omit(b)) %*%
+            stats::na.omit(as.matrix(c)))[1])
 }
 oprod_NA <- function(a, b) {
-  return(outer(na.omit(a), na.omit(b)))
+  return(outer(stats::na.omit(a), stats::na.omit(b)))
 }
 
 #' Builds a design matrix for replicates of dose response data for performing a
@@ -57,9 +57,6 @@ oprod_NA <- function(a, b) {
 #'
 #' @return a matrix built from the vectors of the input to mimic a design matrix
 #'   for a linear model
-#' @export
-#'
-#' @examples
 build_replicate_matrix <- function(v_list) {
   num_repls <- length(v_list)
   num_samples <- length(v_list[[1]])
@@ -91,7 +88,7 @@ init_u_RE <- function(repl_matrix, take_RE = TRUE) {
   if (take_RE) {
     return(offset)
   }
-  return(median(max_curve_values))
+  return(stats::median(max_curve_values))
 }
 
 
@@ -130,9 +127,8 @@ init_u_RE <- function(repl_matrix, take_RE = TRUE) {
 #' @return a list with the full sampled chains for the parameters: slope (phi),
 #'   sill+ec50 (theta1 and theta2), noise variance (sigma), random effects,
 #'   random effect prior variances.
-#' @export
 #'
-#' @examples
+#' @export
 RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
                         n_iter = 10000,
                         n_hill_par = 3) {
@@ -179,12 +175,12 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
           prop_phi_cj <- truncnorm::rtruncnorm(1, a = .1,
                                                mean = phi_curr, sd = sigma_mh)
           # if symmetric proposal, just get alpha from ratio
-          total_llh_curr <- dgamma(phi_curr, shape = phi_shape,
-                                   rate = phi_rate, log = TRUE) +
+          total_llh_curr <- stats::dgamma(phi_curr, shape = phi_shape,
+                                          rate = phi_rate, log = TRUE) +
             log(truncnorm::dtruncnorm(prop_phi_cj, a = .1,
                                       mean = phi_curr, sd = sigma_mh))
-          total_llh_prop <- dgamma(prop_phi_cj, shape = phi_shape,
-                                   rate = phi_rate, log = TRUE) +
+          total_llh_prop <- stats::dgamma(prop_phi_cj, shape = phi_shape,
+                                          rate = phi_rate, log = TRUE) +
             log(truncnorm::dtruncnorm(phi_curr, a = .1,
                                       mean = prop_phi_cj, sd = sigma_mh))
           ## MH: allow for negative slopes
@@ -201,21 +197,21 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
               curr_denom <- 1 + (theta_2[j] / active_X)^phi_curr
               curr_mean <- (theta_1[j] + u_RE) / curr_denom + v_RE
               curr_sd_RE <- sigma[j]
-              llh_curr <- sum(dnorm(active_Y, mean = curr_mean,
-                                    sd = curr_sd_RE, log = TRUE),
+              llh_curr <- sum(stats::dnorm(active_Y, mean = curr_mean,
+                                           sd = curr_sd_RE, log = TRUE),
                               na.rm = TRUE)
               total_llh_curr <- total_llh_curr + llh_curr
               prop_denom <- 1 + (theta_2[j] / active_X)^prop_phi_cj
               prop_mean <- (theta_1[j] + u_RE) / (prop_denom) + v_RE
               prop_sd_RE <- sigma[j]
-              llh_prop <- sum(dnorm(active_Y, mean = prop_mean,
-                                    sd = prop_sd_RE, log = TRUE),
+              llh_prop <- sum(stats::dnorm(active_Y, mean = prop_mean,
+                                           sd = prop_sd_RE, log = TRUE),
                               na.rm = TRUE)
               total_llh_prop <- total_llh_prop + llh_prop
             }
           }
           accept_thresh <- exp(total_llh_prop - total_llh_curr)
-          if (runif(1) < accept_thresh) {
+          if (stats::runif(1) < accept_thresh) {
             phi_curr <- prop_phi_cj
           }
         }
@@ -250,7 +246,7 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
       lin_terms_post_mean <- vprod_NA(lin_terms_post_var, XY_term)
       # sample from the post distribution
       lin_term_sample <- t(chol(lin_terms_post_var)) %*%
-        rnorm(length(lin_terms_post_mean)) + lin_terms_post_mean
+        stats::rnorm(length(lin_terms_post_mean)) + lin_terms_post_mean
       theta_1[j] <- lin_term_sample[1]
       fill_idx <- 2:n_replicates[j]
       u_repl[[j]][fill_idx] <- lin_term_sample[fill_idx]
@@ -270,30 +266,32 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
       sigma_mh_theta_2 <- .1
       # for log scale: lower_bd = -12; upper_bd = -2
       for (itern in 1:num_sampling_iters) {
-        log_theta2_prop <- rnorm(1, mean = log(theta_2[j]),
-                                 sd = sigma_mh_theta_2)
+        log_theta2_prop <- stats::rnorm(1, mean = log(theta_2[j]),
+                                        sd = sigma_mh_theta_2)
         theta2_prop <- exp(log_theta2_prop)
         numerator <- theta_1[j] + u_RE_vec
         curr_mean <- numerator /
           (1 + (theta_2[j] / active_X)^phi_c[c_i[j]]) + v_RE_vec
-        llh_curr <- sum(dnorm(active_Y, mean = curr_mean,
-                              sd = sigma[j], log = TRUE),
+        llh_curr <- sum(stats::dnorm(active_Y, mean = curr_mean,
+                                     sd = sigma[j], log = TRUE),
                         na.rm = TRUE) +
-          log(dlnorm(theta2_prop,
-                     meanlog = log(theta_2[j]),
-                     sdlog = sigma_mh_theta_2)) +
-          dgamma(theta_2[j], shape = ec50_shape, rate = ec50_rate, log = TRUE)
+          log(stats::dlnorm(theta2_prop,
+                            meanlog = log(theta_2[j]),
+                            sdlog = sigma_mh_theta_2)) +
+          stats::dgamma(theta_2[j], shape = ec50_shape, rate = ec50_rate,
+                        log = TRUE)
         prop_mean <- numerator /
           (1 + (theta2_prop / active_X)^phi_c[c_i[j]]) + v_RE_vec
-        llh_prop <- sum(dnorm(active_Y, mean = prop_mean,
-                              sd = sigma[j], log = TRUE),
+        llh_prop <- sum(stats::dnorm(active_Y, mean = prop_mean,
+                                     sd = sigma[j], log = TRUE),
                         na.rm = TRUE) +
-          log(dlnorm(theta_2[j],
-                     meanlog = log(theta2_prop),
-                     sdlog = sigma_mh_theta_2)) +
-          dgamma(theta2_prop, shape = ec50_shape, rate = ec50_rate, log = TRUE)
+          log(stats::dlnorm(theta_2[j],
+                            meanlog = log(theta2_prop),
+                            sdlog = sigma_mh_theta_2)) +
+          stats::dgamma(theta2_prop, shape = ec50_shape, rate = ec50_rate,
+                        log = TRUE)
         accept_p <- min(exp(llh_prop - llh_curr), 1)
-        if (runif(1) < accept_p) theta_2[j] <- theta2_prop
+        if (stats::runif(1) < accept_p) theta_2[j] <- theta2_prop
       }
     }
     # update sigma: for each chem (vs across all data, originally)
@@ -309,9 +307,9 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
       sum_sqr_err <- sum((active_Y - numerator / denom - v_RE_vec)^2,
                          na.rm = TRUE)
       tot_error <- tot_error + sum_sqr_err
-      sigma_sqr <- 1 / rgamma(1,
-                              shape = .1 + n_dose * length(act_idx) / 2,
-                              rate = .1 + tot_error / 2)
+      sigma_sqr <- 1 / stats::rgamma(1,
+                                     shape = .1 + n_dose * length(act_idx) / 2,
+                                     rate = .1 + tot_error / 2)
       # if sigma is global, sum all errors else update each term within loop
       sigma[j] <- sqrt(sigma_sqr)
     }
@@ -324,12 +322,12 @@ RE_MCMC_fit <- function(y_i, Cx, replicate_sets,
       act_idx <- replicate_sets[[j]]
       G_beta_post_u <- G_beta_prior_u + u_repl[[j]] %*% u_repl[[j]] / 2
       G_alpha_post_u <- G_alpha_prior_u + (n_replicates[j] - 1) / 2
-      sigma_u[j] <- sqrt(1 / rgamma(1, shape = G_alpha_post_u,
-                                    rate = G_beta_post_u))
+      sigma_u[j] <- sqrt(1 / stats::rgamma(1, shape = G_alpha_post_u,
+                                           rate = G_beta_post_u))
       G_beta_post_v <- G_beta_prior_v + v_repl[[j]] %*% v_repl[[j]] / 2
       G_alpha_post_v <- G_alpha_prior_v + (n_replicates[j] - 1) / 2
-      sigma_v[j] <- sqrt(1 / rgamma(1, shape = G_alpha_post_v,
-                                    rate = G_beta_post_v))
+      sigma_v[j] <- sqrt(1 / stats::rgamma(1, shape = G_alpha_post_v,
+                                           rate = G_beta_post_v))
     }
     record_RE_u[iter, ] <- mk_vec(u_repl)
     record_RE_v[iter, ] <- mk_vec(v_repl)

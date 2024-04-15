@@ -3,6 +3,8 @@ test_that("rgca hill inverse works", {
   b <- 3
   c <- 0.5
   y <- -1
+  # case 0
+  expect_equal(hill_invs_factry(a, b, c)(0), 0)
   # case 1, y extended to small negative conc, invert slope
   expect_equal(hill_invs_factry(a, b, c)(y),
                -b / (1 + (-a / y)^(1 / c)))
@@ -88,8 +90,8 @@ test_that("mix_response_prediction_works", {
   # specify some mixture doses to test
   dose_range <- seq(0, 10, length.out = 3)
   # create a matrix of mixture doses
-  dose_matrix <- tidyr::expand_grid(dose_range, dose_range,
-                                    dose_range, dose_range)
+  dose_matrix <- rev(expand.grid(dose_range, dose_range,
+                                 dose_range, dose_range))
   # test that mixture doses give expected response (snapshot April 2024)
   expect_snapshot(apply(dose_matrix, MARGIN = 1, mix_function))
 })

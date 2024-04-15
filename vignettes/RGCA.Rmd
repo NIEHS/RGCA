@@ -75,3 +75,7 @@ plot(equimol_conc, pred_equimol, log = "x", ylim = c(0, 5))
 points(equipot_conc, pred_equimol, col = 2)
 ```
 
+
+## Fitting Dose Response Curves with Nimble
+
+In the example above, we assume the parameters are known.  If you have raw data for the individual chemical dose responses and want to fit the random effect model that we describe in our manuscript, the RGCA package has a built-in fitting routing based on Nimble.  Three pieces of data are needed:  the responses, the doses, and a list of the replicates.  

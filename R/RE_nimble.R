@@ -1,19 +1,48 @@
-library(nimble, warn.conflicts = TRUE)
+# global variable definition for CRAN: vars appear in Nimble model
+globalVariables(c("CM", "a1", "u", "theta1", "x", "beta1", "v"))
+
 ################################################################
 # -----------  nimble: mixed effect -------------
 ################################################################
-# -----------  samples + replicates  -------------
-#' Nimble MCMC script to fit the manuscript model to the Tox21 data.
+#' Nimble MCMC script to fit a random effect Hill model.
 #'
 #' Fit a random effect dose response model using Nimble for fast MCMC.  Nimble
 #' creates a compiled sampler that can run iterations much faster than the
 #' manually implemented version.
 #'
+#' @param y_i Response data as a matrix where each row is a chemical and each
+#'   column is a dose.
+#' @param Cx Dose data with dimension equal to y_i.
+#' @param replicate_sets A list of arrays where each array indicates the rows of
+#'   y_i that correspond to replicates of a single chemical
+#' @param n_iter Number of MCMC iterations to run, defaults to 50k
+#' @param n_burn Number of initial MCMC iterations to discard, defaults to 10k
+#'   or half of n_iter, whichever is lower.
+#' @param n_thin Number of MCMC iterations to skip to approximate iid samples,
+#'   defaults to 20.  If it is larger than difference in iterations and burn in,
+#'   it is reset to 1.
+#' @param prior_alpha_sd hyperparameter for the sill, controls prior variance
+#' @param prior_theta_shape hyperparameter for the EC50, controls gamma shape
+#' @param prior_theta_rate hyperparameter for the EC50, controls gamma rate
+#' @param prior_beta_shape hyperparameter for the slope, controls gamma shape
+#' @param prior_beta_rate hyperparameter for the slope, controls gamma rate
+#' @param prior_sd_noninfo hyperparameter for various noise terms which use a
+#'   weakly informative prior, controls spread from 1.  Default is 0.1.
+#'
 #' @return nimble_samples: a list of MCMC chains with an entry for each
 #'   parameter of the model.
 #' @export
-run_RE_nimble <- function() {
-  code <- nimbleCode({
+run_RE_nimble <- function(y_i, Cx, replicate_sets,
+                          n_iter = 5e4, n_burn = 1e4, n_thin = 20,
+                          prior_alpha_sd = sqrt(1000),
+                          prior_theta_shape = 1e-3,
+                          prior_theta_rate = 1e-3,
+                          prior_beta_shape = 0.3,
+                          prior_beta_rate = 0.3,
+                          prior_sd_noninfo = 0.1) {
+  if (n_burn >= as.integer(n_iter / 2)) n_burn <- as.integer(n_iter / 2)
+  if (n_thin >= n_iter - n_burn) n_thin <- 1
+  code <- nimble::nimbleCode({
     for (chm in 1:CM) {
       a1[chm] ~ dnorm(0, sd = sqrt(1000))
       theta1[chm] ~ dgamma(shape = 1e-3, rate = 1e-3)
@@ -80,7 +109,7 @@ run_RE_nimble <- function() {
     u = rep(0, nrow(y_i)),
     v = rep(0, nrow(y_i))
   )
-  drcModel <- nimbleModel(
+  drcModel <- nimble::nimbleModel(
     code = code, constants = constants, data = data,
     inits = inits, check = FALSE
   )
@@ -93,10 +122,11 @@ run_RE_nimble <- function() {
   ## Ensure we have both data nodes and deterministic intermediates (e.g.,
   ## lifted nodes)
   simNodes_drc <- drcModel$getDependencies(parentNodes_drc, self = FALSE)
-  c_drcmodel <- compileNimble(drcModel)
-  mcmc <- buildMCMC(c_drcmodel, monitors = parentNodes_drc)
-  cmcmc <- compileNimble(mcmc, project = drcModel)
-  nimble_samples <- runMCMC(cmcmc, niter = 50000, nburnin = 10000, thin = 20)
+  c_drcmodel <- nimble::compileNimble(drcModel)
+  mcmc <- nimble::buildMCMC(c_drcmodel, monitors = parentNodes_drc)
+  cmcmc <- nimble::compileNimble(mcmc, project = drcModel)
+  nimble_samples <- nimble::runMCMC(cmcmc, niter = n_iter,
+                                    nburnin = n_burn, thin = n_thin)
   return(nimble_samples)
 }
 
@@ -128,18 +158,18 @@ if (FALSE) {
   )
   data <- list(beta1 = beta1)
   constants <- list(nchm = length(beta1))
-  dpModel <- nimbleModel(
+  dpModel <- nimble::nimbleModel(
     code = codeDP, name = "DPMM", constants = constants,
     data = data, inits = inits
   )
   # slow, not always needed: CdpModel <- compileNimble(dpModel)
-  dpMCMC <- buildMCMC(dpModel,
+  dpMCMC <- nimble::buildMCMC(dpModel,
     monitors = c("nu", "ki", "sigsqrd")
   )
-  CdpMCMC <- compileNimble(dpMCMC, project = dpModel)
+  CdpMCMC <- nimble::compileNimble(dpMCMC, project = dpModel)
   niter <- 5e4
   nburnin <- 1e4
-  dpMCMC_samples <- runMCMC(CdpMCMC, niter = niter, nburnin = nburnin)
+  dpMCMC_samples <- nimble::runMCMC(CdpMCMC, niter = niter, nburnin = nburnin)
   cluster_assign <- dpMCMC_samples[, grep("ki", colnames(dpMCMC_samples))]
   cluster_value <- dpMCMC_samples[, grep("nu", colnames(dpMCMC_samples))]
   for (i in 1:(niter - nburnin)) {
@@ -156,7 +186,7 @@ if (FALSE) {
   )
   cluster_centers(cluster_chain_nimble, n_top = 50)
   # as one line
-  samples <- nimbleMCMC(
+  samples <- nimble::nimbleMCMC(
     code = codeDP, data = data, inits = inits,
     constants = constants,
     monitors = c("nu", "ki", "sigsqrd", "alpha"),

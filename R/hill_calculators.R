@@ -1,10 +1,3 @@
-library(truncnorm)
-library(CVXR)
-library(coda)
-library(ggplot2)
-library(scoringRules)
-library(tables) # for converting data frames to latex tabulars
-
 #' Hill function
 #'
 #' A simple function to compute the Hill function response given parameters and
@@ -19,6 +12,7 @@ library(tables) # for converting data frames to latex tabulars
 #' @export
 #'
 #' @examples
+#' hill_function(1, 1.5, 2, 3)
 hill_function <- function(a, b, c, conc) {
   a / (1 + (b / conc)^c)
 }
@@ -36,9 +30,8 @@ hill_function <- function(a, b, c, conc) {
 #'
 #' @return a matrix of parameters with a row for each chemical and columns
 #'        corresponding to ()
-#' @export
 #'
-#' @examples
+#' @export
 get_mle_curve_fits <- function(y_i, Cx, replicate_sets) {
   # individual fits
   curve_fits <- matrix(0, nrow = length(replicate_sets), ncol = 3)
@@ -48,7 +41,7 @@ get_mle_curve_fits <- function(y_i, Cx, replicate_sets) {
     fit_coeff <- try(drc::drm(drc_yi ~ drc_xi,
                               fct = drc::LL.3())$coefficients,
                      silent = TRUE)
-    if (is(fit_coeff, "try-error")) next
+    if (methods::is(fit_coeff, "try-error")) next
     fit_coeff <- fit_coeff[c(2, 3, 1)]
     fit_coeff[3] <- -fit_coeff[3]
     fit_coeff[2] <- fit_coeff[2]
@@ -58,63 +51,6 @@ get_mle_curve_fits <- function(y_i, Cx, replicate_sets) {
 }
 
 
-
-get_MCMC_diagnostics <- function(re_chains, re_chains2, re_chains3) {
-  # explicit call to global env
-  n_chems <- .GlobalEnv$n_chems
-  get_GR_Diagnostic <- function(data_id, input_cols) {
-    mcmc1 <- coda::as.mcmc(re_chains[[data_id]][, input_cols])
-    mcmc2 <- coda::as.mcmc(re_chains2[[data_id]][, input_cols])
-    mcmc3 <- coda::as.mcmc(re_chains3[[data_id]][, input_cols])
-    mcmclist <- coda::as.mcmc.list(list(mcmc1, mcmc2, mcmc3))
-    coda_test <- coda::gelman.diag(mcmclist)$psrf
-    return(coda_test)
-  }
-  coda_u_RE_sd <- get_GR_Diagnostic("u_RE_sd", seq(ncol(re_chains$u_RE_sd)))
-  coda_sigma <- get_GR_Diagnostic("sigma", seq(ncol(re_chains$sigma)))
-  coda_slope <- get_GR_Diagnostic("slope_record",
-                                  seq(ncol(re_chains$slope_record)))
-  coda_sill <- get_GR_Diagnostic("sill_mideffect_record", 1:n_chems)
-  # EC50 part, needs log
-  chain_sill_mid <- re_chains$sill_mideffect_record
-  mcmc1 <- coda::as.mcmc(log(chain_sill_mid[, (1 + n_chems):(2 * n_chems)]))
-  mcmc2 <- coda::as.mcmc(log(chain_sill_mid[, (1 + n_chems):(2 * n_chems)]))
-  mcmc3 <- coda::as.mcmc(log(chain_sill_mid[, (1 + n_chems):(2 * n_chems)]))
-  mcmclist <- coda::as.mcmc.list(list(mcmc1, mcmc2, mcmc3))
-  coda_ec50 <- coda::gelman.diag(mcmclist)$psrf
-  all_dats <- round(cbind(coda_sill,
-                          coda_ec50,
-                          coda_slope,
-                          coda_sigma,
-                          coda_u_RE_sd),
-                    digits = 2)
-  all_dats <- as.data.frame(all_dats)
-  new_names <- array(sapply(c("Sill", "EC50", "Slope", "Sigma", "Variance_U"),
-                            FUN = function(sx) {
-                              (paste(sx, c("Point est.", "Upper C.I.")))
-                            }))
-  names(all_dats) <- new_names
-  rownames(all_dats) <- chem_map
-  return(all_dats)
-}
-
-
-
-
-
-# Some notes on posterior summary stats:
-# mode (MAP) is usually the lowest, followed by median and mean due to skewness
-# MAP or median makes sense for heavily skewed parameters, but slope was not so
-# skewed due to strong prior
-modes <- function(dats) {
-  if (all(dats == 0)) {
-    return(0)
-  }
-  dens <- density(dats)
-  i <- which(diff(sign(diff(dens$y))) < 0) + 1
-  max_i <- i[which(dens$y[i] == max(dens$y[i]))]
-  dens$x[max_i]
-}
 
 #' Pull parameters from an MCMC chain
 #'
@@ -127,11 +63,10 @@ modes <- function(dats) {
 #'   median, but can be mean or any other similar measure of the center.
 #'
 #' @return a list of parameter estimates
-#' @export
 #'
-#' @examples
+#' @export
 pull_summary_parameters <- function(re_chains,
-                                    summry_stat = median) {
+                                    summry_stat = stats::median) {
   burnin <- 5000
   # explicit call to global env
   n_chems <- ncol(re_chains$slope_record)
@@ -144,13 +79,13 @@ pull_summary_parameters <- function(re_chains,
                        summry_stat)
   sill_sd <- apply(chain_sill_ec_param[thin_idx, 1:n_chems],
                    MARGIN = 2,
-                   sd)
+                   stats::sd)
   ec50_params <- apply(chain_sill_ec_param[thin_idx, 1:n_chems + n_chems],
                        MARGIN = 2,
                        summry_stat)
   ec50_sd <- apply(chain_sill_ec_param[thin_idx, 1:n_chems + n_chems],
                    MARGIN = 2,
-                   sd)
+                   stats::sd)
   u_RE_params <- apply(re_chains$u_RE[thin_idx, ], MARGIN = 2, summry_stat)
   v_RE_params <- apply(re_chains$v_RE[thin_idx, ], MARGIN = 2, summry_stat)
   u_RE_sd_params <- apply(re_chains$u_RE_sd[thin_idx, ],
@@ -187,17 +122,16 @@ pull_summary_parameters <- function(re_chains,
 #'   chains, where each chain is a vector of posterior samples
 #' @param summry_stat the statistic used to summarize the posterior.  Default is
 #'   median, but can be mean or any other similar measure of the center.
-#' @param input_replicates The list of indices of replicates for each chemical
+#' @param input_replicates The optional list of indices of replicates for each
+#'   chemical
 #'
 #' @return a list with posterior samples and summary estimates of the parameters
-#' @export
 #'
-#' @examples
-pull_parameters <- function(re_chains, summry_stat = median,
+#' @export
+pull_parameters <- function(re_chains, summry_stat = stats::median,
                             input_replicates = NA) {
   if (is.list(input_replicates)) replicate_sets <- input_replicates
   burnin <- 5000
-  # explicit call to global env
   n_chems <- ncol(re_chains$slope_record)
   re_iter <- nrow(re_chains$slope_record)
   if (re_iter <= burnin) burnin <- 100
@@ -210,8 +144,8 @@ pull_parameters <- function(re_chains, summry_stat = median,
   slope_sample <- re_chains$slope_record[thin_idx, 1:n_chems]
   u_RE_center <- sapply(1:n_chems,
                         FUN = function(ridx) {
-                          median(re_chains$u_RE[thin_idx,
-                                                replicate_sets[[ridx]]])
+                          stats::median(re_chains$u_RE[thin_idx,
+                                                       replicate_sets[[ridx]]])
                         })
   u_RE_sd_est <- apply(re_chains$u_RE_sd[thin_idx, ], MARGIN = 2, summry_stat)
   v_RE_sd_est <- apply(re_chains$v_RE_sd[thin_idx, ], MARGIN = 2, summry_stat)
@@ -229,10 +163,33 @@ pull_parameters <- function(re_chains, summry_stat = median,
   ))
 }
 
-pull_parameters_nimble <- function(nimble_samples, summry_stat = median) {
-  sill_sample <- nimble_samples[, 1:n_chems]
+
+
+#' Organize output of the Nimble MCMC
+#'
+#' Fitting a random effect model to data using a Bayesian method like MCMC
+#' creates posterior samples.  Our implementation with Nimble creates a large
+#' output object that contains posterior samples after burn-in and thinning.
+#' This function organizes the samples for convenient downstream usage.
+#'
+#' @param nimble_samples the object returned by the [run_RE_nimble] function.
+#' @param summry_stat The function used to compute the summarizing statistic for
+#'   the slope parameter.  Default function is median.
+#' @param input_replicates The optional list of indices of replicates for each
+#'   chemical.  By default, input_replicates is NA and the method assumes there
+#'   exists a global var called replicate_sets
+#'
+#' @return A named list of arrays where each array is a posterior thinned sample
+#'   from the nimble chain.
+#' @export
+pull_parameters_nimble <- function(nimble_samples,
+                                   summry_stat = stats::median,
+                                   input_replicates = NA) {
+  if (is.list(input_replicates)) replicate_sets <- input_replicates
   ec50_idx <- grep("theta", colnames(nimble_samples))
   ec50_sample <- nimble_samples[, ec50_idx]
+  n_chems <- ncol(ec50_sample)
+  sill_sample <- nimble_samples[, 1:n_chems]
   slope_idx <- grep("beta", colnames(nimble_samples))
   slope_sample <- nimble_samples[, slope_idx]
   u_RE_sd_idx <- grep("sigma_u", colnames(nimble_samples))
@@ -243,7 +200,7 @@ pull_parameters_nimble <- function(nimble_samples, summry_stat = median) {
   u_RE_samples <- nimble_samples[, u_RE_cent_idx]
   u_RE_center <- sapply(1:n_chems,
                         FUN = function(ridx) {
-                          median(u_RE_samples[, replicate_sets[[ridx]]])
+                          stats::median(u_RE_samples[, replicate_sets[[ridx]]])
                         })
   # slopes must be estimated for DP clustering
   phi_c <- apply(slope_sample, MARGIN = 2, summry_stat)
@@ -368,9 +325,9 @@ create_mix_calc <- function(idx, par_list, add_RE = TRUE, unit_slopes = FALSE) {
   if (unit_slopes) slope_params_samp <- slope_params_samp * 0 + 1
   # add iid gauss noise for RE variance
   sill_params_boot <- sill_params_samp
-  sill_RE_boot <- rnorm(n_chem_pars,
-                        mean = par_list$u_RE_center,
-                        sd = par_list$u_RE_sd)
+  sill_RE_boot <- stats::rnorm(n_chem_pars,
+                               mean = par_list$u_RE_center,
+                               sd = par_list$u_RE_sd)
   if (add_RE) sill_params_boot <- sill_params_boot + sill_RE_boot
   # We dont sample intercept RE: assume intercept 0, d=0
   # TODO consider empirical max, or clusterwise max
@@ -427,9 +384,9 @@ create_mix_calc_clustered <- function(idx,
                             MARGIN = 2,
                             FUN = function(colx) sample(colx, 1))
   # add iid gauss noise for RE variance
-  sill_RE_boot <- rnorm(n_chem_pars,
-                        mean = par_list$u_RE_center,
-                        sd = par_list$u_RE_sd)
+  sill_RE_boot <- stats::rnorm(n_chem_pars,
+                               mean = par_list$u_RE_center,
+                               sd = par_list$u_RE_sd)
   sill_params_boot <- sill_params_samp
   if (add_RE) sill_params_boot <- sill_params_boot + sill_RE_boot
   # sample ec50
@@ -450,117 +407,16 @@ create_mix_calc_clustered <- function(idx,
   return(mixture_calculator)
 }
 
-#' Mixture Response Calculator Wrapper for Manuscript, matched index
-#'
-#' A slight variation on the standard create_mix_calc, the parameters are still
-#' sampled from the posterior MCMC but they are sampled with a single index so
-#' that the set of parameters is feasible. Sampling all the parameters randomly
-#' could cause an issue when there is non-identifiability, and an extreme value
-#' in one parameter is not offset by a small value in another parameter.
-#'
-#' @param idx Specifies which clustering to apply to the parameters
-#' @param par_list a data frame with individual chemical dose response
-#'   parameters
-#' @param add_RE boolean to include or exclude random effect variances
-#'
-#' @return a function to take a concentration vector as input and response as
-#'   output
-#'
-create_mix_calc_sample_row <- function(idx, par_list, add_RE = TRUE) {
-  # bootstrap the cluster slope from top clusters
-  cluster_name <- names(par_list$cluster_assign[idx])
-  cluster_assign_vec <- as.numeric(strsplit(cluster_name, split = " ")[[1]])
-  # sample the cluster value rather than use mean/sd
-  slope_mean <- par_list$centers[idx, ]
-  # if add noise from DP cluster to centers:
-  # sample rnorm(mean = 0, sd = unique( par_list$centers[idx, ]))
-  # add to mean using slope_mean + slope_noise[cluster_assign_vec]
-  # sample values for the sill parameter, can be independent
-  n_chem_pars <- ncol(par_list$sill_sample)
-  n_samples <- nrow(par_list$sill_sample)
-  param_idx <- sample(1:n_samples, n_chem_pars, replace = TRUE)
-  sill_params_samp <- rep(0, n_chem_pars)
-  ec50_params_boot <- rep(0, n_chem_pars)
-  for (pidx in 1:n_chem_pars) {
-    sill_params_samp[pidx] <- par_list$sill_sample[param_idx[pidx], pidx]
-    ec50_params_boot[pidx] <- par_list$ec50_sample[param_idx[pidx], pidx]
-  }
-  # add iid gauss noise for RE variance
-  sill_RE_boot <- rnorm(n_chem_pars, mean = 0, sd = par_list$u_RE_sd)
-  sill_params_boot <- sill_params_samp
-  if (add_RE) sill_params_boot <- sill_params_boot + sill_RE_boot
-  # We dont sample intercept RE: assume intercept 0, d=0
-  # TODO consider empirical max, or clusterwise max
-  max_effect_R <- max(sill_params_boot)
-  # generate calculator for
-  bootstrap_param_matrix <- as.matrix(cbind(
-    "a" = sill_params_boot,
-    "b" = ec50_params_boot,
-    "c" = slope_mean,
-    "max_R" = max_effect_R,
-    "d" = 0
-  ))
-  mixture_calculator <- mix_function_generator(
-    bootstrap_param_matrix,
-    cluster_assign_vec
-  )
-  return(mixture_calculator)
-}
-
-
-
-#' Predict Responses for a List of Calculators
-#'
-#' This is a convenience function that applies the lists of bootstrapped mixture
-#' response calculators to the matrix of concentrations that define the doses
-#' for the mixture.
-#'
-#'
-#' @param sampled_mix_funs list of boostrapped functions for the main method of
-#'   the manuscript, RGCA+DP, instances produced by the factory method
-#'   mix_function_generator
-#' @param sampled_mix_funs_GCA list of boostrapped functions for the standard
-#'   method of GCA
-#' @param sampled_mix_funs_IA list of boostrapped functions for the standard
-#'   method of IA
-#' @param n_dose integer number of doses of the mixture
-#' @param chem_conc_matr a matrix where the rows represent the constituent
-#'   chemicals and the columns represent the dose.  The column sum is the
-#'   mixture dose.
-#' @param default_entry  a default entry for the methods, with default=0.  Can
-#'   be set to null NA to aid in plotting.
-#'
-#' @return
-#'
-predict_mix_response <- function(sampled_mix_funs, sampled_mix_funs_GCA,
-                                 sampled_mix_funs_IA, n_dose, chem_conc_matr,
-                                 default_entry = 0) {
-  n_bootstraps <- length(sampled_mix_funs)
-  curve_data <- matrix(default_entry, ncol = n_dose, nrow = n_bootstraps)
-  curve_data_GCA <- matrix(default_entry, ncol = n_dose, nrow = n_bootstraps)
-  curve_data_IA <- matrix(default_entry, ncol = n_dose, nrow = n_bootstraps)
-  for (row_idx in 1:n_dose) {
-    # each row of conc_matrix is a mixture dose
-    conc_val <- chem_conc_matr[row_idx, ]
-    # if there are missing conc values, skip prediction
-    if (any(is.na(conc_val))) next
-    curve_data[, row_idx] <- sapply(sampled_mix_funs,
-                                    FUN = function(x) x(conc_val))
-    curve_data_GCA[, row_idx] <- sapply(sampled_mix_funs_GCA,
-                                        FUN = function(x) x(conc_val))
-    curve_data_IA[, row_idx] <- sapply(sampled_mix_funs_IA,
-                                       FUN = function(x) x(conc_val))
-  }
-  return(list(curve_data, curve_data_GCA, curve_data_IA))
-}
-
 
 #' Predict Responses for a List of Calculators, generic
 #'
 #' A similar function to predict_mix_response.  This is a convenience function
 #' that takes a list of lists as input and iteratively applies the elements,
 #' which are bootstrapped mixture repsonse calculators, to the columns of the
-#' mixture dose matrix.
+#' mixture dose matrix.  For example, three different clustering approaches can
+#' be used for the outer list while each inner list has 50 bootstrapped mixture
+#' response estimators.  Then the outer list has length 3 and each inner list
+#' has length 50.
 #'
 #'
 #' @param n_dose number of mixture doses
@@ -572,7 +428,8 @@ predict_mix_response <- function(sampled_mix_funs, sampled_mix_funs_GCA,
 #' @param default_entry a default entry for the methods, with default=0.  Can be
 #'   set to null NA to aid in plotting
 #'
-#' @return
+#' @return A list of matrices where each matrix has dose by column and the
+#'   bootstrapped response prediction as a row.
 #' @export
 predict_mix_response_many <- function(n_dose,
                                       chem_conc_matr,
@@ -596,98 +453,6 @@ predict_mix_response_many <- function(n_dose,
   return(curve_list)
 }
 
-#' Compute Scores for Mixture Predictions
-#'
-#' Computes the log likelihood, mean square error, and continuous rank
-#' probability score for predictions of the mixture response compared to the
-#' observed mixture response.
-#'
-#' @param mix_df data frame with the observed mixture responses
-#' @param mix_idx integer index specifying which observed data should be used
-#' @param unplotted_repl integer indices specifying additional observed values
-#'   to plot
-#' @param curve_data_list list of vectors where each vector is a predicted
-#'   curve.  List length matches the number of methods used to make predictions.
-#'
-#' @return a vector of scores with scores grouped by method.  If there are two
-#'   methods and three scores, the output would have the form (M1S1, M1S2, M1S3,
-#'   M2S1, M2S2, M2S3).
-#' @export
-#'
-compute_mixpred_scores <- function(mix_df,
-                                   mix_idx,
-                                   unplotted_repl,
-                                   curve_data_list) {
-  n_x_values <- ncol(Cx)
-  score_matrix <- c()
-  # for each set of curve data
-  for (curve_data in curve_data_list) {
-    llh <- 0
-    mse <- 0
-    crps <- 0
-    # response index is set globally when running read_prepared_Tox21_data()
-    resp_idx <- .GlobalEnv$resp_idx
-    # for each replicate of data
-    for (repl_idx in c(mix_idx, unplotted_repl)) {
-      # get the replicate response
-      resp_y_repl <- array(unlist(mix_df[repl_idx, resp_idx]))
-      for (x_idx in 1:n_x_values) {
-        # compute scores for given replicate
-        llh <- llh + scoringRules::logs_sample(resp_y_repl[x_idx],
-                                               curve_data[, x_idx])
-        mse <- mse + (resp_y_repl[x_idx] - median(curve_data[, x_idx]))^2 /
-          n_x_values
-        crps <- crps + scoringRules::crps_sample(resp_y_repl[x_idx],
-                                                 curve_data[, x_idx])
-      }
-    }
-    score_matrix <- cbind(score_matrix, c(llh, mse, crps))
-  }
-  return(score_matrix)
-}
-
-
-# Not used; compute empirical LLH given bootstrapped curve estimates
-get_emp_llh <- function(obs_res, boot_vals) {
-  # get optimal bandwidth for KDE
-  bw <- bw.SJ(boot_vals)
-  # sum equivalent to a kernel density estimate at the point
-  p_density <- sum(dnorm(obs_res,
-                         mean = boot_vals,
-                         sd = bw)) / length(boot_vals)
-  return(log(p_density))
-}
-
-# Not used; compute CRPS given bootstraped estimates, empirical value
-get_kernel_CRPS <- function(obs_res, boot_vals) {
-  # get optimal bandwidth for KDE
-  bw <- bw.SJ(boot_vals)
-  #
-  interval <- min(1, bw / 5)
-  pdf_xvals <- seq(min(boot_vals) - 5 * bw,
-                   max(boot_vals) + 5 * bw,
-                   by = interval) # min(1, bw/5 ) )
-  # sum equivalent to a kernel density estimate at the point
-  pdf_kernel <- sapply(pdf_xvals,
-                       FUN = function(x) {
-                         sum(dnorm(x, mean = boot_vals, sd = bw)) /
-                           length(boot_vals)
-                       })
-  # approximate CDF integral with summation
-  cdf_kernel <- cumsum(pdf_kernel) * interval
-  # approximate CRPS integral with summation
-  CRPS_val <- sum((cdf_kernel - 1 * (pdf_xvals >= obs_res))^2) * interval
-  return(CRPS_val)
-}
-
-# not used
-get_empr_CRPS <- function(obs_res, boot_vals) {
-  cdf_edf <- sapply(sort(boot_vals), FUN = function(x) mean(x > boot_vals))
-  CRPS_val <- sum(((cdf_edf - 1 * (sort(boot_vals) >= obs_res))^2)[-1] *
-                    diff(sort(boot_vals)))
-  return(CRPS_val)
-}
-
 # Inverse Hill Functions ####
 
 #' Inverse Hill Function Factory
@@ -709,30 +474,6 @@ get_empr_CRPS <- function(obs_res, boot_vals) {
 #'
 #' @examples NA
 hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
-  hilly_inverse <- function(y) {
-    # input y: the response to invert
-    # force: in case values change before function is used
-    force(a)
-    force(b)
-    force(c)
-    if (y == 0) {
-      return(0)
-    }
-    # case 1, y extended to small negative conc, invert slope
-    if ((a > 0 && y < 0) || (a < 0 && y > 0)) {
-      return(-b / (1 + (-a / y)^(1 / c)))
-    }
-    # case 2, standard inverse
-    if ((a > 0 && y < a) || (a < 0 && y > a)) {
-      return(b / (a / y - 1)^(1 / c))
-    }
-    # case 3, reflected part of the standard inverse
-    if ((a > 0 && y < 2 * a) || (a < 0 && y > 2 * a)) {
-      return(-2 * b - b / (a / (2 * a - y) - 1)^(1 / c))
-    }
-    # case 4, reflection of extension, slope inverted
-    return(-2 * b + b / (1 + (a / (-2 * a + y))^(1 / c)))
-  }
   # the following method change was suggested by Insang Song to reduce
   # cyclomatic complexity
   hilly_inverse_low_cyclo <- function(y) {
@@ -786,8 +527,6 @@ hill_invs_factry <- function(a, b, c, max_R = 1, d = 0) {
 #' @return a function GCA_over_list that has a response r as a input and a
 #'   norm (measure of optimality according to GCA) as output
 #' @export
-#'
-#' @examples
 eff_response_opt <- function(hill_inverse_list,
                              conc_vec,
                              synergy_const = 0,
@@ -844,8 +583,6 @@ eff_response_opt <- function(hill_inverse_list,
 #' @return an instance of the function mix_effect_fun which takes as input the
 #'   concentration of the component chemicals and outputs a predict response
 #' @export
-#'
-#' @examples
 mix_function_generator <- function(param_matrix,
                                    clust_assign,
                                    get_counts = FALSE,
@@ -886,9 +623,9 @@ mix_function_generator <- function(param_matrix,
                                        active_conc,
                                        synergy_const = synergy_const)
       # optim_res is the equivalent dose across all chems, note Log scale
-      optim_res <- optimize(GCA_function,
-                            interval = c(-20, 10),
-                            tol = .Machine$double.eps)
+      optim_res <- stats::optimize(GCA_function,
+                                   interval = c(-20, 10),
+                                   tol = .Machine$double.eps)
       response_per_cluster[cid] <- exp(optim_res$minimum)
       # for the cases when there is a negative sill, check if the mix response
       # should be negative
@@ -896,9 +633,9 @@ mix_function_generator <- function(param_matrix,
                                            active_conc,
                                            synergy_const = synergy_const,
                                            interval_sign = -1)
-      optim_res_neg <- optimize(GCA_function_neg,
-                                interval = c(-20, 10),
-                                tol = .Machine$double.eps)
+      optim_res_neg <- stats::optimize(GCA_function_neg,
+                                       interval = c(-20, 10),
+                                       tol = .Machine$double.eps)
       # compare positive vs negative predicted response objective
       if (optim_res_neg$objective < optim_res$objective) {
         # if negative response provides the optimal value, return negative
@@ -922,76 +659,4 @@ mix_function_generator <- function(param_matrix,
     return(total_response)
   }
   return(mix_effect_fun)
-}
-
-#' Correcting Responses assuming Deactivation
-#'
-#' Given input concentrations, suppose some chemicals "deactivate" other
-#' chemicals if they have a higher weight (eg molecular weight, docking score,
-#' or affinity).  This function will adjust the true concentrations to reflect
-#' how the higher weight chemicals will substitute the lower weight chemicals.
-#' If the highest weight chemical has high enough concentration, it can dominate
-#' and result in a mixture with only one effective chemical.  We can set rules
-#' for which chemicals can substitute others using a matrix A_full.
-#'
-#' @param conc a vector of postive values representing concentrations (eg
-#'   micromol/L)
-#' @param R a vector of real-valued weights used in the objective; examples
-#'   include docking scores or molecular weights
-#' @param A_full a binary matrix.  if A_{ij}= 1, chemical i can substitute
-#'   chemical j.  The diagonal must be 1.  If A is the Id matrix, the output
-#'   adjusted concentrations will be equal to the input.
-#'
-#' @return a vector of adjusted concentrations, some of which may be 0
-#' @export
-#'
-#' @examples
-#' A_full <- matrix(1, nrow=3, ncol=3)
-#' conc <- matrix(c(4,9, 7), nrow=3, ncol=1)
-#' binding_affinity <- c(-2, -1, -0.5)
-adjust_concentrations <- function(conc, R, A_full) {
-  # scale conc for numerical accuracy?
-  active_chems <- which(conc > 0)
-  n_chem <- length(active_chems)
-  if (n_chem == 1) return(conc)
-  #normalize concentrations so that the smallest conc has value 1
-  scale_factor <- 1 / min(conc[conc > 0])
-  conc <- conc * scale_factor
-  active_conc <- conc[active_chems]
-  active_weight <- R[active_chems]
-  # subset the substitution matrix for building constrained optimization
-  A <- A_full[active_chems, active_chems]
-  K <- CVXR::Variable(rows = n_chem, cols = n_chem)
-  j_vec <- matrix(1, nrow = n_chem, ncol = 1)
-  Jo <- matrix(1, nrow = n_chem, ncol = n_chem)
-  diag(Jo) <- -1
-  # total concentration conserved
-  constraint_1 <- K %*% j_vec == active_conc
-  # allocation bounded by diagonals
-  constraint_2 <- (diag(t(K) %*% Jo) <= 0)
-  # nonnegativity
-  constraint_3 <- K >= 0
-  # Ligand-Ligand (L-L) binding respected
-  constraint_4 <- K * (1 - A) == 0
-  probl <- CVXR::Problem(
-    objective = CVXR::Minimize(sum(diag(active_weight) %*% t(K) %*% j_vec)),
-    constraints = list(
-      constraint_1,
-      constraint_2,
-      constraint_3,
-      constraint_4
-    )
-  )
-  result <- solve(probl)
-  if (result$status == "solver_error") {
-    warning("Adjusting Conc Failed")
-    return(conc / scale_factor)
-  }
-  Kp <- result$getValue(K)
-  new_conc <- rep(0, length(conc))
-  new_conc[active_chems] <- base::diag(Kp)
-  # machine precision issues, zero out small vals
-  new_conc[new_conc < 1e-8] <- 0
-  new_conc <- new_conc / scale_factor
-  return(new_conc)
 }

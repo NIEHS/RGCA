@@ -2,9 +2,53 @@
 % Please edit documentation in R/RE_nimble.R
 \name{run_RE_nimble}
 \alias{run_RE_nimble}
-\title{Nimble MCMC script to fit the manuscript model to the Tox21 data.}
+\title{Nimble MCMC script to fit a random effect Hill model.}
 \usage{
-run_RE_nimble()
+run_RE_nimble(
+  y_i,
+  Cx,
+  replicate_sets,
+  n_iter = 50000,
+  n_burn = 10000,
+  n_thin = 20,
+  prior_alpha_sd = sqrt(1000),
+  prior_theta_shape = 0.001,
+  prior_theta_rate = 0.001,
+  prior_beta_shape = 0.3,
+  prior_beta_rate = 0.3,
+  prior_sd_noninfo = 0.1
+)
+}
+\arguments{
+\item{y_i}{Response data as a matrix where each row is a chemical and each
+column is a dose.}
+
+\item{Cx}{Dose data with dimension equal to y_i.}
+
+\item{replicate_sets}{A list of arrays where each array indicates the rows of
+y_i that correspond to replicates of a single chemical}
+
+\item{n_iter}{Number of MCMC iterations to run, defaults to 50k}
+
+\item{n_burn}{Number of initial MCMC iterations to discard, defaults to 10k
+or half of n_iter, whichever is lower.}
+
+\item{n_thin}{Number of MCMC iterations to skip to approximate iid samples,
+defaults to 20.  If it is larger than difference in iterations and burn in,
+it is reset to 1.}
+
+\item{prior_alpha_sd}{hyperparameter for the sill, controls prior variance}
+
+\item{prior_theta_shape}{hyperparameter for the EC50, controls gamma shape}
+
+\item{prior_theta_rate}{hyperparameter for the EC50, controls gamma rate}
+
+\item{prior_beta_shape}{hyperparameter for the slope, controls gamma shape}
+
+\item{prior_beta_rate}{hyperparameter for the slope, controls gamma rate}
+
+\item{prior_sd_noninfo}{hyperparameter for various noise terms which use a
+weakly informative prior, controls spread from 1.  Default is 0.1.}
 }
 \value{
 nimble_samples: a list of MCMC chains with an entry for each

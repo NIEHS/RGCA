@@ -1,6 +1,3 @@
-library(dplyr)
-library(tidyr)
-
 # functions to deal with Tox21 data:
 # function to convert named array to vector
 mk_vec <- function(arow) unlist(array(arow))
@@ -42,6 +39,7 @@ oprod_NA <- function(a, b) {
 #'
 #' @examples
 read_prepared_Tox21_data <- function(df, mix_guide) {
+  require(dplyr)
   # pull mix data for computing concentrations of mixture components
   mix_df <<- df %>% filter(substr(CAS, 1, 5) == "NOCAS")
   # separate pure data for fitting tox model

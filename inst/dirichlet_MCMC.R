@@ -40,7 +40,6 @@ remove_unused_phi <- function(c_i, phi_c) {
 #'
 #' @return a list with MCMC samples for the cluster means, cluster assignments,
 #'   concentration parameter alpha, and the cluster variance sigma
-#' @export
 #'
 #' @examples
 #' y_i <- c(-1.48, -1.4, -1.16, -1.08, -1.02, 0.14, 0.51, 0.53, 0.78)
@@ -179,7 +178,6 @@ DP_MCMC_fit <- function(y_in, n_iter = 10000, sigma_in = .1) {
 #' @return a list with the cluster centers, standard deviations, approximated
 #'   probabilities, assignments, and the number of leftover or unused
 #'   clusterings
-#' @export
 #'
 #' @examples
 #' y_i <- c(-1.48, -1.4, -1.16, -1.08, -1.02, 0.14, 0.51, 0.53, 0.78)
@@ -240,7 +238,6 @@ cluster_centers <- function(cluster_chain, n_top = 5, plot_hist = TRUE) {
 #' @param n_top integer number of top clusters to select
 #'
 #' @return a list with the same attributes as the [cluster_centers()] output
-#' @export
 #'
 #' @examples
 convert_DP_pack_obj <- function(dp_fit, n_top = 5) {

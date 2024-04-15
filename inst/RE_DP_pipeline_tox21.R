@@ -1,32 +1,10 @@
 # for profiling: Rprof(), code, Rprof(NULL) summaryRprof("Rprof.out")
 
 #  Functions: ####
-library(ggplot2)
-library(reshape2)
-library(scoringRules)
-library(drc)
-
-
+require(readxl)
+require(beepr)
 
 sessionInfo()
-# investigated checkpoint package but found issues
-# rather than rbind, use data.table funcction rbindlist
-# MKL rathter than BLAS
-# Pipeline start #####
-
-source("R/helper_plots.R")
-source("R/helper_calculators.R")
-source("R/RE_dose_response_MCMC.R")
-source("R/dirichlet_MCMC.R")
-source("R/RE_nimble.R")
-
-# read in data
-source("R/tox21_prep_data.R")
-# y_i = obs responses
-# Cx = measured concentrations
-# replicate_sets = indices for replicates of each compound
-
-# Run MLE via drc package
 run_pipe <- FALSE # avoid long build times
 small_run <- TRUE
 
@@ -48,7 +26,6 @@ if (run_pipe) {
   set.seed(102)
   # fit random effects model
   re_chains <- RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = re_iter)
-  beepr::beep()
   re_par_list <- pull_parameters(re_chains)
   # if nimble is used, get re_par_list_nimble from pull_parameters_nimble(chain)
   re_par_summary <- pull_summary_parameters(re_chains, summry_stat = median)
