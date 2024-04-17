@@ -6,7 +6,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">RGCA</a>
 
@@ -34,7 +34,7 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/Spatiotemporal-Exposures-and-Toxicology/RGCA/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/NIEHS/RGCA/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -62,11 +62,6 @@
 
       <dl><dt>
           
-          <code><a href="DP_MCMC_fit.html">DP_MCMC_fit()</a></code> 
-        </dt>
-        <dd>Dirichlet Process MCMC</dd>
-      </dl><dl><dt>
-          
           <code><a href="RE_MCMC_fit.html">RE_MCMC_fit()</a></code> 
         </dt>
         <dd>Random Effect MCMC fitting</dd>
@@ -77,6 +72,11 @@
         <dd>Pull parameter posterior chains from an MCMC object.</dd>
       </dl><dl><dt>
           
+          <code><a href="pull_parameters_nimble.html">pull_parameters_nimble()</a></code> 
+        </dt>
+        <dd>Organize output of the Nimble MCMC</dd>
+      </dl><dl><dt>
+          
           <code><a href="pull_summary_parameters.html">pull_summary_parameters()</a></code> 
         </dt>
         <dd>Pull parameters from an MCMC chain</dd>
@@ -84,7 +84,7 @@
           
           <code><a href="run_RE_nimble.html">run_RE_nimble()</a></code> 
         </dt>
-        <dd>Nimble MCMC script to fit the manuscript model to the Tox21 data.</dd>
+        <dd>Nimble MCMC script to fit a random effect Hill model.</dd>
       </dl></div><div class="section level2">
       <h2 id="rgca-plotting-functions">RGCA Plotting functions<a class="anchor" aria-label="anchor" href="#rgca-plotting-functions"></a></h2>
       
@@ -97,51 +97,6 @@
       
 
       <dl><dt>
-          
-          <code><a href="make_ggplot.html">make_ggplot()</a></code> 
-        </dt>
-        <dd>Makes a ggplot of the mixture response curves</dd>
-      </dl><dl><dt>
-          
-          <code><a href="make_ggplot_many.html">make_ggplot_many()</a></code> 
-        </dt>
-        <dd>Makes a ggplot of the mixture response curves</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_dummy_mixture.html">plot_dummy_mixture()</a></code> 
-        </dt>
-        <dd>Wrapper function to plot dummy concentrations</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_mix_vs_individuals.html">plot_mix_vs_individuals()</a></code> 
-        </dt>
-        <dd>Compare individual and Mixture response</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_mixture_response.html">plot_mixture_response()</a></code> 
-        </dt>
-        <dd>Plot the mixture response</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_sample_indv.html">plot_sample_indv()</a></code> 
-        </dt>
-        <dd>Plot individual dose response curves</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_scores.html">plot_scores()</a></code> 
-        </dt>
-        <dd>Create a violin plot given a data frame with scores.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="visualize_clusters.html">visualize_clusters()</a></code> 
-        </dt>
-        <dd>Visualize Feasible Clusters</dd>
-      </dl><dl><dt>
-          
-          <code><a href="visualize_clusters_blocks.html">visualize_clusters_blocks()</a></code> 
-        </dt>
-        <dd>Visualize Feasible Clusters</dd>
-      </dl><dl><dt>
           
           <code><a href="get_mle_curve_fits.html">get_mle_curve_fits()</a></code> 
         </dt>
@@ -171,14 +126,7 @@
           
           <code><a href="create_mix_calc_from_summary.html">create_mix_calc_from_summary()</a></code> 
         </dt>
-        <dd>These functions are wrappers for the factory method mix_function_generator.
-The wrappers provide different ways of sampling the parameters.
-Creates a function that computes mixture response.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="create_mix_calc_sample_row.html">create_mix_calc_sample_row()</a></code> 
-        </dt>
-        <dd>Mixture Response Calculator Wrapper for Manuscript, matched index</dd>
+        <dd>These functions are wrappers for the factory method mix_function_generator. The wrappers provide different ways of sampling the parameters. Creates a function that computes mixture response.</dd>
       </dl><dl><dt>
           
           <code><a href="hill_function.html">hill_function()</a></code> 
@@ -191,24 +139,9 @@ Creates a function that computes mixture response.</dd>
         <dd>Inverse Hill Function Factory</dd>
       </dl><dl><dt>
           
-          <code><a href="adjust_concentrations.html">adjust_concentrations()</a></code> 
-        </dt>
-        <dd>Correcting Responses assuming Deactivation</dd>
-      </dl><dl><dt>
-          
           <code><a href="eff_response_opt.html">eff_response_opt()</a></code> 
         </dt>
         <dd>Mixture Response Optimization Routine</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_mixture_response.html">plot_mixture_response()</a></code> 
-        </dt>
-        <dd>Plot the mixture response</dd>
-      </dl><dl><dt>
-          
-          <code><a href="predict_mix_response.html">predict_mix_response()</a></code> 
-        </dt>
-        <dd>Predict Responses for a List of Calculators</dd>
       </dl><dl><dt>
           
           <code><a href="predict_mix_response_many.html">predict_mix_response_many()</a></code> 
@@ -230,12 +163,8 @@ Creates a function that computes mixture response.</dd>
       
       
 
-      <dl><dt>
-          
-          <code><a href="generate_mixture_subset.html">generate_mixture_subset()</a></code> 
-        </dt>
-        <dd>Find mixtures satisfying criteria.</dd>
-      </dl></div><div class="section level2">
+      
+    </div><div class="section level2">
       <h2 id="rgca-miscellaneous-functions">RGCA Miscellaneous functions<a class="anchor" aria-label="anchor" href="#rgca-miscellaneous-functions"></a></h2>
       
       <p class="section-desc"></p><p>Other helpful functions</p>
@@ -250,29 +179,7 @@ Creates a function that computes mixture response.</dd>
           
           <code><a href="build_replicate_matrix.html">build_replicate_matrix()</a></code> 
         </dt>
-        <dd>Builds a design matrix for replicates of dose response data for performing a
-simultaneous Gibbs update for the sill, sill random effect, and intercept
-random effect</dd>
-      </dl><dl><dt>
-          
-          <code><a href="cluster_centers.html">cluster_centers()</a></code> 
-        </dt>
-        <dd>Get the cluster results</dd>
-      </dl><dl><dt>
-          
-          <code><a href="compute_mixpred_scores.html">compute_mixpred_scores()</a></code> 
-        </dt>
-        <dd>Compute Scores for Mixture Predictions</dd>
-      </dl><dl><dt>
-          
-          <code><a href="convert_DP_pack_obj.html">convert_DP_pack_obj()</a></code> 
-        </dt>
-        <dd>Convert output from dirichletprocess package</dd>
-      </dl><dl><dt>
-          
-          <code><a href="read_prepared_Tox21_data.html">read_prepared_Tox21_data()</a></code> 
-        </dt>
-        <dd>Read preprocessed Tox21 Input data</dd>
+        <dd>Builds a design matrix for replicates of dose response data for performing a simultaneous Gibbs update for the sill, sill random effect, and intercept random effect</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
@@ -283,7 +190,7 @@ random effect</dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer></div>
