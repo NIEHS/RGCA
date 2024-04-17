@@ -43,9 +43,9 @@ library(scoringRules)
 library(RGCA)
 library(utils)
 
-source("../inst/manuscript_plots.R")
-source("../inst/tox21_prep_data.R")
-source("../inst/helper_pipeline.R")
+source("../../inst/manuscript_plots.R")
+source("../../inst/tox21_prep_data.R")
+source("../../inst/helper_pipeline.R")
 
 
 ```
