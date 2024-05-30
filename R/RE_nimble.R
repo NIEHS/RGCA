@@ -44,13 +44,16 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
   if (n_thin >= n_iter - n_burn) n_thin <- 1
   code <- nimble::nimbleCode({
     for (chm in 1:CM) {
-      a1[chm] ~ dnorm(0, sd = sqrt(1000))
-      theta1[chm] ~ dgamma(shape = 1e-3, rate = 1e-3)
-      beta1[chm] ~ dgamma(shape = .3, rate = .3)
+      a1[chm] ~ dnorm(0, sd = prior_alpha_sd)
+      theta1[chm] ~ dgamma(shape = prior_theta_shape, rate = prior_theta_rate)
+      beta1[chm] ~ dgamma(shape = prior_beta_shape, rate = prior_beta_rate)
       # give each chemical a noise term
-      sigma_eps[chm] ~ dinvgamma(shape = 0.1, rate = 0.1)
-      sigma_u[chm] ~ dinvgamma(shape = 0.1, rate = 0.1)
-      sigma_v[chm] ~ dinvgamma(shape = 0.1, rate = 0.1)
+      sigma_eps[chm] ~ dinvgamma(shape = prior_sd_noninfo,
+                                 rate = prior_sd_noninfo)
+      sigma_u[chm] ~ dinvgamma(shape = prior_sd_noninfo,
+                               rate = prior_sd_noninfo)
+      sigma_v[chm] ~ dinvgamma(shape = prior_sd_noninfo,
+                               rate = prior_sd_noninfo)
       for (j in 1:n_reps[chm]) {
         # j is the relative index for replicates
         # replicate_matrix[j, chm]: gets the correct index for the replicate
@@ -72,13 +75,14 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
 
   ## constants, data, and initial values
   nchm <- length(replicate_sets)
+  n_reps <- unlist(lapply(replicate_sets, length))
+  max_repls = max(n_reps)
   replicate_matrix <- matrix(unlist(lapply(replicate_sets, function(x) {
-    a <- rep(0, 6)
+    a <- rep(0, max_repls)
     a[1:length(x)] <- x
     return(a)
-  })), nrow = 6)
-  n_reps <- unlist(lapply(replicate_sets, length))
-  # for random effects, fix first replicate to 0 my setting variance to 0
+  })), nrow = max_repls)
+  # for random effects, fix first replicate to 0 by setting variance to 0
   identifiability_constr <- replicate_matrix * 0 + 1
   # 0 doesnt work, use small value instead
   identifiability_constr[1, ] <- 1e-6
@@ -91,7 +95,13 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
     replicate_matrix = replicate_matrix,
     n_reps = n_reps,
     CM = ncol(replicate_matrix),
-    identifiability_constr = identifiability_constr
+    identifiability_constr = identifiability_constr,
+    prior_theta_shape = prior_theta_shape,
+    prior_theta_rate = prior_theta_rate,
+    prior_beta_shape = prior_beta_shape,
+    prior_beta_rate = prior_beta_rate,
+    prior_sd_noninfo = prior_sd_noninfo,
+    prior_alpha_sd = prior_alpha_sd
   )
 
   data <- list(
@@ -101,8 +111,8 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
 
   inits <- list(
     beta1 = rep(1, nchm),
-    theta1 = rep(1e-6, nchm),
-    a1 = rep(10, nchm),
+    theta1 = rep(1, nchm),#theta1 = rep(1e-6, nchm),
+    a1 = rep(1, nchm),#a1 = rep(10, nchm),
     sigma_eps = rep(1, nchm),
     sigma_u = rep(1, nchm),
     sigma_v = rep(1, nchm),
