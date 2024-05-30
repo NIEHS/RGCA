@@ -76,7 +76,7 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
   ## constants, data, and initial values
   nchm <- length(replicate_sets)
   n_reps <- unlist(lapply(replicate_sets, length))
-  max_repls = max(n_reps)
+  max_repls <- max(n_reps)
   replicate_matrix <- matrix(unlist(lapply(replicate_sets, function(x) {
     a <- rep(0, max_repls)
     a[1:length(x)] <- x
@@ -111,8 +111,8 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
 
   inits <- list(
     beta1 = rep(1, nchm),
-    theta1 = rep(1, nchm),#theta1 = rep(1e-6, nchm),
-    a1 = rep(1, nchm),#a1 = rep(10, nchm),
+    theta1 = rep(1, nchm),
+    a1 = rep(1, nchm),
     sigma_eps = rep(1, nchm),
     sigma_u = rep(1, nchm),
     sigma_v = rep(1, nchm),
