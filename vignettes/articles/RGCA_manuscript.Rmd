@@ -68,7 +68,7 @@ head(replicate_sets)
 
 A random effect model is fit to each chemical indexed by $i$, $$  R_i(c) =f_i(c|a_i,\theta_i,\beta_i, u_{ij}, v_{ij}) =
 \frac{a_i+u_{ij}}{1+\left(\frac{\theta_i}{c}\right)^{\beta_i}} + v_{ij} +
-\epsilon_{ijc} $$ The MCMC script uses standard methods and an alternative script is available for Nimble.
+\epsilon_{ijc} $$ The MCMC script uses standard methods.
 
 ```{r RE-MCMC}
 re_iter <- 1e4 #for manuscript we use 2.5e4 = 25,000 iterations

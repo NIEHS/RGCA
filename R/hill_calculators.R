@@ -172,7 +172,8 @@ pull_parameters <- function(re_chains, summry_stat = stats::median,
 #' output object that contains posterior samples after burn-in and thinning.
 #' This function organizes the samples for convenient downstream usage.
 #'
-#' @param nimble_samples the object returned by the [run_RE_nimble] function.
+#' @param nimble_samples the object returned by the run_RE_nimble function found
+#'   in the inst folder.
 #' @param summry_stat The function used to compute the summarizing statistic for
 #'   the slope parameter.  Default function is median.
 #' @param input_replicates The optional list of indices of replicates for each
@@ -181,7 +182,6 @@ pull_parameters <- function(re_chains, summry_stat = stats::median,
 #'
 #' @return A named list of arrays where each array is a posterior thinned sample
 #'   from the nimble chain.
-#' @export
 pull_parameters_nimble <- function(nimble_samples,
                                    summry_stat = stats::median,
                                    input_replicates = NA) {

@@ -31,7 +31,6 @@ globalVariables(c("CM", "a1", "u", "theta1", "x", "beta1", "v"))
 #'
 #' @return nimble_samples: a list of MCMC chains with an entry for each
 #'   parameter of the model.
-#' @export
 run_RE_nimble <- function(y_i, Cx, replicate_sets,
                           n_iter = 5e4, n_burn = 1e4, n_thin = 20,
                           prior_alpha_sd = sqrt(1000),

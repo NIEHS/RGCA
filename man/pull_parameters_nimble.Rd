@@ -11,7 +11,8 @@ pull_parameters_nimble(
 )
 }
 \arguments{
-\item{nimble_samples}{the object returned by the \link{run_RE_nimble} function.}
+\item{nimble_samples}{the object returned by the run_RE_nimble function found
+in the inst folder.}
 
 \item{summry_stat}{The function used to compute the summarizing statistic for
 the slope parameter.  Default function is median.}
