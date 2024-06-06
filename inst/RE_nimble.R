@@ -139,6 +139,59 @@ run_RE_nimble <- function(y_i, Cx, replicate_sets,
   return(nimble_samples)
 }
 
+
+#' Organize output of the Nimble MCMC
+#'
+#' Fitting a random effect model to data using a Bayesian method like MCMC
+#' creates posterior samples.  Our implementation with Nimble creates a large
+#' output object that contains posterior samples after burn-in and thinning.
+#' This function organizes the samples for convenient downstream usage.
+#'
+#' @param nimble_samples the object returned by the run_RE_nimble function found
+#'   in the inst folder.
+#' @param summry_stat The function used to compute the summarizing statistic for
+#'   the slope parameter.  Default function is median.
+#' @param input_replicates The optional list of indices of replicates for each
+#'   chemical.  By default, input_replicates is NA and the method assumes there
+#'   exists a global var called replicate_sets
+#'
+#' @return A named list of arrays where each array is a posterior thinned sample
+#'   from the nimble chain.
+pull_parameters_nimble <- function(nimble_samples,
+                                   summry_stat = stats::median,
+                                   input_replicates = NA) {
+  if (is.list(input_replicates)) replicate_sets <- input_replicates
+  ec50_idx <- grep("theta", colnames(nimble_samples))
+  ec50_sample <- nimble_samples[, ec50_idx]
+  n_chems <- ncol(ec50_sample)
+  sill_sample <- nimble_samples[, 1:n_chems]
+  slope_idx <- grep("beta", colnames(nimble_samples))
+  slope_sample <- nimble_samples[, slope_idx]
+  u_RE_sd_idx <- grep("sigma_u", colnames(nimble_samples))
+  u_RE_sd_est <- nimble_samples[, u_RE_sd_idx]
+  v_RE_sd_idx <- grep("sigma_v", colnames(nimble_samples))
+  v_RE_sd_est <- nimble_samples[, v_RE_sd_idx]
+  u_RE_cent_idx <- setdiff(grep("u", colnames(nimble_samples)), u_RE_sd_idx)
+  u_RE_samples <- nimble_samples[, u_RE_cent_idx]
+  u_RE_center <- sapply(1:n_chems,
+                        FUN = function(ridx) {
+                          stats::median(u_RE_samples[, replicate_sets[[ridx]]])
+                        })
+  # slopes must be estimated for DP clustering
+  phi_c <- apply(slope_sample, MARGIN = 2, summry_stat)
+  return(list(
+    "sill_sample" = sill_sample,
+    "ec50_sample" = ec50_sample,
+    "u_RE_center" = u_RE_center,
+    "u_RE_sd" = u_RE_sd_est,
+    "v_RE_sd" = v_RE_sd_est,
+    "slope_sample" = slope_sample,
+    "slope_params" = phi_c
+  ))
+}
+
+
+
 if (FALSE) {
   # -----------  DP with slopes  -------------
   codeDP <- nimbleCode({
