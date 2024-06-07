@@ -86,7 +86,7 @@ test_that("mix_response_prediction_works", {
     synergy_const = 0,
     interval_sign = 1
   )
-  # Check GCA equation solving, match saved state (snapshot April 2024)
+  # Check GCA equation solving, match saved state (snapshot June 2024)
   expect_snapshot(optimize(GCA_function,
     interval = c(-20, 10),
     tol = .Machine$double.eps
@@ -134,12 +134,12 @@ test_that("summary_stats_are_correct", {
   fake_MCMC$sill_mideffect_record <- matrix(rnorm(2 * n_chems * iters),
     nrow = iters
   )
-  fake_MCMC$sigma <- matrix(rnorm(n_chems * iters), nrow = iters)
-  fake_MCMC$tau <- matrix(rnorm(iters), nrow = iters)
+  fake_MCMC$sigma <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
+  fake_MCMC$tau <- matrix(abs(rnorm(iters)), nrow = iters)
   fake_MCMC$u_RE <- matrix(rnorm(n_reps * n_chems * iters), nrow = iters)
   fake_MCMC$v_RE <- matrix(rnorm(n_reps * n_chems * iters), nrow = iters)
-  fake_MCMC$u_RE_sd <- matrix(rnorm(n_chems * iters), nrow = iters)
-  fake_MCMC$v_RE_sd <- matrix(rnorm(n_chems * iters), nrow = iters)
+  fake_MCMC$u_RE_sd <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
+  fake_MCMC$v_RE_sd <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
 
   # the summary stats should correspond to the median of the thinned samples
   expect_snapshot(pull_summary_parameters(fake_MCMC))
@@ -148,7 +148,18 @@ test_that("summary_stats_are_correct", {
   repl_fun <- function(idx) idx + ((1:n_reps) - 1) * 10
   replicate_sets <<- lapply(1:n_chems, repl_fun)
   # the pulled parameters should correspond to the thinned samples only
-  expect_snapshot(pull_parameters(fake_MCMC, input_replicates = replicate_sets))
+  param_list <- pull_parameters(fake_MCMC, input_replicates = replicate_sets)
+  expect_snapshot(param_list)
+
+  # test the mix calculator generator using the param list
+  clust_name <- paste(rep(c(1, 2), 5), collapse = " ")
+  cluster_weight <- 1
+  names(cluster_weight) <- clust_name
+  clust_list <- list("cluster_assign" = cluster_weight)
+  param_list <- c(param_list, clust_list)
+  mix_calc_test <- create_mix_calc(idx = 1, par_list = param_list)
+  # test that the prediction is a number
+  expect_equal(typeof(mix_calc_test(c(1:10))), "double")
 })
 
 test_that("random_cluster_reproducible_with_seed", {
@@ -179,4 +190,23 @@ test_that("predicting_many_mix_responses_produces_correct_dim", {
   expect_type(predict_resp_matrix, "list")
   expect_equal(length(predict_resp_matrix), n_methods)
   expect_equal(dim(predict_resp_matrix[[1]]), c(n_bootstraps, n_dose))
+})
+
+test_that("MLE_curve_fit_returns_estimates", {
+  doses <- 10
+  replicate_sets <- list(c(1, 2), c(3, 4), c(5, 6), c(7, 8))
+  repls <- 2
+  chems <- length(replicate_sets)
+  set.seed(1)
+  y_i <- matrix(abs(rnorm(doses * chems * repls)),
+    nrow = repls * chems,
+    ncol = doses
+  )
+  Cx <- matrix(rep(1:10, each = repls * chems),
+    nrow = repls * chems,
+    ncol = doses
+  )
+  drc_fit <- get_mle_curve_fits(y_i, Cx, replicate_sets)
+  # check that each chemical got estimates for 3 parameters
+  expect_equal(dim(drc_fit), c(chems, 3))
 })
