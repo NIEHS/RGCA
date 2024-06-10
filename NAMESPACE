@@ -2,8 +2,6 @@
 
 export(RE_MCMC_fit)
 export(create_mix_calc)
-export(create_mix_calc_clustered)
-export(create_mix_calc_from_summary)
 export(eff_response_opt)
 export(get_mle_curve_fits)
 export(hill_function)

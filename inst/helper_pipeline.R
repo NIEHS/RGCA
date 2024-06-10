@@ -163,6 +163,124 @@ create_mix_calc_sample_row <- function(idx, par_list, add_RE = TRUE) {
   return(mixture_calculator)
 }
 
+#--------------------- Mix Calulators ------------------- ####
+#' These functions are wrappers for the factory method mix_function_generator.
+#' The wrappers provide different ways of sampling the parameters.
+
+#' Creates a function that computes mixture response.
+#'
+#' A factory method that returns a function that computes the mixture response.
+#' Uses summary statistics to create a random sample rather than directly
+#' sampling from the posterior MCMC chains
+#'
+#' @param idx Specifies which clustering to apply to the parameters
+#' @param par_list Contains all estimated parameters and DP cluster options
+#'
+#' @return a function that takes a concentration vector as input and yields a
+#' predicted response as output
+#' ie a "calculator" for the mixture effect given component concentrations
+#'
+create_mix_calc_from_summary <- function(idx, par_list) {
+  # bootstrap the cluster slope from top clusters
+  cluster_name <- names(par_list$cluster_assign[idx])
+  cluster_assign_vec <- as.numeric(strsplit(cluster_name, split = " ")[[1]])
+  slope_mean <- par_list$centers
+  # For summary, dont need: slope_sd <- par_list$cent_sd
+  if (is.matrix(par_list$centers)) {
+    slope_mean <- par_list$centers[idx, ]
+    # dont need again: slope_sd <- par_list$cent_sd[idx, ]
+  }
+  # must sample both from same idx since diff idx may have small likelihood
+  n_chem_pars <- length(par_list$sill_params)
+  tot_sd <- sqrt(par_list$u_RE_sd_params^2 + par_list$sill_sd^2)
+  sill_params_boot <- truncnorm::rtruncnorm(
+    n = n_chem_pars,
+    mean = par_list$sill_params,
+    sd = tot_sd
+  )
+  ec50_params_boot <- truncnorm::rtruncnorm(
+    n = n_chem_pars,
+    a = 0,
+    mean = par_list$ec50_params,
+    sd = par_list$ec50_stdev
+  )
+  #if bootstrap: rnorm(n = n_chem_pars,mean = 0,sd = par_list$v_RE_sd_params)
+  max_effect_R <- max(par_list$sill_params, sill_params_boot)
+  # test: control has maxR=100
+  bootstrap_param_matrix <- as.matrix(cbind(
+    "a" = sill_params_boot,
+    "b" = ec50_params_boot,
+    "c" = slope_mean,
+    "max_R" = max_effect_R,
+    "d" = 0
+  ))
+  mixture_calculator <- mix_function_generator(
+    bootstrap_param_matrix,
+    cluster_assign_vec
+  )
+  return(mixture_calculator)
+}
+
+
+
+#' Mixture Response Calculator Wrapper for Manuscript using Dirichlet Process
+#'
+#' A factory method that returns a function that computes the mixture response.
+#' Samples directly from the posterior MCMC chains for the EC50 and sill
+#' parameters. Slope is taken from the Dirichlet Process clustering.  Noise is
+#' added to some parameters according to the random effect variance.
+#'
+#'
+#' @param idx Specifies which clustering to apply to the parameters
+#' @param par_list a data frame with individual chemical dose response
+#'   parameters
+#' @param add_RE boolean to include or exclude random effect variances
+#' @param unit_slopes boolean to fix slopes to 1 (but still use slope
+#'   clustering) Used for special case of GCA, where slope = 1
+#'
+#' @return function to take a concentration vector as input and response as
+#'   output
+create_mix_calc_clustered <- function(idx,
+                                      par_list,
+                                      add_RE = TRUE,
+                                      unit_slopes = FALSE) {
+  # bootstrap the cluster slope from top clusters
+  cluster_name <- names(par_list$cluster_assign[idx])
+  cluster_assign_vec <- as.numeric(strsplit(cluster_name, split = " ")[[1]])
+  # sample the cluster value rather than use mean/sd
+  slope_mean <- par_list$centers[idx, ]
+  # if add noise from DP cluster to centers:
+  # sample rnorm(mean = 0, sd = unique(par_list$cent_sd[idx, ])
+  # add to mean using slope_mean + slope_noise[cluster_assign_vec]
+  if (unit_slopes) slope_mean <- slope_mean * 0 + 1
+  # sample values for the sill parameter, can be independent
+  n_chem_pars <- ncol(par_list$sill_sample)
+  sill_params_samp <- apply(par_list$sill_sample,
+                            MARGIN = 2,
+                            FUN = function(colx) sample(colx, 1))
+  # add iid gauss noise for RE variance
+  sill_RE_boot <- stats::rnorm(n_chem_pars,
+                               mean = par_list$u_RE_center,
+                               sd = par_list$u_RE_sd)
+  sill_params_boot <- sill_params_samp
+  if (add_RE) sill_params_boot <- sill_params_boot + sill_RE_boot
+  # sample ec50
+  ec50_params_boot <- apply(par_list$ec50_sample,
+                            MARGIN = 2,
+                            FUN = function(colx) sample(colx, 1))
+  # We dont sample intercept RE: assume intercept 0, d=0
+  # TODO consider empirical max, or clusterwise max
+  max_effect_R <- max(sill_params_boot)
+  # generate calculator for
+  bootstrap_param_matrix <- as.matrix(cbind("a" = sill_params_boot,
+                                            "b" = ec50_params_boot,
+                                            "c" = slope_mean,
+                                            "max_R" = max_effect_R,
+                                            "d" = 0))
+  mixture_calculator <- mix_function_generator(bootstrap_param_matrix,
+                                               cluster_assign_vec)
+  return(mixture_calculator)
+}
 
 
 #' Predict Responses for a List of Calculators

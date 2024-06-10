@@ -130,8 +130,8 @@ test_that("summary_stats_are_correct", {
   iters <- 300
   n_chems <- 10
   n_reps <- 3
-  fake_MCMC$slope_record <- matrix(rnorm(n_chems * iters), nrow = iters)
-  fake_MCMC$sill_mideffect_record <- matrix(rnorm(2 * n_chems * iters),
+  fake_MCMC$slope_record <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
+  fake_MCMC$sill_mideffect_record <- matrix(abs(rnorm(2 * n_chems * iters)),
     nrow = iters
   )
   fake_MCMC$sigma <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
@@ -142,8 +142,15 @@ test_that("summary_stats_are_correct", {
   fake_MCMC$v_RE_sd <- matrix(abs(rnorm(n_chems * iters)), nrow = iters)
 
   # the summary stats should correspond to the median of the thinned samples
-  expect_snapshot(pull_summary_parameters(fake_MCMC))
+  param_summary <- pull_summary_parameters(fake_MCMC)
+  expect_snapshot(param_summary)
 
+  # prepare a cluster assignment
+  clust_name <- paste(rep(c(1, 2), 5), collapse = " ")
+  cluster_weight <- 1
+  names(cluster_weight) <- clust_name
+  clust_list <- list("cluster_assign" = cluster_weight)
+  
   # for the second parameter summary function, need replicate sets
   repl_fun <- function(idx) idx + ((1:n_reps) - 1) * 10
   replicate_sets <<- lapply(1:n_chems, repl_fun)
@@ -152,14 +159,10 @@ test_that("summary_stats_are_correct", {
   expect_snapshot(param_list)
 
   # test the mix calculator generator using the param list
-  clust_name <- paste(rep(c(1, 2), 5), collapse = " ")
-  cluster_weight <- 1
-  names(cluster_weight) <- clust_name
-  clust_list <- list("cluster_assign" = cluster_weight)
   param_list <- c(param_list, clust_list)
   mix_calc_test <- create_mix_calc(idx = 1, par_list = param_list)
   # test that the prediction is a number
-  expect_equal(typeof(mix_calc_test(c(1:10))), "double")
+  expect_equal(typeof(mix_calc_test(c(1:n_chems))), "double")
 })
 
 test_that("random_cluster_reproducible_with_seed", {
