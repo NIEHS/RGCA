@@ -150,7 +150,7 @@ test_that("summary_stats_are_correct", {
   cluster_weight <- 1
   names(cluster_weight) <- clust_name
   clust_list <- list("cluster_assign" = cluster_weight)
-  
+
   # for the second parameter summary function, need replicate sets
   repl_fun <- function(idx) idx + ((1:n_reps) - 1) * 10
   replicate_sets <<- lapply(1:n_chems, repl_fun)
