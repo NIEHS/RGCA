@@ -78,20 +78,6 @@ build_replicate_matrix <- function(v_list) {
   return(V_mat)
 }
 
-
-# an older method to initialize the random effects, not used
-init_u_RE <- function(repl_matrix, take_RE = TRUE) {
-  max_curve_values <- apply(repl_matrix,
-                            MARGIN = 1,
-                            function(x) max(x, na.rm = TRUE))
-  offset <- max_curve_values - max_curve_values[1]
-  if (take_RE) {
-    return(offset)
-  }
-  return(stats::median(max_curve_values))
-}
-
-
 # Fit RE hill model to arbitrary dose response data.
 # Input:
 # n_c = number of chemicals (with replicates, may be redundant)

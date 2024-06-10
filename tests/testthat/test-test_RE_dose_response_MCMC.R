@@ -56,9 +56,28 @@ test_that("Random Effect MCMC works", {
   Cx <- do.call(rbind, rep(list(Cx), sum(n_replicates)))
   # now have obs and doses, can run MCMC.  Large list returned, use snapshot
   expect_snapshot(RE_MCMC_fit(y_i,
-                              Cx,
-                              replicate_sets,
-                              n_iter = 100,
-                              n_hill_par = 3))
+    Cx,
+    replicate_sets,
+    n_iter = 100,
+    n_hill_par = 3
+  ))
   # MCMC run is too short to test against true params
+})
+
+test_that("product_functions_work", {
+  n <- 10
+  a <- matrix(rnorm(n^2), nrow = n)
+  b <- rnorm(n)
+  c <- matrix(rnorm(n^2), nrow = n)
+  # quadratic product, returns first entry?
+  expect_type(qprod_NA(a, b, c), type = "double")
+  a[1, 2] <- NA
+  c[2, 1] <- NA
+  b[2] <- NA
+  expect_type(qprod_NA(a, b, c), type = "double")
+
+  # outer product with null test
+  expect_equal(dim(oprod_NA(a[1, ], b)), c(n - 1, n - 1))
+  # vector product
+  expect_equal(length(vprod_NA(as.matrix(a[1, ]), as.matrix(b))), 1)
 })
