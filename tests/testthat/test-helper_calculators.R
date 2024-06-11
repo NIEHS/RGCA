@@ -133,8 +133,45 @@ test_that("mix_response_prediction_works", {
     dose_range, dose_range,
     dose_range, dose_range
   ))
-  # test that mixture doses give expected response (snapshot April 2024)
+  # test that mixture doses give expected response (snapshot June 2024)
   expect_snapshot(apply(dose_matrix, MARGIN = 1, mix_function))
+
+  # generate a mix function assuming concentration addition
+  mix_function_CA <- mix_function_generator(param_matrix,
+    clust_assign,
+    get_counts = FALSE,
+    scale_CA = TRUE,
+    synergy_const = 0
+  )
+  expect_equal(
+    length(apply(dose_matrix, MARGIN = 1, mix_function_CA)),
+    nrow(dose_matrix)
+  )
+
+  # Test the negative sill case
+  param_matrix[1, 1] <- -param_matrix[1, 1]
+  param_matrix[4, 1] <- -param_matrix[4, 1]
+  mix_function_neg <- mix_function_generator(param_matrix,
+    clust_assign,
+    get_counts = FALSE,
+    scale_CA = FALSE,
+    synergy_const = 0
+  )
+  negative_response <- any(apply(dose_matrix, MARGIN = 1, mix_function_neg) < 0)
+  expect_true(negative_response)
+
+  # test that we can get the number of solutions
+  mix_fun_solutions <- mix_function_generator(param_matrix,
+    clust_assign,
+    get_counts = TRUE,
+    scale_CA = FALSE,
+    synergy_const = 0
+  )
+  # numerical precision issues...generally there should be 1,2, or 3 solutions
+  expect_equal(
+    unique(apply(dose_matrix, MARGIN = 1, mix_fun_solutions)),
+    c(0, 1)
+  )
 })
 
 
@@ -178,6 +215,13 @@ test_that("summary_stats_are_correct", {
   mix_calc_test <- create_mix_calc(idx = 1, par_list = param_list)
   # test that the prediction is a number
   expect_equal(typeof(mix_calc_test(c(1:n_chems))), "double")
+  # test that predict works with unit slope
+  mix_calc_test_units <- create_mix_calc(
+    idx = 1,
+    par_list = param_list,
+    unit_slopes = TRUE
+  )
+  expect_equal(typeof(mix_calc_test_units(c(1:n_chems))), "double")
 })
 
 test_that("random_cluster_reproducible_with_seed", {
@@ -239,4 +283,9 @@ test_that("MLE_curve_fit_returns_estimates", {
   drc_fit <- get_mle_curve_fits(y_i, Cx, replicate_sets)
   # check that each chemical got estimates for 3 parameters
   expect_equal(dim(drc_fit), c(chems, 3))
+  # check that null value is handled
+  Cx[1, ] <- NA
+  Cx[2, ] <- NA
+  drc_fit <- get_mle_curve_fits(y_i, Cx, replicate_sets)
+  expect_equal(drc_fit[1, ], rep(0, 3))
 })
