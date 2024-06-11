@@ -102,6 +102,21 @@ test_that("mix_response_prediction_works", {
     tol = .Machine$double.eps
   ))
 
+  # test the 0 case
+  GCA_function_zero <- eff_response_opt(hill_inverse_list,
+    conc_vec = c(0, 0, 0),
+    synergy_const = 0,
+    interval_sign = 1
+  )
+  zero_optim <- optimize(GCA_function_zero,
+    interval = c(-20, 10),
+    tol = .Machine$double.eps
+  )$minimum
+  expect_equal(zero_optim,
+    -20,
+    tolerance = 1e-6
+  )
+
   # specify a clustering
   clust_assign <- c(1, 1, 2, 1)
   # generate the mix response function
@@ -193,6 +208,18 @@ test_that("predicting_many_mix_responses_produces_correct_dim", {
   expect_type(predict_resp_matrix, "list")
   expect_equal(length(predict_resp_matrix), n_methods)
   expect_equal(dim(predict_resp_matrix[[1]]), c(n_bootstraps, n_dose))
+
+  # test with NA concentrations: returns 0 by default
+  chem_conc_matrix[1, 1] <- NA
+  predict_resp_matrix_NA <- predict_mix_response_many(
+    n_dose,
+    chem_conc_matrix,
+    bootstrap_calc_list
+  )
+  expect_type(predict_resp_matrix_NA, "list")
+  expect_equal(length(predict_resp_matrix_NA), n_methods)
+  expect_equal(dim(predict_resp_matrix_NA[[1]]), c(n_bootstraps, n_dose))
+  expect_equal(predict_resp_matrix_NA[[1]][, 1], rep(0, n_bootstraps))
 })
 
 test_that("MLE_curve_fit_returns_estimates", {
