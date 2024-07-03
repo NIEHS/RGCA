@@ -6,6 +6,9 @@ template:
 development:
   mode: auto
 
+home:
+  readme: true  
+
 reference:
   - title: RGCA MCMC functions
     desc: Functions related to MCMC parameter estimation
