@@ -3,8 +3,7 @@
 [![test-coverage](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/test-coverage.yaml)
 [![cov](https://NIEHS.github.io/RGCA/badges/coverage.svg)](https://github.com/NIEHS/RGCA/actions)
 [![pkgdown](https://github.com/NIEHS/RGCA/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/NIEHS/RGCA/actions/workflows/pkgdown.yaml)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 # RGCA
 Reflected Generalized Concentration Addition: A geometric, piecewise inverse function for 3+ parameter sigmoidal (e.g. hill) models used in chemical mixture concentration-response modeling
