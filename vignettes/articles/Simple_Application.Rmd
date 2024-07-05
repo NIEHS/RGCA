@@ -38,7 +38,7 @@ Additivity).  If all chemicals are added to separate groups, the prediction is
 equivalent to independent action (AKA response addition, Bliss independence).
 
 ```{r}
-# Example 1: concentration addition 
+# Example 1: concentration addition
 cluster_assign_vec <- c(1, 1, 1)
 # Example 2: independent action
 cluster_assign_vec <- c(1, 2, 3)
@@ -91,20 +91,20 @@ Three pieces of data are needed:  the responses, the doses, and a list of the
 replicates. We will sample curves using the specified parameters.
 ```{r Simulate data}
 set.seed(123)
-replicate_sets = list(c(1,2,3), c(4,5), c(6,7,8))
-n_repls = max(unlist(replicate_sets))
-doses = 1/ (10^seq(2, -3, length.out = n_samps))
-Cx = matrix(doses, nrow = n_repls, ncol = n_samps, byrow = T)
+replicate_sets <- list(c(1, 2, 3), c(4, 5), c(6, 7, 8))
+n_repls <- max(unlist(replicate_sets))
+doses <- 1/ (10^seq(2, -3, length.out = n_samps))
+Cx <- matrix(doses, nrow = n_repls, ncol = n_samps, byrow = TRUE)
 # specify which rows of the data will correspond to which parameter
-data = matrix(0, nrow = n_repls, ncol = n_samps)
+data <- matrix(0, nrow = n_repls, ncol = n_samps)
 #iterate over the parameter sets
-for(rep_idx in seq_along(replicate_sets)){
+for (rep_idx in seq_along(replicate_sets)){
   # iterate over replicates
-  for(row_idx in replicate_sets[[rep_idx]]){
+  for (row_idx in replicate_sets[[rep_idx]]){
     hill_params <- param_matrix[rep_idx,1:3]
     # add random effect for sill
-    samp_sd_u = ifelse(row_idx == replicate_sets[[rep_idx]][1], 0, 1)
-    hill_params[['a']] <- hill_params[['a']] + rnorm(1, sd=samp_sd_u)
+    samp_sd_u <- ifelse(row_idx == replicate_sets[[rep_idx]][1], 0, 1)
+    hill_params[["a"]] <- hill_params[["a"]] + rnorm(1, sd=samp_sd_u)
     data[row_idx,] <- sapply(doses, FUN = function(d) {
       do.call(hill_function, as.list(c(hill_params, conc = d)))
     })
