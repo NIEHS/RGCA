@@ -2,12 +2,15 @@ url: https://niehs.github.io/RGCA/
 
 template:
   bootstrap: 5
+  bootswatch: minty
 
 development:
   mode: auto
 
-home:
-  readme: true  
+navbar:
+  structure:
+    left:  [reference, articles, search]
+    right: [github]
 
 reference:
   - title: RGCA MCMC functions
