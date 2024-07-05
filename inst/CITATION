@@ -1,4 +1,4 @@
-citHeader("To cite package sf in publications, please use:")
+citHeader("To cite package RGCA in publications, please use:")
 
 bibentry(bibtype = "article",
   author= "Daniel Zilber and Kyle P Messier",
