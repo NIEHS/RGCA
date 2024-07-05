@@ -4,9 +4,6 @@ template:
   bootstrap: 5
   bootswatch: minty
 
-development:
-  mode: auto
-
 navbar:
   structure:
     left:  [reference, articles, search]
