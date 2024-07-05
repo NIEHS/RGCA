@@ -3,7 +3,7 @@ title: "Simple Application of RGCA"
 author: "Daniel Zilber"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{RGCA}
+  %\VignetteIndexEntry{Simple Application of RGCA}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -93,7 +93,7 @@ replicates. We will sample curves using the specified parameters.
 set.seed(123)
 replicate_sets <- list(c(1, 2, 3), c(4, 5), c(6, 7, 8))
 n_repls <- max(unlist(replicate_sets))
-doses <- 1/ (10^seq(2, -3, length.out = n_samps))
+doses <- 1 / (10^seq(2, -3, length.out = n_samps))
 Cx <- matrix(doses, nrow = n_repls, ncol = n_samps, byrow = TRUE)
 # specify which rows of the data will correspond to which parameter
 data <- matrix(0, nrow = n_repls, ncol = n_samps)
@@ -101,28 +101,28 @@ data <- matrix(0, nrow = n_repls, ncol = n_samps)
 for (rep_idx in seq_along(replicate_sets)){
   # iterate over replicates
   for (row_idx in replicate_sets[[rep_idx]]){
-    hill_params <- param_matrix[rep_idx,1:3]
+    hill_params <- param_matrix[rep_idx, 1:3]
     # add random effect for sill
     samp_sd_u <- ifelse(row_idx == replicate_sets[[rep_idx]][1], 0, 1)
-    hill_params[["a"]] <- hill_params[["a"]] + rnorm(1, sd=samp_sd_u)
-    data[row_idx,] <- sapply(doses, FUN = function(d) {
+    hill_params[["a"]] <- hill_params[["a"]] + rnorm(1, sd = samp_sd_u)
+    data[row_idx, ] <- sapply(doses, FUN = function(d) {
       do.call(hill_function, as.list(c(hill_params, conc = d)))
     })
   }
 }
 # now we add iid noise to simulate observations
-noisy_data = data + matrix(rnorm(length(data), sd = 0.25), nrow = 8)
+noisy_data <- data + matrix(rnorm(length(data), sd = 0.25), nrow = 8)
 ```
 The output is plotted and looks reasonable.
 ```{r plot data}
-matplot(doses,t(data), type = "l", log = "x")
-matplot(doses, t(noisy_data), type = "p",add = T, pch = 1)
+matplot(doses, t(data), type = "l", log = "x")
+matplot(doses, t(noisy_data), type = "p", add = TRUE, pch = 1)
 ```
 Now we can run our custom MCMC script to fit the data.
 ```{r}
-RE_mcmc_chains = RE_MCMC_fit(y_i = noisy_data,
+RE_mcmc_chains <- RE_MCMC_fit(y_i = noisy_data,
             Cx = Cx,
-            replicate_sets = replicate_sets)
+           replicate_sets = replicate_sets)
 ```
 We use a helper function to extract the relevant parameters and compare to the
 true parameters.
