@@ -29,3 +29,10 @@ This inverse provides a wide enough support to satisfy the invertibility require
 
 ## Abstract:  
   Environmental toxicants overwhelmingly occur together as mixtures. The variety of possible chemical interactions makes it difficult to predict the danger of the mixture. In this work, \hl{we propose the novel Reflected Generalized Concentration Addition (RGCA), a piece-wise, geometric technique for sigmoidal dose-responsed inverse functions that extends the use of generalized concentration addition (GCA) for 3+ parameter  models.  Since experimental tests of all relevant mixtures is costly and intractable, we rely only on the individual chemical dose responses. Additionally, RGCA enhances} the classical two-step model for the cumulative effects of mixtures, which assumes a combination of GCA and  independent action (IA).  We explore how various clustering methods can dramatically improve predictions.  We compare our technique to the IA, CA, and GCA models and show in a simulation study that \hl{the two-step approach performs well under a variety of true models. We then apply our method to a challenging data set of individual chemical and mixture responses where the target is an androgen receptor (Tox21 AR-luc). Our results show significantly improved predictions for larger mixtures. Our work complements ongoing efforts to predict environmental exposure to various chemicals and offers a starting point for combining different exposure predictions to quantify a total risk to health.
+
+## Citation
+
+To cite the `RGCA` package in publications, use:
+
+```{r, echo=FALSE, results='asis'}
+citation("RGCA")
