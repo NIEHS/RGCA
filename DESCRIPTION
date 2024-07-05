@@ -28,3 +28,5 @@ Suggests:
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/website: rmarkdown
+Citation: inst/CITATION
+
