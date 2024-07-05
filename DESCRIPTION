@@ -5,7 +5,7 @@ Authors@R:
     c(person("Daniel", "Zilber", , "daniel.zilber@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4387-0271")),
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut"),
-           comment = c(ORCID = "YOUR-ORCID-ID")))
+           comment = c(ORCID = "0000-0001-9508-9623")))
 Description: This package estimates dose response curves using a Bayesian calculation and then combines the dose responses using a two-step approach to estimate the dose response for an arbitrary mixture of the chemicals.  Our RGCA allows the mixture estimation to use three parameter models for the individual dose response curves.
 License: GPL (>= 2)
 Encoding: UTF-8
