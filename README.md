@@ -10,6 +10,28 @@ Reflected Generalized Concentration Addition: A geometric, piecewise inverse fun
 
 [Zilber, Daniel, and Kyle Messier. "Reflected generalized concentration addition and Bayesian hierarchical models to improve chemical mixture prediction." Plos one 19.3 (2024): e0298687.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0298687)
 
+
+# Installation
+
+Installation of this R data package can be done through the `devtools::install_github()` function.  After starting R, first make sure that you have the devtools package.  
+
+```
+install.packages("devtools")
+```
+
+Then, use the code below
+
+```
+library("devtools")
+install_github("NIEHS/RGCA")
+```
+You can also use the remotes package
+
+```
+install.packages("remotes")
+remotes::install_github("NIEHS/RGCA")
+```
+
 ---
 ## Key Inverse Function:  
 
