@@ -1,57 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://niehs.github.io/RGCA/404.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/articles/RGCA_manuscript.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/articles/Simple_Application.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/index.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/RE_MCMC_fit.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/build_replicate_matrix.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/create_mix_calc.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/eff_response_opt.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/get_mle_curve_fits.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/hill_function.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/hill_invs_factry.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/mix_function_generator.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/predict_mix_response_many.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/pull_parameters.html</loc>
-  </url>
-  <url>
-    <loc>https://niehs.github.io/RGCA/reference/pull_summary_parameters.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://niehs.github.io/RGCA/404.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/articles/RGCA_manuscript.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/articles/Simple_Application.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/articles/index.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/authors.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/index.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/RE_MCMC_fit.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/build_replicate_matrix.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/create_mix_calc.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/eff_response_opt.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/get_mle_curve_fits.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/hill_function.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/hill_invs_factry.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/index.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/mix_function_generator.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/predict_mix_response_many.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/pull_parameters.html</loc></url>
+<url><loc>https://niehs.github.io/RGCA/reference/pull_summary_parameters.html</loc></url>
 </urlset>
+
