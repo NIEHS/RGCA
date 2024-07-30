@@ -43,9 +43,9 @@ library(scoringRules)
 library(RGCA)
 library(utils)
 
-source("../../inst/manuscript_plots.R")
-source("../../inst/tox21_prep_data.R")
-source("../../inst/helper_pipeline.R")
+source("../inst/manuscript_plots.R")
+source("../inst/tox21_prep_data.R")
+source("../inst/helper_pipeline.R")
 
 
 ```
@@ -53,8 +53,8 @@ source("../../inst/helper_pipeline.R")
 Next we read the prepared Tox21 data, which creates a series of objects including the observed dose response $y_i$, the concentration for the observed dose response $Cx$, and a list to track which entries are replicates. Null values are present in the data to indicate an anomalous response, such as cell death. Some chemicals have 3 replicates and some have 6.
 
 ```{r prepped input}
-input_df <- utils::read.delim("../../inst/extdata/AR-luc.txt")
-mix_guide <- readxl::read_xls("../../inst/extdata/AllMixtureComponentsARER.xls")
+input_df <- utils::read.delim("../inst/extdata/AR-luc.txt")
+mix_guide <- readxl::read_xls("../inst/extdata/AllMixtureComponentsARER.xls")
 read_prepared_Tox21_data(input_df, mix_guide)
 message("Observed response")
 head(y_i)

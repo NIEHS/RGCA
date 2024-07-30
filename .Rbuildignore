@@ -7,4 +7,5 @@
 ^R/manuscript$
 ^output$
 ^\.lintr$
-^vignettes/articles$
+^doc$
+^Meta$
