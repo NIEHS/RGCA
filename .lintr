@@ -5,5 +5,5 @@ linters: linters_with_defaults(
     cyclocomp_linter = NULL
   )
 exclusions: list(
-    "vignettes/articles/Simple_Application.Rmd"
+    "vignettes/Simple_Application.Rmd"
   )
