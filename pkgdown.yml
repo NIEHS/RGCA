@@ -2,9 +2,9 @@ pandoc: 3.1.11
 pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
-  articles/RGCA_manuscript: RGCA_manuscript.html
-  articles/Simple_Application: Simple_Application.html
-last_built: 2024-07-30T20:23Z
+  RGCA_manuscript: RGCA_manuscript.html
+  Simple_Application: Simple_Application.html
+last_built: 2024-07-31T13:26Z
 urls:
   reference: https://niehs.github.io/RGCA/reference
   article: https://niehs.github.io/RGCA/articles
