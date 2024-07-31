@@ -6,6 +6,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-4387-0271")),
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9508-9623")))
+Maintainer: Kyle Messier <kyle.messier@nih.gov>
 Description: Extending Generalized Concentration Addition for mixtures prediction to use three parameter hill models. Estimate dose response curves using a Bayesian calculation and then combine the dose responses using a two-step approach to estimate the dose response for an arbitrary mixture of the chemicals.
 License: GPL (>= 2)
 Encoding: UTF-8
