@@ -1,7 +1,9 @@
 ---
 title: "Simple Application of RGCA"
 author: "Daniel Zilber"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    output_dir: inst/doc
 vignette: >
   %\VignetteIndexEntry{Simple Application of RGCA}
   %\VignetteEngine{rmarkdown::html_vignette}
