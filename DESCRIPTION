@@ -26,7 +26,8 @@ Suggests:
 	rmarkdown, 
 	scoringRules,
 	testthat (>= 3.0.0),
-	utils
+	utils,
+	Rdpack
 VignetteBuilder: knitr, rmarkdown
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
