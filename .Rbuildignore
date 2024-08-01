@@ -19,3 +19,4 @@
 ^vignettes/\.DS_Store$
 ^vignettes/\.gitignore$
 ^doc$
+^tests/
