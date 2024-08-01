@@ -6,7 +6,7 @@ output:
     output_dir: inst/doc
 vignette: >
   %\VignetteIndexEntry{RGCA Manuscript Pipeline}
-  %\VignetteEngine{rmarkdown::html_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
