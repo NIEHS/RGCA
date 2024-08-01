@@ -4,7 +4,7 @@ author: "Daniel Zilber"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Simple Application of RGCA}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::html_vignette}
   %\VignetteEncoding{UTF-8}
 ---
 ```{r setup, include=FALSE}
