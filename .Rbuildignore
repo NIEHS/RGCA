@@ -18,3 +18,4 @@
 ^man/\.DS_Store$
 ^vignettes/\.DS_Store$
 ^vignettes/\.gitignore$
+^doc$

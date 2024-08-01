@@ -2,8 +2,7 @@
 title: "Simple Application of RGCA"
 author: "Daniel Zilber"
 output: 
-  rmarkdown::html_vignette:
-    output_dir: inst/doc
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Simple Application of RGCA}
   %\VignetteEngine{knitr::rmarkdown}
