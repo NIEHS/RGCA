@@ -26,7 +26,7 @@ Suggests:
 	scoringRules,
 	testthat (>= 3.0.0),
 	utils
-VignetteBuilder: knitr, rmarkdown
+VignetteBuilder: rmarkdown
 Config/testthat/edition: 3
 Config/Needs/website: rmarkdown
 

@@ -3,6 +3,7 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^_pkgdown.yml$
 ^\.github$
 ^R/manuscript$
 ^output$
