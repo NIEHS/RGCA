@@ -8,7 +8,6 @@
 ^R/manuscript$
 ^output$
 ^\.lintr$
-^doc$
 ^Meta$
 ^inst/CITATION$
 ^.*\.pdf$
