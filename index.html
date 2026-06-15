@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Reflected Generalized Concentration Addition • RGCA</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Reflected Generalized Concentration Addition">
 <meta name="description" content="Extending Generalized Concentration Addition for mixtures prediction to use three parameter hill models. Estimate dose response curves using a Bayesian calculation and then combine the dose responses using a two-step approach to estimate the dose response for an arbitrary mixture of the chemicals.">
 <meta property="og:description" content="Extending Generalized Concentration Addition for mixtures prediction to use three parameter hill models. Estimate dose response curves using a Bayesian calculation and then combine the dose responses using a two-step approach to estimate the dose response for an arbitrary mixture of the chemicals.">
@@ -43,7 +43,9 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
       </ul>
-<ul class="navbar-nav"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/NIEHS/RGCA/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+      </ul>
 </div>
 
 
@@ -60,11 +62,11 @@
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
-<p>Installation of this R data package can be done through the <code>devtools::install_github()</code> function. After starting R, first make sure that you have the devtools package.</p>
+<p>Installation of this R data package can be done through the <code><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">devtools::install_github()</a></code> function. After starting R, first make sure that you have the devtools package.</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span></code></pre>
 <p>Then, use the code below</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span><span class="op">)</span></span>
-<span><span class="fu">install_github</span><span class="op">(</span><span class="st">"NIEHS/RGCA"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"NIEHS/RGCA"</span><span class="op">)</span></span></code></pre>
 <p>You can also use the remotes package</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"NIEHS/RGCA"</span><span class="op">)</span></span></code></pre>
@@ -72,7 +74,7 @@
 <div class="section level2">
 <h2 id="key-inverse-function">Key Inverse Function:<a class="anchor" aria-label="anchor" href="#key-inverse-function"></a>
 </h2>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="prefix">|</mo><mi>α</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo><mi>θ</mi><mo>,</mo><mi>β</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mo>−</mo><mi>θ</mi></mrow><mrow><mn>1</mn><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mo>−</mo><mi>α</mi></mrow><mi>r</mi></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mi>∞</mi><mo>,</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>θ</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mi>r</mi></mfrac><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo>−</mo><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mo>−</mo><mn>2</mn><mi>θ</mi><mo>−</mo><mi>θ</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mrow><mn>2</mn><mi>α</mi><mo>−</mo><mi>r</mi></mrow></mfrac><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo>−</mo><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>α</mi><mo>,</mo><mn>2</mn><mi>α</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mo>−</mo><mn>2</mn><mi>θ</mi><mo>+</mo><mfrac><mi>θ</mi><mrow><mn>1</mn><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mrow><mi>r</mi><mo>−</mo><mn>2</mn><mi>α</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>α</mi><mo>,</mo><mi>∞</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="prefix">|</mo><mi>α</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo><mi>θ</mi><mo>,</mo><mi>β</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>−</mi><mi>θ</mi></mrow><mrow><mn>1</mn><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>−</mi><mi>α</mi></mrow><mi>r</mi></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mi>∞</mi><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>θ</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mi>r</mi></mfrac><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>−</mi><mn>2</mn><mi>θ</mi><mo>−</mo><mi>θ</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mrow><mn>2</mn><mi>α</mi><mo>−</mo><mi>r</mi></mrow></mfrac><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mn>2</mn><mi>α</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>−</mi><mn>2</mn><mi>θ</mi><mo>+</mo><mfrac><mi>θ</mi><mrow><mn>1</mn><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mi>α</mi><mrow><mi>r</mi><mo>−</mo><mn>2</mn><mi>α</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mi>α</mi><mo>,</mo><mi>∞</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
 \begin{equation}
 f^{-1}(r | \alpha&gt;0, \theta, \beta&gt;0) =
 \begin{cases}
@@ -92,7 +94,15 @@ f^{-1}(r | \alpha&gt;0, \theta, \beta&gt;0) =
 </div>
 </div>
 
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/NIEHS/RGCA/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/NIEHS/RGCA/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>GPL (&gt;= 2)</li>
@@ -110,8 +120,8 @@ f^{-1}(r | \alpha&gt;0, \theta, \beta&gt;0) =
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Daniel Zilber <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-4387-0271" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Kyle Messier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-9508-9623" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Daniel Zilber <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-4387-0271" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Kyle Messier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-9508-9623" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -136,7 +146,7 @@ f^{-1}(r | \alpha&gt;0, \theta, \beta&gt;0) =
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

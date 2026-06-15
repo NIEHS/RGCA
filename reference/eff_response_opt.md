@@ -1,0 +1,48 @@
+# Mixture Response Optimization Routine
+
+An internal factory function that returns a function with one input that
+can be optimized with respect to that input. The returned function
+computes the generalized concentration addition formula for the input
+set of chemicals and input concentrations.
+
+## Usage
+
+``` r
+eff_response_opt(
+  hill_inverse_list,
+  conc_vec,
+  synergy_const = 0,
+  interval_sign = 1
+)
+```
+
+## Arguments
+
+- hill_inverse_list:
+
+  a list of the hill inverse functions with one function per chemical
+
+- conc_vec:
+
+  a vector of non-negative values with the same length as the
+  hill_inverse_list
+
+- synergy_const:
+
+  a scaling term for synergy. Difficult to specify so it is not used and
+  currently set to 0, implying no synergy.
+
+- interval_sign:
+
+  1 by default and can be set to -1. Used for chemicals with a negative
+  sill. Details: For numerical stability around very small
+  concentrations and responses, the output function exponentiates the
+  input response, making it impossible to invert a negative response. If
+  at least one chemical in the mixture has a negative sill, this
+  parameter should be set to -1 to check if the optimal (predicted)
+  response is negative.
+
+## Value
+
+a function GCA_over_list that has a response r as a input and a norm
+(measure of optimality according to GCA) as output

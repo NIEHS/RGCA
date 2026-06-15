@@ -1,0 +1,50 @@
+# Random Effect MCMC fitting
+
+Performs a Markov Chain Monte Carlo sampling procedure to create
+posterior samples for the random effect model specified above. Uses
+Gibbs updates when possible and reverts to Metropolis-Hastings with
+Gaussian random walk proposals where needed. The EC50 parameter varies
+over multiple orders of magnitude and involves a log normal proposal
+distribution.
+
+## Usage
+
+``` r
+RE_MCMC_fit(y_i, Cx, replicate_sets, n_iter = 10000, n_hill_par = 3)
+```
+
+## Arguments
+
+- y_i:
+
+  a matrix of dose responses for individual chemicals. Rows are
+  chemicals where each replicate has a separate row, columns are the
+  dose, and entries are the response.
+
+- Cx:
+
+  a matrix of the doses given for individual chemicals. Rows are
+  chemicals where each replicate has a separate row, columns are the
+  index, and the entry is the dose. Should match y_i
+
+- replicate_sets:
+
+  a list of vectors where each vector has the row index of all
+  replicates of a particular chemical. The length of the list should
+  match the number of unique chemicals.
+
+- n_iter:
+
+  the number of iterations, defaults to 10,000
+
+- n_hill_par:
+
+  specifies if the full Hill model with 3 parameters is fit (default) or
+  if a simplified model with 2 parameters (slope =1) is fit. Useful for
+  comparing our method to standard GCA, whcih requires slope=1.
+
+## Value
+
+a list with the full sampled chains for the parameters: slope (phi),
+sill+ec50 (theta1 and theta2), noise variance (sigma), random effects,
+random effect prior variances.

@@ -1,0 +1,58 @@
+# Mixture Response Calculator
+
+Factory method to return a function that predicts the mixture response
+given the concentrations of the mixture component chemicals. A factory
+method is used because the uncertainty quantification is based on a
+bootstrapped collection of feasible parameters, and each set of
+parameters leads to a different predictor for the mixture effect. Rather
+than keeping track of lists of parameters, we immediately convert the
+sampled parameter set to a function (a "calculator") that takes the
+mixture concentration as input. The list of calculators can be applied
+to a
+
+## Usage
+
+``` r
+mix_function_generator(
+  param_matrix,
+  clust_assign,
+  get_counts = FALSE,
+  scale_CA = FALSE,
+  synergy_const = 0
+)
+```
+
+## Arguments
+
+- param_matrix:
+
+  a simple matrix object with rows corresponding to unique chemicals and
+  columns representing parameters (a, b, c, max_R, d), where a is the
+  sill b is the EC50 c is the slope value max_R is the maximum sill
+  across all chemicals (deprecated) d is the minimum response
+  (deprecated)
+
+- clust_assign:
+
+  a vector with integers defining cluster membership. For 3 chemicals, a
+  clust_assign could be c(1,2,1), meaning chemicals 1 and 3 are
+  clustered together and 2 is by itself. It is assumed that the cluster
+  assignments start from 1 and do not skip integers.
+
+- get_counts:
+
+  boolean flag to return a count of the number of solutions found
+
+- scale_CA:
+
+  boolean flag to apply Concentration Addition assumption of equal sills
+
+- synergy_const:
+
+  a real number used to adjust the mixture prediction for synergistic
+  effects
+
+## Value
+
+an instance of the function mix_effect_fun which takes as input the
+concentration of the component chemicals and outputs a predict response
