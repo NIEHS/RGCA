@@ -2,146 +2,76 @@
 
     Code
       optimize(GCA_function, interval = c(-20, 10), tol = .Machine$double.eps)
-    Condition
-      Warning in `conc_vec / invs_vec`:
+    Warning <simpleWarning>
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
     Output
       $minimum
@@ -155,182 +85,94 @@
 
     Code
       optimize(GCA_function_neg, interval = c(-20, 10), tol = .Machine$double.eps)
-    Condition
-      Warning in `conc_vec / invs_vec`:
+    Warning <simpleWarning>
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
-      Warning in `conc_vec / invs_vec`:
       longer object length is not a multiple of shorter object length
     Output
       $minimum

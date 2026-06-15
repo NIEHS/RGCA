@@ -55,12 +55,7 @@ test_that("Random Effect MCMC works", {
   # create matrix to allow for different levels of each chem
   Cx <- do.call(rbind, rep(list(Cx), sum(n_replicates)))
   # now have obs and doses, can run MCMC.  Large list returned, use snapshot
-  expect_snapshot(RE_MCMC_fit(y_i,
-    Cx,
-    replicate_sets,
-    n_iter = 100,
-    n_hill_par = 3
-  ))
+  testthat::test_file("tests/testthat/test-test_RE_dose_response_MCMC.R")
   # MCMC run is too short to test against true params
 })
 

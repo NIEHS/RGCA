@@ -1,9 +1,10 @@
 ---
 title: "RGCA Manuscript Pipeline"
 author: "Daniel Zilber"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{RGCA_manuscript}
+  %\VignetteIndexEntry{RGCA Manuscript Pipeline}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
